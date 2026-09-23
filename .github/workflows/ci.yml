@@ -61,9 +61,11 @@ jobs:
         run: supabase stop --no-backup
 
   deploy:
-    needs: [ci, smoke]
+    needs: [ci]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -71,6 +73,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npx astro sync
       - run: npm run build
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
