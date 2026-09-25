@@ -1,7 +1,7 @@
 ---
 change_id: report-data-schema
 title: Schemat i trwałość danych raportu
-status: implementing
+status: implemented
 created: 2026-09-25
 updated: 2026-09-25
 archived_at: null

@@ -277,7 +277,7 @@ Brak istniejących danych do migrowania — to pierwsza migracja poza wbudowanym
 #### Automated
 
 - [x] 2.1 `npx supabase db reset` aplikuje politykę bez błędów — 115e25d
-- [ ] 2.2 `npm run verify:rls` przechodzi
+- [x] 2.2 `npm run verify:rls` przechodzi — 1f4f166
 
 #### Manual
 
@@ -298,9 +298,9 @@ Brak istniejących danych do migrowania — to pierwsza migracja poza wbudowanym
 
 #### Automated
 
-- [x] 4.1 `npm run verify:rls` kończy się kodem 0 lokalnie (po `npx supabase start`)
+- [x] 4.1 `npm run verify:rls` kończy się kodem 0 lokalnie (po `npx supabase start`) — 1f4f166
 
 #### Manual
 
-- [x] 4.2 Przegląd logu skryptu potwierdza jawne asercje izolacji dla wszystkich trzech tabel
-- [x] 4.3 Krok w job `smoke` poprawnie dodany do workflow (job pozostaje zakomentowany — poza zakresem)
+- [x] 4.2 Przegląd logu skryptu potwierdza jawne asercje izolacji dla wszystkich trzech tabel — 1f4f166
+- [x] 4.3 Krok w job `smoke` poprawnie dodany do workflow (job pozostaje zakomentowany — poza zakresem) — 1f4f166
