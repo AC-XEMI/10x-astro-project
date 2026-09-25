@@ -1,6 +1,6 @@
 ---
 project: "Kontrola Trasówek"
-version: 1
+version: 2
 status: draft
 created: 2026-09-22
 context_type: greenfield
@@ -77,6 +77,30 @@ przeszukiwać raporty.
 - Jedna wizyta może złamać więcej niż jedną regułę jednocześnie — lista
   pokazuje wszystkie zadziałane reguły dla tej wizyty
 
+## User Stories (ciąg dalszy)
+
+### US-02: Kierownik usuwa błędnie wgrany raport
+
+- **Given** zalogowany kierownik ma wgrany raport (wraz z wykrytymi odstępstwami)
+- **When** kierownik wybiera opcję usunięcia tego raportu i potwierdza
+- **Then** raport oraz wszystkie powiązane wizyty i odstępstwa znikają z listy i nie są już widoczne dla tego konta
+
+#### Acceptance Criteria
+- Usunięcie wymaga jawnego potwierdzenia (żeby uniknąć przypadkowej utraty danych)
+- Po usunięciu raportu nie da się go odzyskać z poziomu UI
+- Usunięcie jednego raportu nie wpływa na inne wgrane raporty tego samego kierownika
+
+### US-03: Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm
+
+- **Given** zalogowany kierownik widzi listę odstępstw z co najmniej jedną pozycją
+- **When** kierownik oznacza konkretne odstępstwo jako "sprawdzone" (fałszywy alarm)
+- **Then** ta pozycja pozostaje widoczna na liście, ale z wyraźnym oznaczeniem statusu przeglądu, odróżniającym ją od odstępstw jeszcze nieprzejrzanych
+
+#### Acceptance Criteria
+- Oznaczenie statusu przeglądu jest trwałe — widoczne przy kolejnym powrocie do tego samego raportu
+- Oznaczenie nie usuwa odstępstwa z listy, tylko zmienia jego status
+- Kierownik może cofnąć oznaczenie (przywrócić status "nieprzejrzane")
+
 ## Functional Requirements
 
 ### Logowanie i wgrywanie raportu
@@ -131,6 +155,12 @@ przeszukiwać raporty.
   > Socratic: Brak kontrargumentu — FR stoi jak napisano (i tak poza MVP).
 - FR-008: Kierownik może wyeksportować listę odstępstw do pliku. Priority: nice-to-have
   > Socratic: Brak kontrargumentu — FR stoi jak napisano (i tak poza MVP).
+- FR-012: Kierownik może oznaczyć odstępstwo jako sprawdzone/fałszywy alarm. Priority: must-have
+  > Socratic: Kontrargument rozważony: "to nie jest wymagane do udowodnienia głównej hipotezy — samo wykrywanie odstępstw już to robi". Rozstrzygnięcie: zostaje jako must-have na wyraźne życzenie użytkownika (2026-09-25) — bez statusu przeglądu kierownik przy każdym powrocie do raportu widzi te same odstępstwa bez śladu, że już je sprawdził, co podważa użyteczność przy regularnym użyciu.
+
+### Zarządzanie raportem
+- FR-011: Kierownik może usunąć wgrany raport (wraz z powiązanymi wizytami i odstępstwami). Priority: must-have
+  > Socratic: Kontrargument rozważony: "usuwanie danych zwiększa ryzyko przypadkowej utraty". Rozstrzygnięcie: zostaje jako must-have (2026-09-25) — wymaga jawnego potwierdzenia w UI (patrz US-02); narzędzie oparte na ręcznym wgrywaniu plików wymaga podstawowej higieny danych (możliwość poprawienia pomyłki).
 
 ## Non-Functional Requirements
 
@@ -158,7 +188,9 @@ musi sam przeglądać raportu, żeby znaleźć nieprawidłowość.
 
 Logowanie: email + hasło. Model płaski — jedna rola (kierownik regionalny),
 bez podziału na admina i użytkownika w MVP. Każdy zalogowany użytkownik ma
-dostęp do raportów, które sam wgrał, i wyników ich analizy.
+dostęp do raportów, które sam wgrał, i wyników ich analizy — w tym do ich
+usuwania (FR-011) i oznaczania statusu przeglądu odstępstw (FR-012); żaden
+inny użytkownik nie ma dostępu do tych operacji na cudzych raportach.
 
 ## Non-Goals
 
