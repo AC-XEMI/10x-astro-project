@@ -57,6 +57,7 @@ jobs:
           npm run preview -- --port 4321 &
           for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:4321/ && break; sleep 1; done
           BASE_URL=http://localhost:4321 npm run smoke
+      - run: npm run verify:rls
       - if: always()
         run: supabase stop --no-backup
 

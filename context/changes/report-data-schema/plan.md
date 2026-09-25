@@ -287,20 +287,20 @@ Brak istniejących danych do migrowania — to pierwsza migracja poza wbudowanym
 
 #### Automated
 
-- [x] 3.1 `npx astro check` przechodzi z nowym src/types.ts
-- [x] 3.2 `npm run lint` przechodzi
+- [x] 3.1 `npx astro check` przechodzi z nowym src/types.ts — 60186ed
+- [x] 3.2 `npm run lint` przechodzi — 60186ed
 
 #### Manual
 
-- [x] 3.3 Ręczny przegląd src/types.ts potwierdza obecność wszystkich trzech tabel
+- [x] 3.3 Ręczny przegląd src/types.ts potwierdza obecność wszystkich trzech tabel — 60186ed
 
 ### Phase 4: Automatyczna weryfikacja izolacji RLS
 
 #### Automated
 
-- [ ] 4.1 `npm run verify:rls` kończy się kodem 0 lokalnie (po `npx supabase start`)
+- [x] 4.1 `npm run verify:rls` kończy się kodem 0 lokalnie (po `npx supabase start`)
 
 #### Manual
 
-- [ ] 4.2 Przegląd logu skryptu potwierdza jawne asercje izolacji dla wszystkich trzech tabel
-- [ ] 4.3 Krok w job `smoke` poprawnie dodany do workflow (job pozostaje zakomentowany — poza zakresem)
+- [x] 4.2 Przegląd logu skryptu potwierdza jawne asercje izolacji dla wszystkich trzech tabel
+- [x] 4.3 Krok w job `smoke` poprawnie dodany do workflow (job pozostaje zakomentowany — poza zakresem)

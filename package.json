@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "smoke": "node scripts/smoke.mjs",
+    "verify:rls": "node scripts/verify-rls.mjs",
     "db:types": "supabase gen types typescript --local > src/types.ts"
   },
   "dependencies": {
