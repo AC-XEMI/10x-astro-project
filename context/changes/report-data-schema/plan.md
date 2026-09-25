@@ -262,26 +262,26 @@ Brak istniejących danych do migrowania — to pierwsza migracja poza wbudowanym
 
 #### Automated
 
-- [x] 1.1 `npx supabase db reset` kończy się bez błędów i aplikuje migrację
-- [x] 1.2 `npx supabase migration list` pokazuje nową migrację jako zastosowaną
-- [x] 1.3 `npx supabase db push` kończy się bez błędów na zdalnym projekcie
+- [x] 1.1 `npx supabase db reset` kończy się bez błędów i aplikuje migrację — 3ad9b4b
+- [x] 1.2 `npx supabase migration list` pokazuje nową migrację jako zastosowaną — 3ad9b4b
+- [x] 1.3 `npx supabase db push` kończy się bez błędów na zdalnym projekcie — 3ad9b4b
 
 #### Manual
 
-- [ ] 1.4 Supabase Studio (lokalnie) pokazuje trzy nowe tabele z poprawnymi kolumnami i typami
-- [ ] 1.5 Ręczny INSERT + kaskadowy DELETE działa poprawnie
-- [x] 1.6 Supabase Studio na hostowanym projekcie (ujvfzfjrijxgpzifnfhi) pokazuje te same trzy tabele po db push
+- [x] 1.4 Supabase Studio (lokalnie) pokazuje trzy nowe tabele z poprawnymi kolumnami i typami
+- [x] 1.5 Ręczny INSERT + kaskadowy DELETE działa poprawnie
+- [x] 1.6 Supabase Studio na hostowanym projekcie (ujvfzfjrijxgpzifnfhi) pokazuje te same trzy tabele po db push — 3ad9b4b
 
 ### Phase 2: Polityki RLS
 
 #### Automated
 
-- [ ] 2.1 `npx supabase db reset` aplikuje politykę bez błędów
+- [x] 2.1 `npx supabase db reset` aplikuje politykę bez błędów
 - [ ] 2.2 `npm run verify:rls` przechodzi
 
 #### Manual
 
-- [ ] 2.3 Supabase Studio „Run as authenticated user" potwierdza izolację danych
+- [x] 2.3 Supabase Studio „Run as authenticated user" potwierdza izolację danych
 
 ### Phase 3: Typy TypeScript
 
