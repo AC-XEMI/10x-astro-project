@@ -117,11 +117,7 @@ async function main() {
   if (updateErr) throw new Error(`assert: user B update report failed unexpectedly: ${updateErr.message}`);
   record((updateResult ?? []).length === 0, "user B cannot update user A's report");
 
-  const { data: deleteResult, error: deleteErr } = await clientB
-    .from("reports")
-    .delete()
-    .eq("id", report.id)
-    .select();
+  const { data: deleteResult, error: deleteErr } = await clientB.from("reports").delete().eq("id", report.id).select();
   if (deleteErr) throw new Error(`assert: user B delete report failed unexpectedly: ${deleteErr.message}`);
   record((deleteResult ?? []).length === 0, "user B cannot delete user A's report");
 
