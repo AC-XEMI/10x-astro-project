@@ -312,8 +312,8 @@ Brak — ten plan nie zmienia schematu bazy (schemat już istnieje z `F-01`); ty
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` przechodzi
-- [ ] 2.2 `npx astro check` przechodzi
+- [x] 2.1 `npm run lint` przechodzi — f07b4a1
+- [x] 2.2 `npx astro check` przechodzi — f07b4a1
 
 #### Manual
 

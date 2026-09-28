@@ -1,0 +1,32 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Banner from "@/components/Banner.astro";
+
+const error = Astro.url.searchParams.get("error");
+---
+
+<Layout title="Wgraj raport">
+  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+      <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
+        Wgraj raport
+      </h1>
+      {error && <Banner variant="error">{error}</Banner>}
+      <form method="POST" action="/api/reports/upload" enctype="multipart/form-data" class="space-y-4">
+        <input
+          type="file"
+          name="report_file"
+          accept=".csv,.xlsx"
+          required
+          class="block w-full text-sm text-blue-100/80 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-purple-500"
+        />
+        <button
+          type="submit"
+          class="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500"
+        >
+          Wgraj
+        </button>
+      </form>
+    </div>
+  </div>
+</Layout>
