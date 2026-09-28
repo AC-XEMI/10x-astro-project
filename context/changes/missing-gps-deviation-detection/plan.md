@@ -301,12 +301,12 @@ Brak — ten plan nie zmienia schematu bazy (schemat już istnieje z `F-01`); ty
 
 #### Automated
 
-- [ ] 1.1 `npm run lint` przechodzi
-- [ ] 1.2 `npx astro check` przechodzi
+- [x] 1.1 `npm run lint` przechodzi — 1e60246
+- [x] 1.2 `npx astro check` przechodzi — 1e60246
 
 #### Manual
 
-- [ ] 1.3 Ręczny przegląd report-parser.ts potwierdza reguły walidacji z wywiadu
+- [x] 1.3 Ręczny przegląd report-parser.ts potwierdza reguły walidacji z wywiadu — 1e60246
 
 ### Phase 2: Endpoint uploadu i zapis do bazy
 
