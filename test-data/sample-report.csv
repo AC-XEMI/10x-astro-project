@@ -1,0 +1,5 @@
+przedstawiciel,data_wizyty,gps_wlaczony,typ_aktywnosci,dystans_km,czas_na_miejscu_min,planowana_trasa
+Jan Kowalski,2026-09-01,TAK,wizyta,12.5,45,Klient A;Klient B
+Anna Nowak,2026-09-01,NIE,wizyta,8.2,30,Klient C
+Piotr Wiśniewski,2026-09-02,TAK,wizyta,20.1,60,Klient D;Klient E
+Katarzyna Zielińska,2026-09-02,NIE,telefon,0,5,Klient F

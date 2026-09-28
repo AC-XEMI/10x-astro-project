@@ -317,23 +317,23 @@ Brak — ten plan nie zmienia schematu bazy (schemat już istnieje z `F-01`); ty
 
 #### Manual
 
-- [ ] 2.3 Wgranie poprawnego CSV kończy się przekierowaniem i zapisem w bazie
-- [ ] 2.4 Wgranie pliku z brakującą wymaganą kolumną nie zapisuje niczego i pokazuje komunikat błędu
+- [x] 2.3 Wgranie poprawnego CSV kończy się przekierowaniem i zapisem w bazie — f07b4a1
+- [x] 2.4 Wgranie pliku z brakującą wymaganą kolumną nie zapisuje niczego i pokazuje komunikat błędu — f07b4a1
 
 ### Phase 3: UI — upload i wynik
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` przechodzi
-- [ ] 3.2 `npx astro check` przechodzi
-- [ ] 3.3 `npm run build` kończy się bez błędów
+- [x] 3.1 `npm run lint` przechodzi — 0a891f3
+- [x] 3.2 `npx astro check` przechodzi — 0a891f3
+- [x] 3.3 `npm run build` kończy się bez błędów — 0a891f3
 
 #### Manual
 
-- [ ] 3.4 `/reports` wymaga zalogowania
-- [ ] 3.5 Wizyta bez GPS pojawia się na liście po wgraniu pliku
-- [ ] 3.6 Kliknięcie wiersza rozwija pełny kontekst wizyty
-- [ ] 3.7 Wizyta z GPS nie pojawia się na liście odstępstw
+- [x] 3.4 `/reports` wymaga zalogowania — 0a891f3
+- [x] 3.5 Wizyta bez GPS pojawia się na liście po wgraniu pliku — 0a891f3
+- [x] 3.6 Kliknięcie wiersza rozwija pełny kontekst wizyty — 0a891f3
+- [x] 3.7 Wizyta z GPS nie pojawia się na liście odstępstw — 0a891f3
 
 ### Phase 4: Fixture testowy i skrypt weryfikacji
 
