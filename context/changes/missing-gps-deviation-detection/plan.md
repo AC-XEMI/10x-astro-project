@@ -339,8 +339,8 @@ Brak — ten plan nie zmienia schematu bazy (schemat już istnieje z `F-01`); ty
 
 #### Automated
 
-- [ ] 4.1 `npm run verify:report-detection` kończy się kodem 0
+- [x] 4.1 `npm run verify:report-detection` kończy się kodem 0 — e7ceab9
 
 #### Manual
 
-- [ ] 4.2 Log skryptu pokazuje jawne asercje dla obu formatów
+- [x] 4.2 Log skryptu pokazuje jawne asercje dla obu formatów — e7ceab9
