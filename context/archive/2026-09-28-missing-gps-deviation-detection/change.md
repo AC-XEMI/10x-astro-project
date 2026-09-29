@@ -1,10 +1,10 @@
 ---
 change_id: missing-gps-deviation-detection
 title: Wykrywanie braku GPS w wgranym raporcie (gwiazda przewodnia)
-status: impl_reviewed
+status: archived
 created: 2026-09-28
-updated: 2026-09-28
-archived_at: null
+updated: 2026-09-29
+archived_at: 2026-09-29T08:29:47Z
 ---
 
 ## Notes
