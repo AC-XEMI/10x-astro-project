@@ -364,25 +364,25 @@ Migracja z Fazy 1 jest czysto addytywna (nowe nullable kolumny, brak backfillu) 
 
 #### Automated
 
-- [x] 2.1 `npm run lint` przechodzi
-- [x] 2.2 `npx astro check` przechodzi
+- [x] 2.1 `npm run lint` przechodzi — 6532937
+- [x] 2.2 `npx astro check` przechodzi — 6532937
 
 #### Manual
 
-- [x] 2.3 Ręczny przegląd `detectRouteDeviations` potwierdza logikę z wywiadu
+- [x] 2.3 Ręczny przegląd `detectRouteDeviations` potwierdza logikę z wywiadu — 6532937
 
 ### Phase 3: Integracja z endpointem uploadu
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` przechodzi
-- [ ] 3.2 `npx astro check` przechodzi
+- [x] 3.1 `npm run lint` przechodzi
+- [x] 3.2 `npx astro check` przechodzi
 
 #### Manual
 
-- [ ] 3.3 Wizyta poza planowaną listą zapisuje `route_deviation` z poprawnym `detail`
-- [ ] 3.4 Wizyta z nadmiarowym dystansem zapisuje `route_deviation` z poprawnym `detail`
-- [ ] 3.5 Wizyta łamiąca dwie reguły naraz ma oba wpisy w `deviations`
+- [x] 3.3 Wizyta poza planowaną listą zapisuje `route_deviation` z poprawnym `detail`
+- [x] 3.4 Wizyta z nadmiarowym dystansem zapisuje `route_deviation` z poprawnym `detail`
+- [x] 3.5 Wizyta łamiąca dwie reguły naraz ma oba wpisy w `deviations`
 
 ### Phase 4: UI — rozszerzony kontekst wizyty
 

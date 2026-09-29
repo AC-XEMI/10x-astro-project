@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { parseReportFile } from "@/lib/services/report-parser";
-import { detectMissingGps } from "@/lib/services/deviation-rules";
+import { detectMissingGps, detectRouteDeviations } from "@/lib/services/deviation-rules";
 import type { TablesInsert } from "@/types";
 
 // 5 MB, enforced on file.size before the file is read into memory as an ArrayBuffer.
@@ -73,10 +73,18 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(`/reports?error=${encodeURIComponent(visitsError.message)}`);
   }
 
-  const deviationsToInsert: TablesInsert<"deviations">[] = insertedVisits.flatMap((visit) => {
+  const missingGpsDeviations: TablesInsert<"deviations">[] = insertedVisits.flatMap((visit) => {
     const rule = detectMissingGps(visit);
     return rule ? [{ visit_id: visit.id, rule }] : [];
   });
+
+  const routeDeviations: TablesInsert<"deviations">[] = detectRouteDeviations(insertedVisits).map((flag) => ({
+    visit_id: flag.visit_id,
+    rule: "route_deviation" as const,
+    detail: flag.detail,
+  }));
+
+  const deviationsToInsert: TablesInsert<"deviations">[] = [...missingGpsDeviations, ...routeDeviations];
 
   if (deviationsToInsert.length > 0) {
     const { error: deviationsError } = await supabase.from("deviations").insert(deviationsToInsert);
