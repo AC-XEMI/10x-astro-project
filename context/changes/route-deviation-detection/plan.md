@@ -401,8 +401,8 @@ Migracja z Fazy 1 jest czysto addytywna (nowe nullable kolumny, brak backfillu) 
 
 #### Automated
 
-- [x] 5.1 `npm run verify:report-detection` kończy się kodem 0
+- [x] 5.1 `npm run verify:report-detection` kończy się kodem 0 — 5fc4b33
 
 #### Manual
 
-- [x] 5.2 Log skryptu pokazuje jawne asercje dla wszystkich pięciu nowych przypadków, dla obu formatów
+- [x] 5.2 Log skryptu pokazuje jawne asercje dla wszystkich pięciu nowych przypadków, dla obu formatów — 5fc4b33
