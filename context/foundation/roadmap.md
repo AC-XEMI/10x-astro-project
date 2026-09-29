@@ -142,12 +142,12 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 | Roadmap ID | Change ID                        | Suggested issue title                                          | Ready for `/10x-plan` | Notes                          |
 | ---------- | ---------------------------------- | ---------------------------------------------------------------- | ---------------------- | ------------------------------- |
-| F-01       | report-data-schema                 | Migracja Supabase: schemat raportów/wizyt/odstępstw z RLS       | yes                    | Uruchom `/10x-plan report-data-schema` · GitHub: [#1](https://github.com/AC-XEMI/10x-astro-project/issues/1) |
-| S-01       | missing-gps-deviation-detection    | Wykrywanie braku GPS w raporcie (gwiazda przewodnia)             | no                     | Czeka na ukończenie F-01 · GitHub: [#2](https://github.com/AC-XEMI/10x-astro-project/issues/2) |
-| S-02       | route-deviation-detection          | Wykrywanie nieoptymalnej trasy w raporcie                        | no                     | Czeka na F-01, S-01 · GitHub: [#3](https://github.com/AC-XEMI/10x-astro-project/issues/3) |
-| S-03       | phone-vs-visit-deviation-detection | Wykrywanie telefonu zamiast wizyty w raporcie                    | no                     | Czeka na F-01, S-01 · GitHub: [#4](https://github.com/AC-XEMI/10x-astro-project/issues/4) |
-| S-04       | delete-uploaded-report             | Usuwanie błędnie wgranego raportu                                 | no                     | Czeka na F-01, S-01 · GitHub: [#6](https://github.com/AC-XEMI/10x-astro-project/issues/6) |
-| S-05       | mark-deviation-reviewed            | Oznaczanie odstępstwa jako sprawdzone/fałszywy alarm              | no                     | Czeka na F-01, S-01 · GitHub: [#7](https://github.com/AC-XEMI/10x-astro-project/issues/7) |
+| F-01       | report-data-schema                 | Migracja Supabase: schemat raportów/wizyt/odstępstw z RLS       | done                   | Zaimplementowane i zarchiwizowane 2026-09-25 → `context/archive/2026-09-25-report-data-schema/` · GitHub: [#1](https://github.com/AC-XEMI/10x-astro-project/issues/1) |
+| S-01       | missing-gps-deviation-detection    | Wykrywanie braku GPS w raporcie (gwiazda przewodnia)             | done                   | Zaimplementowane i zarchiwizowane 2026-09-29 → `context/archive/2026-09-28-missing-gps-deviation-detection/` · GitHub: [#2](https://github.com/AC-XEMI/10x-astro-project/issues/2) |
+| S-02       | route-deviation-detection          | Wykrywanie nieoptymalnej trasy w raporcie                        | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan route-deviation-detection` · GitHub: [#3](https://github.com/AC-XEMI/10x-astro-project/issues/3) |
+| S-03       | phone-vs-visit-deviation-detection | Wykrywanie telefonu zamiast wizyty w raporcie                    | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan phone-vs-visit-deviation-detection` · GitHub: [#4](https://github.com/AC-XEMI/10x-astro-project/issues/4) |
+| S-04       | delete-uploaded-report             | Usuwanie błędnie wgranego raportu                                 | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan delete-uploaded-report` · GitHub: [#6](https://github.com/AC-XEMI/10x-astro-project/issues/6) |
+| S-05       | mark-deviation-reviewed            | Oznaczanie odstępstwa jako sprawdzone/fałszywy alarm              | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan mark-deviation-reviewed` · GitHub: [#7](https://github.com/AC-XEMI/10x-astro-project/issues/7) |
 
 ## Open Roadmap Questions
 
