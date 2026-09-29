@@ -388,21 +388,21 @@ Migracja z Fazy 1 jest czysto addytywna (nowe nullable kolumny, brak backfillu) 
 
 #### Automated
 
-- [x] 4.1 `npm run lint` przechodzi
-- [x] 4.2 `npx astro check` przechodzi
-- [x] 4.3 `npm run build` kończy się bez błędów
+- [x] 4.1 `npm run lint` przechodzi — d95a372
+- [x] 4.2 `npx astro check` przechodzi — d95a372
+- [x] 4.3 `npm run build` kończy się bez błędów — d95a372
 
 #### Manual
 
-- [x] 4.4 Rozwinięty wiersz pokazuje odwiedzonego klienta, współrzędne i przyczynę odstępstwa
-- [x] 4.5 Wizyta tylko z `missing_gps` renderuje się poprawnie bez pustej sekcji szczegółów
+- [x] 4.4 Rozwinięty wiersz pokazuje odwiedzonego klienta, współrzędne i przyczynę odstępstwa — d95a372
+- [x] 4.5 Wizyta tylko z `missing_gps` renderuje się poprawnie bez pustej sekcji szczegółów — d95a372
 
 ### Phase 5: Fixture testowy i rozszerzenie skryptu weryfikacji
 
 #### Automated
 
-- [ ] 5.1 `npm run verify:report-detection` kończy się kodem 0
+- [x] 5.1 `npm run verify:report-detection` kończy się kodem 0
 
 #### Manual
 
-- [ ] 5.2 Log skryptu pokazuje jawne asercje dla wszystkich pięciu nowych przypadków, dla obu formatów
+- [x] 5.2 Log skryptu pokazuje jawne asercje dla wszystkich pięciu nowych przypadków, dla obu formatów
