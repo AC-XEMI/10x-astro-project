@@ -96,3 +96,28 @@ Plan: Pierwsze wdrożenie Kontroli Trasówek na Cloudflare Workers
  5. Opcjonalnie: wrangler tail --status error (wymaga lokalnego
     wrangler login, poza zakresem tego pierwszego, CI-only deployu, ale
     dostępne jako następny krok przy debugowaniu).
+
+ Addendum (2026-09-28, dopisane po /10x-impl-review)
+
+ Podczas realizacji tego planu wykonano dwie dodatkowe zmiany w
+ .github/workflows/ci.yml, nieujęte w oryginalnych "Krokach automatycznych"
+ powyżej — obie okazały się konieczne, gdy pierwszy faktyczny deploy
+ ujawnił luki, których plan nie przewidział:
+
+ 1. Commit 31efb44 — "Push Supabase credentials as Workers runtime
+    secrets on deploy". Job deploy wstrzykiwał SUPABASE_URL/SUPABASE_KEY
+    tylko na etapie astro build; sam Worker w runtime (Astro.locals.
+    runtime.env) nigdy ich nie otrzymywał, więc żywy deploy serwowałby
+    "Supabase is not configured" na signup/dashboard. Naprawiono przez
+    dodanie sekcji secrets: do kroku cloudflare/wrangler-action@v3, co
+    nieinteraktywnie uruchamia wrangler secret put z env joba — bez
+    potrzeby lokalnego wrangler login.
+ 2. Commit c9ace44 — "fix(ci): re-enable smoke job and gate deploy on
+    it". Odkomentowano job smoke (lokalny Supabase + npm run smoke) i
+    zmieniono needs joba deploy z [ci] na [ci, smoke] — produkcyjny
+    deploy jest teraz blokowany, dopóki smoke test nie przejdzie.
+
+ Uwaga: nie zweryfikowano na żywym tokenie, czy zakres Workers
+ Scripts:Edit (patrz Bramki manualne, krok 1) wystarcza do wrangler
+ secret put — jeśli nie, krok "secrets:" w deploy zawiedzie i zakres
+ tokena trzeba będzie rozszerzyć.

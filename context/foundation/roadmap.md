@@ -3,7 +3,7 @@ project: "Kontrola Trasówek"
 version: 1
 status: draft
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-09-28
 prd_version: 2
 main_goal: quality
 top_blocker: time
@@ -42,7 +42,7 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 | ID   | Change ID                        | Outcome (user can …)                                                              | Prerequisites | PRD refs                                              | Status   |
 | ---- | --------------------------------- | ----------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------ | -------- |
 | F-01 | report-data-schema                 | (foundation) Schemat i trwałość danych raportu w Supabase, izolowane per-użytkownik | —              | Access Control, NFR (izolacja danych)                  | done |
-| S-01 | missing-gps-deviation-detection    | Kierownik wgrywa raport i widzi wizyty bez GPS oznaczone jako odstępstwo             | F-01           | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, US-01  | proposed |
+| S-01 | missing-gps-deviation-detection    | Kierownik wgrywa raport i widzi wizyty bez GPS oznaczone jako odstępstwo             | F-01           | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, US-01  | in-progress |
 | S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | proposed |
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | proposed |
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | proposed |
@@ -87,7 +87,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** To gwiazda przewodnia — sekwencjonowana zaraz po F-01, najmniej złożona z trzech reguł (prosty warunek, bez silnika liczenia dystansu), więc najszybciej dowodzi, że cały pipeline (upload → ekstrakcja → zapis → detekcja → lista → szczegóły) działa.
-- **Status:** proposed
+- **Status:** in-progress
 
 ### S-02: Kierownik wykrywa nieoptymalną trasę w wgranym raporcie
 
