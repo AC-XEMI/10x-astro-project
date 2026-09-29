@@ -70,6 +70,9 @@ export const POST: APIRoute = async (context) => {
   const { data: insertedVisits, error: visitsError } = await supabase.from("visits").insert(visitsToInsert).select();
 
   if (visitsError) {
+    // Compensating rollback: report is already committed at this point but would be
+    // permanently orphaned with zero visits — mirrors the deviationsError branch below.
+    await supabase.from("reports").delete().eq("id", report.id);
     return context.redirect(`/reports?error=${encodeURIComponent(visitsError.message)}`);
   }
 
