@@ -37,6 +37,7 @@ export type Database = {
       deviations: {
         Row: {
           created_at: string
+          detail: string | null
           id: string
           reviewed_at: string | null
           rule: Database["public"]["Enums"]["deviation_rule"]
@@ -45,6 +46,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          detail?: string | null
           id?: string
           reviewed_at?: string | null
           rule: Database["public"]["Enums"]["deviation_rule"]
@@ -53,6 +55,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          detail?: string | null
           id?: string
           reviewed_at?: string | null
           rule?: Database["public"]["Enums"]["deviation_rule"]
@@ -109,6 +112,9 @@ export type Database = {
           representative_name: string
           time_on_site_minutes: number | null
           visit_date: string
+          visited_client: string | null
+          visited_latitude: number | null
+          visited_longitude: number | null
         }
         Insert: {
           activity_type?: string | null
@@ -122,6 +128,9 @@ export type Database = {
           representative_name: string
           time_on_site_minutes?: number | null
           visit_date: string
+          visited_client?: string | null
+          visited_latitude?: number | null
+          visited_longitude?: number | null
         }
         Update: {
           activity_type?: string | null
@@ -135,6 +144,9 @@ export type Database = {
           representative_name?: string
           time_on_site_minutes?: number | null
           visit_date?: string
+          visited_client?: string | null
+          visited_latitude?: number | null
+          visited_longitude?: number | null
         }
         Relationships: [
           {
