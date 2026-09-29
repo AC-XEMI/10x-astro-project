@@ -17,6 +17,9 @@ export interface ExtractedVisit {
   time_on_site_minutes: number | null;
   planned_route_raw: Json | null;
   raw_data: Json | null;
+  visited_client: string | null;
+  visited_latitude: number | null;
+  visited_longitude: number | null;
 }
 
 export type ParsedReport = { rows: ExtractedVisit[] } | { error: string };
@@ -120,6 +123,10 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
   if (gpsWlaczonyIndex === undefined) {
     return { error: "Brak wymaganej kolumny: gps_wlaczony." };
   }
+  const odwiedzonyKlientIndex = columnIndex.get("odwiedzony_klient");
+  if (odwiedzonyKlientIndex === undefined) {
+    return { error: "Brak wymaganej kolumny: odwiedzony_klient." };
+  }
 
   const dataRows = sheetRows.slice(1);
   if (dataRows.length === 0) {
@@ -130,6 +137,8 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
   const dystansKmIndex = columnIndex.get("dystans_km");
   const czasNaMiejscuIndex = columnIndex.get("czas_na_miejscu_min");
   const planowanaTrasaIndex = columnIndex.get("planowana_trasa");
+  const szerokoscIndex = columnIndex.get("szerokosc");
+  const dlugoscIndex = columnIndex.get("dlugosc");
 
   const extractedVisits: ExtractedVisit[] = [];
 
@@ -173,6 +182,20 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
         : null;
     }
 
+    const visitedClient = cellToText(row[odwiedzonyKlientIndex]) || null;
+
+    let visitedLatitude: number | null = null;
+    let visitedLongitude: number | null = null;
+    if (szerokoscIndex !== undefined && dlugoscIndex !== undefined) {
+      const parsedLatitude = parseOptionalNumber(cellToText(row[szerokoscIndex]));
+      const parsedLongitude = parseOptionalNumber(cellToText(row[dlugoscIndex]));
+      // No partial coordinates — only keep the pair when both parsed successfully.
+      if (parsedLatitude !== null && parsedLongitude !== null) {
+        visitedLatitude = parsedLatitude;
+        visitedLongitude = parsedLongitude;
+      }
+    }
+
     const rawData: Record<string, string> = {};
     headers.forEach((header, index) => {
       if (!header || header === "__proto__") return;
@@ -188,6 +211,9 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
       time_on_site_minutes: timeOnSiteMinutes,
       planned_route_raw: plannedRouteRaw,
       raw_data: rawData,
+      visited_client: visitedClient,
+      visited_latitude: visitedLatitude,
+      visited_longitude: visitedLongitude,
     });
   }
 

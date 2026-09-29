@@ -1,5 +1,6 @@
-import type { Database } from "@/types";
+import type { Database, Json, Tables } from "@/types";
 import type { ExtractedVisit } from "@/lib/services/report-parser";
+import { haversineDistanceKm } from "@/lib/services/geo";
 
 export type DeviationRule = Database["public"]["Enums"]["deviation_rule"];
 
@@ -10,4 +11,90 @@ export type DeviationRule = Database["public"]["Enums"]["deviation_rule"];
  */
 export function detectMissingGps(visit: ExtractedVisit): DeviationRule | null {
   return !visit.gps_enabled ? "missing_gps" : null;
+}
+
+export interface RouteDeviationFlag {
+  visit_id: string;
+  detail: string;
+}
+
+/** Narrows planned_route_raw (Json | null) to string[] at runtime, without an unchecked cast. */
+function asPlannedRouteList(value: Json | null): string[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.every((item): item is string => typeof item === "string") ? value : null;
+}
+
+interface Point {
+  lat: number;
+  lng: number;
+}
+
+function visitedPoint(visit: Tables<"visits">): Point | null {
+  if (visit.visited_latitude === null || visit.visited_longitude === null) return null;
+  return { lat: visit.visited_latitude, lng: visit.visited_longitude };
+}
+
+/**
+ * FR-009: unlike detectMissingGps (per-visit), this rule operates on the whole report's
+ * visit set — it compares consecutive visits of the same representative on the same day,
+ * so it needs the full sequence rather than a single row.
+ */
+export function detectRouteDeviations(visits: Tables<"visits">[]): RouteDeviationFlag[] {
+  const flags: RouteDeviationFlag[] = [];
+
+  // Group by (representative_name, visit_date), preserving first-occurrence order (Map
+  // iterates keys in insertion order) — this function trusts the input array's row order
+  // as the visit sequence and never sorts it. "telefon" activities are dropped entirely,
+  // so they don't occupy a "previous point" slot in the sequence.
+  const groups = new Map<string, Tables<"visits">[]>();
+  for (const visit of visits) {
+    const activityType = visit.activity_type?.trim().toLowerCase() ?? null;
+    if (activityType !== null && activityType !== "wizyta") continue;
+
+    const key = JSON.stringify([visit.representative_name, visit.visit_date]);
+    const group = groups.get(key);
+    if (group) {
+      group.push(visit);
+    } else {
+      groups.set(key, [visit]);
+    }
+  }
+
+  for (const group of groups.values()) {
+    // First visit of the day has no fixed starting point, so it's never distance-checked.
+    let previousPoint: Point | null = null;
+
+    for (const visit of group) {
+      const details: string[] = [];
+
+      const visitedClient = visit.visited_client?.trim() ?? "";
+      const plannedRoute = asPlannedRouteList(visit.planned_route_raw);
+      if (visitedClient && plannedRoute && plannedRoute.length > 0) {
+        const normalizedPlanned = plannedRoute.map((item) => item.trim().toLowerCase());
+        if (!normalizedPlanned.includes(visitedClient.toLowerCase())) {
+          details.push("poza zaplanowaną trasą");
+        }
+      }
+
+      const currentPoint = visitedPoint(visit);
+      if (previousPoint && currentPoint && visit.distance_km !== null && visit.distance_km > 0) {
+        const lineKm = haversineDistanceKm(previousPoint, currentPoint);
+        if (visit.distance_km > lineKm * 1.5) {
+          details.push(`nadmiarowy dystans: zgłoszono ${visit.distance_km} km, linia prosta ${lineKm.toFixed(1)} km`);
+        }
+      }
+
+      if (details.length > 0) {
+        flags.push({ visit_id: visit.id, detail: details.join("; ") });
+      }
+
+      // Always advance the reference point when this visit has full coordinates, flagged
+      // or not, so the next visit in the group compares against the right previous stop.
+      if (currentPoint) {
+        previousPoint = currentPoint;
+      }
+    }
+  }
+
+  return flags;
 }

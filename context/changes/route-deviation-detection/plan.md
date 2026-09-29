@@ -351,25 +351,25 @@ Migracja z Fazy 1 jest czysto addytywna (nowe nullable kolumny, brak backfillu) 
 
 #### Automated
 
-- [x] 1.1 Migracja aplikuje się czysto lokalnie: `npx supabase db reset`
-- [x] 1.2 `npm run db:types` kończy się sukcesem i zawiera nowe kolumny
-- [x] 1.3 `npm run lint` przechodzi
-- [x] 1.4 `npx astro check` przechodzi
+- [x] 1.1 Migracja aplikuje się czysto lokalnie: `npx supabase db reset` — 9a311de
+- [x] 1.2 `npm run db:types` kończy się sukcesem i zawiera nowe kolumny — 9a311de
+- [x] 1.3 `npm run lint` przechodzi — 9a311de
+- [x] 1.4 `npx astro check` przechodzi — 9a311de
 
 #### Manual
 
-- [x] 1.5 Skrypt rollback usuwa kolumny bez błędu; ponowna migracja "up" je przywraca
+- [x] 1.5 Skrypt rollback usuwa kolumny bez błędu; ponowna migracja "up" je przywraca — 9a311de
 
 ### Phase 2: Rdzeń logiki — rozszerzenie parsera i reguła trasy
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` przechodzi
-- [ ] 2.2 `npx astro check` przechodzi
+- [x] 2.1 `npm run lint` przechodzi
+- [x] 2.2 `npx astro check` przechodzi
 
 #### Manual
 
-- [ ] 2.3 Ręczny przegląd `detectRouteDeviations` potwierdza logikę z wywiadu
+- [x] 2.3 Ręczny przegląd `detectRouteDeviations` potwierdza logikę z wywiadu
 
 ### Phase 3: Integracja z endpointem uploadu
 
