@@ -72,7 +72,27 @@ export default function DeviationsList({ visits }: Props) {
                       <dd>{visit.time_on_site_minutes ?? "—"}</dd>
                       <dt className="font-medium">Planowana trasa</dt>
                       <dd>{visit.planned_route_raw ? JSON.stringify(visit.planned_route_raw) : "—"}</dd>
+                      <dt className="font-medium">Odwiedzony klient</dt>
+                      <dd>{visit.visited_client ?? "—"}</dd>
+                      <dt className="font-medium">Współrzędne</dt>
+                      <dd>
+                        {visit.visited_latitude !== null && visit.visited_longitude !== null
+                          ? `${visit.visited_latitude}, ${visit.visited_longitude}`
+                          : "—"}
+                      </dd>
                     </dl>
+                    {visit.deviations.some((deviation) => deviation.detail) && (
+                      <>
+                        <p className="mt-2 font-medium">Szczegóły odstępstw</p>
+                        <ul className="list-disc pl-5 text-sm">
+                          {visit.deviations
+                            .filter((deviation) => deviation.detail)
+                            .map((deviation) => (
+                              <li key={deviation.id}>{deviation.detail}</li>
+                            ))}
+                        </ul>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               )}

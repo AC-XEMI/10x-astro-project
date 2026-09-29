@@ -375,27 +375,27 @@ Migracja z Fazy 1 jest czysto addytywna (nowe nullable kolumny, brak backfillu) 
 
 #### Automated
 
-- [x] 3.1 `npm run lint` przechodzi
-- [x] 3.2 `npx astro check` przechodzi
+- [x] 3.1 `npm run lint` przechodzi — 840c123
+- [x] 3.2 `npx astro check` przechodzi — 840c123
 
 #### Manual
 
-- [x] 3.3 Wizyta poza planowaną listą zapisuje `route_deviation` z poprawnym `detail`
-- [x] 3.4 Wizyta z nadmiarowym dystansem zapisuje `route_deviation` z poprawnym `detail`
-- [x] 3.5 Wizyta łamiąca dwie reguły naraz ma oba wpisy w `deviations`
+- [x] 3.3 Wizyta poza planowaną listą zapisuje `route_deviation` z poprawnym `detail` — 840c123
+- [x] 3.4 Wizyta z nadmiarowym dystansem zapisuje `route_deviation` z poprawnym `detail` — 840c123
+- [x] 3.5 Wizyta łamiąca dwie reguły naraz ma oba wpisy w `deviations` — 840c123
 
 ### Phase 4: UI — rozszerzony kontekst wizyty
 
 #### Automated
 
-- [ ] 4.1 `npm run lint` przechodzi
-- [ ] 4.2 `npx astro check` przechodzi
-- [ ] 4.3 `npm run build` kończy się bez błędów
+- [x] 4.1 `npm run lint` przechodzi
+- [x] 4.2 `npx astro check` przechodzi
+- [x] 4.3 `npm run build` kończy się bez błędów
 
 #### Manual
 
-- [ ] 4.4 Rozwinięty wiersz pokazuje odwiedzonego klienta, współrzędne i przyczynę odstępstwa
-- [ ] 4.5 Wizyta tylko z `missing_gps` renderuje się poprawnie bez pustej sekcji szczegółów
+- [x] 4.4 Rozwinięty wiersz pokazuje odwiedzonego klienta, współrzędne i przyczynę odstępstwa
+- [x] 4.5 Wizyta tylko z `missing_gps` renderuje się poprawnie bez pustej sekcji szczegółów
 
 ### Phase 5: Fixture testowy i rozszerzenie skryptu weryfikacji
 
