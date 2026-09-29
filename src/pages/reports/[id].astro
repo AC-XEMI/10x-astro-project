@@ -1,17 +1,13 @@
 ---
-import type { SupabaseClient } from "@supabase/supabase-js";
 import Layout from "@/layouts/Layout.astro";
 import Banner from "@/components/Banner.astro";
 import DeviationsList from "@/components/reports/DeviationsList";
 import type { VisitWithDeviations } from "@/components/reports/DeviationsList";
 import { createClient } from "@/lib/supabase";
-import type { Database } from "@/types";
 
 const { id } = Astro.params;
 
-// createClient() is not parameterized with Database in src/lib/supabase.ts (out of this phase's
-// file scope), so .from() would otherwise resolve to `any`; cast locally to get typed queries.
-const supabase = createClient(Astro.request.headers, Astro.cookies) as SupabaseClient<Database> | null;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let visits: VisitWithDeviations[] = [];
 let notFound = true;

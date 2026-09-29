@@ -1,17 +1,24 @@
 import type { APIRoute } from "astro";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase";
 import { parseReportFile } from "@/lib/services/report-parser";
 import { detectMissingGps } from "@/lib/services/deviation-rules";
-import type { Database, TablesInsert } from "@/types";
+import type { TablesInsert } from "@/types";
 
 // 5 MB, enforced on file.size before the file is read into memory as an ArrayBuffer.
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
+// Browsers report inconsistent (or empty) MIME types for .csv in particular, so this is a
+// coarse belt-and-suspenders check alongside the extension check in report-parser.ts, not
+// the sole gate — an empty file.type is allowed rather than rejected.
+const ALLOWED_MIME_TYPES = new Set([
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+]);
+
 export const POST: APIRoute = async (context) => {
-  // createClient() is not parameterized with Database in src/lib/supabase.ts (out of this phase's
-  // file scope), so .from() would otherwise resolve to `any`; cast locally to get typed queries.
-  const supabase = createClient(context.request.headers, context.cookies) as SupabaseClient<Database> | null;
+  const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
     return context.redirect(`/reports?error=${encodeURIComponent("Supabase is not configured")}`);
   }
@@ -28,6 +35,10 @@ export const POST: APIRoute = async (context) => {
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
     return context.redirect(`/reports?error=${encodeURIComponent("Plik przekracza limit 5 MB.")}`);
+  }
+
+  if (file.type && !ALLOWED_MIME_TYPES.has(file.type)) {
+    return context.redirect(`/reports?error=${encodeURIComponent("Nieobsługiwany typ pliku.")}`);
   }
 
   const result = parseReportFile(await file.arrayBuffer(), file.name);
@@ -70,6 +81,10 @@ export const POST: APIRoute = async (context) => {
   if (deviationsToInsert.length > 0) {
     const { error: deviationsError } = await supabase.from("deviations").insert(deviationsToInsert);
     if (deviationsError) {
+      // Compensating rollback: visits are already committed at this point, but without
+      // their deviations they'd be silently and permanently under-reported as compliant.
+      // report_id has ON DELETE CASCADE, so deleting the report also removes its visits.
+      await supabase.from("reports").delete().eq("id", report.id);
       return context.redirect(`/reports?error=${encodeURIComponent(deviationsError.message)}`);
     }
   }

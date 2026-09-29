@@ -1,3 +1,5 @@
+// "xlsx" resolves to the @e965/xlsx npm mirror (see package.json) — the plain
+// npm `xlsx` package stopped receiving security patches after 0.18.5.
 import * as XLSX from "xlsx";
 import type { Json } from "@/types";
 
@@ -44,6 +46,14 @@ function parseGpsEnabled(rawValue: string): boolean | null {
   return null;
 }
 
+/** Strict RRRR-MM-DD check — also rejects calendar-invalid dates like 2026-02-30. */
+function isValidIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return false;
+  return date.toISOString().slice(0, 10) === value;
+}
+
 function parseOptionalNumber(rawValue: string): number | null {
   if (!rawValue) return null;
   const parsed = Number(rawValue);
@@ -55,13 +65,17 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
   const extension = dotIndex === -1 ? "" : filename.slice(dotIndex).toLowerCase();
 
   let workbook: XLSX.WorkBook;
-  if (extension === ".csv") {
-    const text = new TextDecoder("utf-8").decode(bytes);
-    workbook = XLSX.read(text, { type: "string" });
-  } else if (extension === ".xlsx") {
-    workbook = XLSX.read(bytes, { type: "array" });
-  } else {
-    return { error: "Nieobsługiwany format pliku — akceptowane CSV lub XLSX." };
+  try {
+    if (extension === ".csv") {
+      const text = new TextDecoder("utf-8").decode(bytes);
+      workbook = XLSX.read(text, { type: "string" });
+    } else if (extension === ".xlsx") {
+      workbook = XLSX.read(bytes, { type: "array" });
+    } else {
+      return { error: "Nieobsługiwany format pliku — akceptowane CSV lub XLSX." };
+    }
+  } catch {
+    return { error: "Nie udało się odczytać pliku — sprawdź czy nie jest uszkodzony." };
   }
 
   const sheetName = workbook.SheetNames[0];
@@ -132,6 +146,11 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
     if (!visitDate) {
       return { error: `Wiersz ${rowNumber}: brak wartości w kolumnie data_wizyty.` };
     }
+    if (!isValidIsoDate(visitDate)) {
+      return {
+        error: `Wiersz ${rowNumber}: nierozpoznany format daty w kolumnie data_wizyty (oczekiwano RRRR-MM-DD).`,
+      };
+    }
 
     const gpsEnabled = parseGpsEnabled(cellToText(row[gpsWlaczonyIndex]));
     if (gpsEnabled === null) {
@@ -156,7 +175,7 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
 
     const rawData: Record<string, string> = {};
     headers.forEach((header, index) => {
-      if (!header) return;
+      if (!header || header === "__proto__") return;
       rawData[header] = cellToText(row[index]);
     });
 
