@@ -3,7 +3,7 @@ project: "Kontrola Trasówek"
 version: 1
 status: draft
 created: 2026-09-25
-updated: 2026-09-29
+updated: 2026-09-30
 prd_version: 2
 main_goal: quality
 top_blocker: time
@@ -43,7 +43,7 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 | ---- | --------------------------------- | ----------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------ | -------- |
 | F-01 | report-data-schema                 | (foundation) Schemat i trwałość danych raportu w Supabase, izolowane per-użytkownik | —              | Access Control, NFR (izolacja danych)                  | done |
 | S-01 | missing-gps-deviation-detection    | Kierownik wgrywa raport i widzi wizyty bez GPS oznaczone jako odstępstwo             | F-01           | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, US-01  | done |
-| S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | in-progress |
+| S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | done |
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | proposed |
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | proposed |
 | S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | proposed |
@@ -100,7 +100,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Unknowns:**
   - Jaką dokładnie metodą liczyć próg dystansu/czasu do najkrótszej trasy (źródło współrzędnych, sposób obliczania odległości)? — Owner: team. Block: no (decyzja implementacyjna dla `/10x-plan`, nie blokuje sekwencjonowania na poziomie roadmapy).
 - **Risk:** PRD samo nazywa tę regułę "realną pracą inżynierską" — najbardziej złożona z trzech reguł. Sekwencjonowana po S-01, żeby wzorce ekstrakcji/listy/szczegółów były już sprawdzone na prostszym przypadku.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-03: Kierownik wykrywa telefon zamiast wizyty w wgranym raporcie
 
@@ -168,3 +168,4 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **F-01: (foundation) Schemat i trwałość danych raportu w Supabase, izolowane per-użytkownik** — Archived 2026-09-25 → `context/archive/2026-09-25-report-data-schema/`. Lesson: —.
 - **S-01: Kierownik wgrywa raport i w ciągu kilku sekund widzi wizyty bez włączonego GPS oznaczone jako odstępstwo; po kliknięciu widzi pełny kontekst wizyty (data, przedstawiciel, dane z raportu).** — Archived 2026-09-29 → `context/archive/2026-09-28-missing-gps-deviation-detection/`. Lesson: —.
+- **S-02: Kierownik widzi na liście odstępstw wizyty, które są poza zaplanowaną trasą lub mają nadmiarowy dystans/czas przejazdu ponad próg wynikający z najkrótszej trasy.** — Archived 2026-09-30 → `context/archive/2026-09-29-route-deviation-detection/`. Lesson: —.
