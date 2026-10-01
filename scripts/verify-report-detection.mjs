@@ -139,6 +139,17 @@ function verifyFixture(filename) {
   // --- phone_instead_of_visit (per-visit) on the 6 newly appended rows (indices 9-14) ---
   const phoneFlags = result.rows.map((visit) => detectPhoneInsteadOfVisit(visit));
 
+  // Index 3: Katarzyna Zielińska (pre-existing S-01 row) — explicit "telefon", GPS off. This
+  // rule is independent of missing_gps (impl-review F2), so this row now correctly gets BOTH.
+  record(
+    phoneFlags[3] !== null && phoneFlags[3].detail.includes("telefon"),
+    `${filename}: index 3 (Katarzyna Zielińska, pre-existing row) — also gets phone_instead_of_visit via explicit 'telefon'`,
+  );
+  record(
+    detectMissingGps(result.rows[3]) === "missing_gps",
+    `${filename}: index 3 (Katarzyna Zielińska) — still gets missing_gps too (both rules independent)`,
+  );
+
   // Index 9: Zofia Mazur — explicit "telefon", GPS on, long time: explicit path ignores GPS/time.
   record(
     phoneFlags[9] !== null && phoneFlags[9].detail.includes("telefon"),

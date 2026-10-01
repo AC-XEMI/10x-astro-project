@@ -22,7 +22,9 @@ export interface PhoneInsteadOfVisitResult {
  * reason (like detectRouteDeviations), since there are two distinct detection paths.
  * Explicit path: activity_type is exactly "telefon" — flagged regardless of GPS/time.
  * Explicit "wizyta" short-circuits to not-flagged. Anything else (null, empty, typos)
- * falls through to the heuristic: no GPS and no meaningful time on site.
+ * falls through to the heuristic: no GPS and no meaningful time on site. detectRouteDeviations
+ * treats null/unrecognized activity_type the same way (excluded, not a confirmed "wizyta") —
+ * kept consistent across both rules after impl-review F1.
  */
 export function detectPhoneInsteadOfVisit(visit: ExtractedVisit): PhoneInsteadOfVisitResult | null {
   const activityType = visit.activity_type?.trim().toLowerCase() ?? "";
@@ -76,12 +78,14 @@ export function detectRouteDeviations(visits: Tables<"visits">[]): RouteDeviatio
 
   // Group by (representative_name, visit_date), preserving first-occurrence order (Map
   // iterates keys in insertion order) — this function trusts the input array's row order
-  // as the visit sequence and never sorts it. "telefon" activities are dropped entirely,
-  // so they don't occupy a "previous point" slot in the sequence.
+  // as the visit sequence and never sorts it. Only an explicit "wizyta" is grouped — null/blank
+  // and any other value (including "telefon") are dropped, matching detectPhoneInsteadOfVisit's
+  // treatment of null/unrecognized activity_type as "not a confirmed visit" (kept consistent
+  // across both rules after impl-review F1).
   const groups = new Map<string, Tables<"visits">[]>();
   for (const visit of visits) {
     const activityType = visit.activity_type?.trim().toLowerCase() ?? null;
-    if (activityType !== null && activityType !== "wizyta") continue;
+    if (activityType !== "wizyta") continue;
 
     const key = JSON.stringify([visit.representative_name, visit.visit_date]);
     const group = groups.get(key);
