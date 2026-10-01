@@ -30,7 +30,8 @@ const resolveHookSource = `
 register(`data:text/javascript,${encodeURIComponent(resolveHookSource)}`, import.meta.url);
 
 const { parseReportFile } = await import("../src/lib/services/report-parser.ts");
-const { detectMissingGps, detectRouteDeviations } = await import("../src/lib/services/deviation-rules.ts");
+const { detectMissingGps, detectRouteDeviations, detectPhoneInsteadOfVisit } =
+  await import("../src/lib/services/deviation-rules.ts");
 
 // Index-based (0-indexed, header excluded) since "Tomasz Kowalczyk" appears twice in the
 // fixture — only his 2nd row (Klient S) is missing_gps, so a name-based list is no longer
@@ -68,7 +69,7 @@ function verifyFixture(filename) {
     return;
   }
   record(true, `${filename}: parseReportFile succeeds`);
-  record(result.rows.length === 9, `${filename}: parses exactly 9 data rows`);
+  record(result.rows.length === 15, `${filename}: parses exactly 15 data rows`);
 
   // --- missing_gps (per-visit) ---
   const missingGpsIndexes = result.rows
@@ -77,8 +78,11 @@ function verifyFixture(filename) {
     .map((entry) => entry.index);
 
   record(
-    sameNumberSet(missingGpsIndexes, EXPECTED_MISSING_GPS_INDEXES),
-    `${filename}: exactly 3 missing_gps deviations (Anna Nowak, Katarzyna Zielińska, Tomasz Kowalczyk/Klient S)`,
+    sameNumberSet(
+      missingGpsIndexes.filter((index) => index < 9),
+      EXPECTED_MISSING_GPS_INDEXES,
+    ),
+    `${filename}: exactly 3 missing_gps deviations within the original 9 rows (Anna Nowak, Katarzyna Zielińska, Tomasz Kowalczyk/Klient S)`,
   );
 
   // --- route_deviation (whole-array, needs Tables<"visits">-shaped rows with an id) ---
@@ -111,13 +115,85 @@ function verifyFixture(filename) {
     `${filename}: Tomasz Kowalczyk's 2nd row (Klient S) is flagged by BOTH missing_gps and route_deviation`,
   );
 
-  // --- zero deviations from either rule combined ---
+  // --- zero deviations from either rule combined (restricted to the original 9 rows,
+  // indices 0-8 — the new rows appended below are evaluated separately below since their
+  // relevant rule is phone_instead_of_visit, not missing_gps/route_deviation) ---
   const zeroDeviationIndexes = result.rows
     .map((_, index) => index)
-    .filter((index) => !missingGpsIndexes.includes(index) && !routeDeviationIndexes.includes(index));
+    .filter((index) => index < 9 && !missingGpsIndexes.includes(index) && !routeDeviationIndexes.includes(index));
   record(
     sameNumberSet(zeroDeviationIndexes, EXPECTED_ZERO_DEVIATION_INDEXES),
-    `${filename}: exactly 4 visits have zero deviations (Jan Kowalski, Piotr Wiśniewski, Marek Nowicki/Klient P, Tomasz Kowalczyk/Klient R)`,
+    `${filename}: exactly 4 visits (of the original 9) have zero deviations (Jan Kowalski, Piotr Wiśniewski, Marek Nowicki/Klient P, Tomasz Kowalczyk/Klient R)`,
+  );
+
+  // --- explicit confirmation: indices 0-8 unaffected by the appended rows ---
+  // (the "exactly 3 missing_gps" assertion above is already filtered to index < 9, and the
+  // "exactly 3 route_deviation" assertion above is unfiltered yet still matches exactly
+  // EXPECTED_ROUTE_DEVIATION_INDEXES — proving none of the appended rows produced a stray
+  // route_deviation flag and none of the original 3 flags were lost.)
+  record(
+    routeDeviationIndexes.every((index) => index < 9),
+    `${filename}: no route_deviation flags leak from the appended rows (indices 9-14)`,
+  );
+
+  // --- phone_instead_of_visit (per-visit) on the 6 newly appended rows (indices 9-14) ---
+  const phoneFlags = result.rows.map((visit) => detectPhoneInsteadOfVisit(visit));
+
+  // Index 9: Zofia Mazur — explicit "telefon", GPS on, long time: explicit path ignores GPS/time.
+  record(
+    phoneFlags[9] !== null && phoneFlags[9].detail.includes("telefon"),
+    `${filename}: index 9 (Zofia Mazur) — phone_instead_of_visit via explicit 'telefon', detail mentions "telefon"`,
+  );
+  record(detectMissingGps(result.rows[9]) === null, `${filename}: index 9 (Zofia Mazur) — no missing_gps (GPS is on)`);
+
+  // Index 10: Robert Lis — heuristic path, time exactly 0.
+  record(
+    phoneFlags[10] !== null && phoneFlags[10].detail.includes("brak GPS"),
+    `${filename}: index 10 (Robert Lis) — phone_instead_of_visit via heuristic (time=0), detail mentions "brak GPS"`,
+  );
+  record(
+    detectMissingGps(result.rows[10]) === "missing_gps",
+    `${filename}: index 10 (Robert Lis) — missing_gps (GPS is off)`,
+  );
+
+  // Index 11: Lucyna Wrona — heuristic path, time_on_site_minutes blank/null treated as zero.
+  record(
+    phoneFlags[11] !== null && phoneFlags[11].detail.includes("brak GPS"),
+    `${filename}: index 11 (Lucyna Wrona) — phone_instead_of_visit via heuristic (null time treated as zero), detail mentions "brak GPS"`,
+  );
+  record(
+    detectMissingGps(result.rows[11]) === "missing_gps",
+    `${filename}: index 11 (Lucyna Wrona) — missing_gps (GPS is off)`,
+  );
+
+  // Index 12: Marcin Duda — heuristic path, unrecognized activity_type ("spotkanie") treated as absent.
+  record(
+    phoneFlags[12] !== null && phoneFlags[12].detail.includes("brak GPS"),
+    `${filename}: index 12 (Marcin Duda) — phone_instead_of_visit via heuristic (unrecognized activity type), detail mentions "brak GPS"`,
+  );
+  record(
+    detectMissingGps(result.rows[12]) === "missing_gps",
+    `${filename}: index 12 (Marcin Duda) — missing_gps (GPS is off)`,
+  );
+
+  // Index 13: Alicja Górecka — NEGATIVE: blank type but GPS on, heuristic's "no GPS" condition fails.
+  record(
+    phoneFlags[13] === null,
+    `${filename}: index 13 (Alicja Górecka) — NO phone_instead_of_visit (GPS is on, heuristic does not apply)`,
+  );
+  record(
+    detectMissingGps(result.rows[13]) === null,
+    `${filename}: index 13 (Alicja Górecka) — no missing_gps (GPS is on)`,
+  );
+
+  // Index 14: Katarzyna Woźniak — NEGATIVE: blank type, GPS off, but time=15 is not short.
+  record(
+    phoneFlags[14] === null,
+    `${filename}: index 14 (Katarzyna Woźniak) — NO phone_instead_of_visit (time=15 is not short enough)`,
+  );
+  record(
+    detectMissingGps(result.rows[14]) === "missing_gps",
+    `${filename}: index 14 (Katarzyna Woźniak) — missing_gps still fires independently (GPS is off)`,
   );
 }
 

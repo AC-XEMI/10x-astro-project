@@ -225,21 +225,21 @@ Brak — ten plan nie zmienia schematu bazy; wszystkie potrzebne kolumny już is
 
 #### Automated
 
-- [x] 2.1 `npm run lint` przechodzi
-- [x] 2.2 `npx astro check` przechodzi
+- [x] 2.1 `npm run lint` przechodzi — d40d395
+- [x] 2.2 `npx astro check` przechodzi — d40d395
 
 #### Manual
 
-- [x] 2.3 Aktywność `telefon` z GPS włączonym daje `phone_instead_of_visit` bez `missing_gps`
-- [x] 2.4 Pusty typ z wyłączonym GPS i zerowym czasem daje obie reguły naraz
-- [x] 2.5 Pusty typ z wyłączonym GPS i dłuższym czasem daje tylko `missing_gps`
+- [x] 2.3 Aktywność `telefon` z GPS włączonym daje `phone_instead_of_visit` bez `missing_gps` — d40d395
+- [x] 2.4 Pusty typ z wyłączonym GPS i zerowym czasem daje obie reguły naraz — d40d395
+- [x] 2.5 Pusty typ z wyłączonym GPS i dłuższym czasem daje tylko `missing_gps` — d40d395
 
 ### Phase 3: Fixture testowy i rozszerzenie skryptu weryfikacji
 
 #### Automated
 
-- [ ] 3.1 `npm run verify:report-detection` kończy się kodem 0
+- [x] 3.1 `npm run verify:report-detection` kończy się kodem 0
 
 #### Manual
 
-- [ ] 3.2 Log skryptu pokazuje jawne asercje dla wszystkich sześciu nowych przypadków, dla obu formatów
+- [x] 3.2 Log skryptu pokazuje jawne asercje dla wszystkich sześciu nowych przypadków, dla obu formatów
