@@ -1,10 +1,10 @@
 ---
 change_id: phone-vs-visit-deviation-detection
 title: Wykrywanie telefonu zamiast wizyty w wgranym raporcie
-status: impl_reviewed
+status: archived
 created: 2026-10-01
 updated: 2026-10-01
-archived_at: null
+archived_at: 2026-10-01T07:46:40Z
 ---
 
 ## Notes
