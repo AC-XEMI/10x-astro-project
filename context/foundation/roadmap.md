@@ -45,8 +45,8 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 | S-01 | missing-gps-deviation-detection    | Kierownik wgrywa raport i widzi wizyty bez GPS oznaczone jako odstępstwo             | F-01           | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, US-01  | done |
 | S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | done |
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | done |
-| S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | proposed |
-| S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | proposed |
+| S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | done |
+| S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | in-progress |
 
 ## Baseline
 
@@ -124,7 +124,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Operacja nieodwracalna — wymaga jawnego potwierdzenia w UI, żeby uniknąć przypadkowej utraty danych. Sekwencjonowana po S-01, bo korzysta z tej samej listy raportów zbudowanej w gwieździe przewodniej.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm
 
@@ -136,7 +136,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Prosta zmiana statusu na już istniejącym rekordzie odstępstwa — niska złożoność, ale wymaga pola statusu przeglądu w schemacie z F-01. Sekwencjonowana po S-01, gdy lista odstępstw już istnieje.
-- **Status:** proposed
+- **Status:** in-progress
 
 ## Backlog Handoff
 
@@ -170,3 +170,4 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **S-01: Kierownik wgrywa raport i w ciągu kilku sekund widzi wizyty bez włączonego GPS oznaczone jako odstępstwo; po kliknięciu widzi pełny kontekst wizyty (data, przedstawiciel, dane z raportu).** — Archived 2026-09-29 → `context/archive/2026-09-28-missing-gps-deviation-detection/`. Lesson: —.
 - **S-02: Kierownik widzi na liście odstępstw wizyty, które są poza zaplanowaną trasą lub mają nadmiarowy dystans/czas przejazdu ponad próg wynikający z najkrótszej trasy.** — Archived 2026-09-30 → `context/archive/2026-09-29-route-deviation-detection/`. Lesson: —.
 - **S-03: Kierownik widzi na liście odstępstw aktywności oznaczone jako "telefon zamiast wizyty" — wprost z pola typu aktywności, albo (gdy pole nie istnieje) na podstawie braku GPS i bardzo krótkiego/zerowego czasu na miejscu.** — Archived 2026-10-01 → `context/archive/2026-10-01-phone-vs-visit-deviation-detection/`. Lesson: —.
+- **S-04: Kierownik może usunąć wgrany raport (po jawnym potwierdzeniu); raport oraz wszystkie powiązane wizyty i odstępstwa znikają z listy i bazy dla tego konta.** — Archived 2026-10-01 → `context/archive/2026-10-01-delete-uploaded-report/`. Lesson: CLAUDE.md wymagał `prerender = false` w API routes, ale żaden endpoint tego nie robił — patrz `context/foundation/lessons.md`.
