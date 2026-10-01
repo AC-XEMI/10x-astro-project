@@ -109,6 +109,35 @@ async function main() {
   if (deviationsSelectErr) throw new Error(`assert: user B select deviations failed: ${deviationsSelectErr.message}`);
   record(!(deviationsSeenByB ?? []).some((d) => d.id === deviation.id), "user B cannot select user A's deviation");
 
+  // Fresh deviation for the UPDATE-on-deviations checks below: the one seeded above
+  // gets cascade-deleted when user A's report is removed further down this file, so
+  // this one must not be reused across that boundary.
+  const { data: reviewDeviation, error: reviewDeviationErr } = await clientA
+    .from("deviations")
+    .insert({ visit_id: visit.id, rule: "missing_gps" })
+    .select()
+    .single();
+  if (reviewDeviationErr)
+    throw new Error(`setup: insert review deviation as user A failed: ${reviewDeviationErr.message}`);
+
+  const { data: ownReviewUpdate, error: ownReviewUpdateErr } = await clientA
+    .from("deviations")
+    .update({ status: "reviewed", reviewed_at: new Date().toISOString() })
+    .eq("id", reviewDeviation.id)
+    .select();
+  if (ownReviewUpdateErr)
+    throw new Error(`assert: user A update own deviation status failed unexpectedly: ${ownReviewUpdateErr.message}`);
+  record((ownReviewUpdate ?? []).length === 1, "user A can update their own deviation status");
+
+  const { data: otherReviewUpdate, error: otherReviewUpdateErr } = await clientB
+    .from("deviations")
+    .update({ status: "reviewed", reviewed_at: new Date().toISOString() })
+    .eq("id", reviewDeviation.id)
+    .select();
+  if (otherReviewUpdateErr)
+    throw new Error(`assert: user B update deviation status failed unexpectedly: ${otherReviewUpdateErr.message}`);
+  record((otherReviewUpdate ?? []).length === 0, "user B cannot update user A's deviation status");
+
   const { data: updateResult, error: updateErr } = await clientB
     .from("reports")
     .update({ original_filename: "hacked.csv" })

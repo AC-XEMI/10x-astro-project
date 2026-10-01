@@ -224,24 +224,24 @@ Brak — `deviations.status` i `deviations.reviewed_at` istnieją od F-01; ten p
 
 #### Automated
 
-- [x] 2.1 `npm run lint` przechodzi
-- [x] 2.2 `npx astro check` przechodzi
-- [x] 2.3 `npm run build` kończy się bez błędów
+- [x] 2.1 `npm run lint` przechodzi — 5a00fe4
+- [x] 2.2 `npx astro check` przechodzi — 5a00fe4
+- [x] 2.3 `npm run build` kończy się bez błędów — 5a00fe4
 
 #### Manual
 
-- [x] 2.4 Licznik "X/Y sprawdzone" i przycisk zbiorczy poprawne w wierszu podsumowania
-- [x] 2.5 Przycisk zbiorczy oznacza/cofa wszystkie odstępstwa bez przeładowania i bez rozwijania wiersza
-- [x] 2.6 Rozwinięty wiersz pokazuje każde odstępstwo (także bez `detail`) z własnym przyciskiem
-- [x] 2.7 Indywidualny przełącznik zmienia tylko jedno odstępstwo, licznik aktualizuje się natychmiast
-- [x] 2.8 Przeładowanie strony potwierdza trwałość zapisanego stanu
+- [x] 2.4 Licznik "X/Y sprawdzone" i przycisk zbiorczy poprawne w wierszu podsumowania — 5a00fe4
+- [x] 2.5 Przycisk zbiorczy oznacza/cofa wszystkie odstępstwa bez przeładowania i bez rozwijania wiersza — 5a00fe4
+- [x] 2.6 Rozwinięty wiersz pokazuje każde odstępstwo (także bez `detail`) z własnym przyciskiem — 5a00fe4
+- [x] 2.7 Indywidualny przełącznik zmienia tylko jedno odstępstwo, licznik aktualizuje się natychmiast — 5a00fe4
+- [x] 2.8 Przeładowanie strony potwierdza trwałość zapisanego stanu — 5a00fe4
 
 ### Phase 3: Testowanie — rozszerzenie weryfikacji RLS
 
 #### Automated
 
-- [ ] 3.1 `npm run verify:rls` kończy się kodem 0
+- [x] 3.1 `npm run verify:rls` kończy się kodem 0
 
 #### Manual
 
-- [ ] 3.2 Log skryptu pokazuje jawne asercje dla zmiany statusu własnego odstępstwa i blokady dla cudzego konta
+- [x] 3.2 Log skryptu pokazuje jawne asercje dla zmiany statusu własnego odstępstwa i blokady dla cudzego konta
