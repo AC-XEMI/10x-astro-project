@@ -238,8 +238,8 @@ Brak — ten plan nie zmienia schematu bazy; wszystkie potrzebne kolumny już is
 
 #### Automated
 
-- [x] 3.1 `npm run verify:report-detection` kończy się kodem 0
+- [x] 3.1 `npm run verify:report-detection` kończy się kodem 0 — 65f36c9
 
 #### Manual
 
-- [x] 3.2 Log skryptu pokazuje jawne asercje dla wszystkich sześciu nowych przypadków, dla obu formatów
+- [x] 3.2 Log skryptu pokazuje jawne asercje dla wszystkich sześciu nowych przypadków, dla obu formatów — 65f36c9
