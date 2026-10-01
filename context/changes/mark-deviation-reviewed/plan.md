@@ -240,8 +240,8 @@ Brak — `deviations.status` i `deviations.reviewed_at` istnieją od F-01; ten p
 
 #### Automated
 
-- [x] 3.1 `npm run verify:rls` kończy się kodem 0
+- [x] 3.1 `npm run verify:rls` kończy się kodem 0 — c79db47
 
 #### Manual
 
-- [x] 3.2 Log skryptu pokazuje jawne asercje dla zmiany statusu własnego odstępstwa i blokady dla cudzego konta
+- [x] 3.2 Log skryptu pokazuje jawne asercje dla zmiany statusu własnego odstępstwa i blokady dla cudzego konta — c79db47
