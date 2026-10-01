@@ -13,6 +13,7 @@ interface Props {
 export default function DeviationsList({ visits: initialVisits }: Props) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [visits, setVisits] = useState<VisitWithDeviations[]>(initialVisits);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   const flaggedVisits = visits.filter((visit) => visit.deviations.length > 0);
 
@@ -33,6 +34,8 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
   }
 
   async function updateDeviationStatus(ids: string[], status: "reviewed" | "unreviewed") {
+    setPendingIds((prev) => new Set([...prev, ...ids]));
+
     try {
       const response = await fetch("/api/deviations/review", {
         method: "POST",
@@ -40,7 +43,8 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
         body: JSON.stringify({ ids, status }),
       });
 
-      if (!response.ok) {
+      const isJson = response.headers.get("content-type")?.includes("application/json");
+      if (!response.ok || !isJson) {
         console.error(`Nie udało się zaktualizować statusu odstępstw (HTTP ${response.status})`);
         return;
       }
@@ -58,6 +62,12 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
       );
     } catch (error) {
       console.error("Błąd podczas aktualizacji statusu odstępstw:", error);
+    } finally {
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        ids.forEach((id) => next.delete(id));
+        return next;
+      });
     }
   }
 
@@ -76,6 +86,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
           const reviewedCount = visit.deviations.filter((deviation) => deviation.status === "reviewed").length;
           const total = visit.deviations.length;
           const allReviewed = reviewedCount === total;
+          const isVisitPending = visit.deviations.some((deviation) => pendingIds.has(deviation.id));
 
           return (
             <Fragment key={visit.id}>
@@ -102,6 +113,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                       className="text-foreground size-7 cursor-pointer hover:border-slate-400 hover:bg-slate-200"
                       title={allReviewed ? "Cofnij oznaczenie wszystkich" : "Oznacz wszystkie jako sprawdzone"}
                       aria-label={allReviewed ? "Cofnij oznaczenie wszystkich" : "Oznacz wszystkie jako sprawdzone"}
+                      disabled={isVisitPending}
                       onClick={(e) => {
                         e.stopPropagation();
                         void updateDeviationStatus(
@@ -161,6 +173,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                             aria-label={
                               deviation.status === "reviewed" ? "Cofnij oznaczenie" : "Oznacz jako sprawdzone"
                             }
+                            disabled={pendingIds.has(deviation.id)}
                             onClick={() => {
                               void updateDeviationStatus(
                                 [deviation.id],
