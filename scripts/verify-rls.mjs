@@ -121,6 +121,33 @@ async function main() {
   if (deleteErr) throw new Error(`assert: user B delete report failed unexpectedly: ${deleteErr.message}`);
   record((deleteResult ?? []).length === 0, "user B cannot delete user A's report");
 
+  // Positive path: user A owns the report and must be able to delete it, with the
+  // delete cascading to the dependent visit and deviation rows.
+
+  const { data: ownDeleteResult, error: ownDeleteErr } = await clientA
+    .from("reports")
+    .delete()
+    .eq("id", report.id)
+    .select();
+  if (ownDeleteErr) throw new Error(`assert: user A delete own report failed unexpectedly: ${ownDeleteErr.message}`);
+  record((ownDeleteResult ?? []).length === 1, "user A can delete their own report");
+
+  const { data: visitsAfterDelete, error: visitsAfterDeleteErr } = await clientA
+    .from("visits")
+    .select()
+    .eq("id", visit.id);
+  if (visitsAfterDeleteErr)
+    throw new Error(`assert: user A select visit after delete failed: ${visitsAfterDeleteErr.message}`);
+  record((visitsAfterDelete ?? []).length === 0, "cascade: visit removed after report deletion");
+
+  const { data: deviationsAfterDelete, error: deviationsAfterDeleteErr } = await clientA
+    .from("deviations")
+    .select()
+    .eq("id", deviation.id);
+  if (deviationsAfterDeleteErr)
+    throw new Error(`assert: user A select deviation after delete failed: ${deviationsAfterDeleteErr.message}`);
+  record((deviationsAfterDelete ?? []).length === 0, "cascade: deviation removed after report deletion");
+
   console.log(failed ? `\n${failed} assertion(s) failed` : "\nAll RLS isolation checks passed");
   process.exit(failed ? 1 : 0);
 }

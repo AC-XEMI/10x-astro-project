@@ -232,24 +232,24 @@ Brak — schemat bazy (w tym `ON DELETE CASCADE`) już istnieje od F-01; ten pla
 
 #### Automated
 
-- [x] 2.1 `npm run lint` przechodzi
-- [x] 2.2 `npx astro check` przechodzi
-- [x] 2.3 `npm run build` kończy się bez błędów
+- [x] 2.1 `npm run lint` przechodzi — c96e27b
+- [x] 2.2 `npx astro check` przechodzi — c96e27b
+- [x] 2.3 `npm run build` kończy się bez błędów — c96e27b
 
 #### Manual
 
-- [x] 2.4 `/reports` pokazuje listę wcześniej wgranych raportów posortowaną od najnowszych
-- [x] 2.5 Kliknięcie "Usuń" otwiera modal z poprawnymi szczegółami raportu
-- [x] 2.6 Potwierdzenie usuwa raport, pokazuje baner sukcesu, raport znika z listy
-- [x] 2.7 "Anuluj" zamyka modal bez usuwania
-- [x] 2.8 Linki paginacji poprawnie nawigują i chowają się na granicach listy
+- [x] 2.4 `/reports` pokazuje listę wcześniej wgranych raportów posortowaną od najnowszych — c96e27b
+- [x] 2.5 Kliknięcie "Usuń" otwiera modal z poprawnymi szczegółami raportu — c96e27b
+- [x] 2.6 Potwierdzenie usuwa raport, pokazuje baner sukcesu, raport znika z listy — c96e27b
+- [x] 2.7 "Anuluj" zamyka modal bez usuwania — c96e27b
+- [x] 2.8 Linki paginacji poprawnie nawigują i chowają się na granicach listy — c96e27b
 
 ### Phase 3: Testowanie — rozszerzenie weryfikacji RLS
 
 #### Automated
 
-- [ ] 3.1 `npm run verify:rls` kończy się kodem 0
+- [x] 3.1 `npm run verify:rls` kończy się kodem 0
 
 #### Manual
 
-- [ ] 3.2 Log skryptu pokazuje jawne asercje usunięcia własnego raportu i kaskady
+- [x] 3.2 Log skryptu pokazuje jawne asercje usunięcia własnego raportu i kaskady
