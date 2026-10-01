@@ -13,6 +13,38 @@ export function detectMissingGps(visit: ExtractedVisit): DeviationRule | null {
   return !visit.gps_enabled ? "missing_gps" : null;
 }
 
+export interface PhoneInsteadOfVisitResult {
+  detail: string;
+}
+
+/**
+ * FR-010: per-visit like detectMissingGps, but with a detail string explaining the
+ * reason (like detectRouteDeviations), since there are two distinct detection paths.
+ * Explicit path: activity_type is exactly "telefon" — flagged regardless of GPS/time.
+ * Explicit "wizyta" short-circuits to not-flagged. Anything else (null, empty, typos)
+ * falls through to the heuristic: no GPS and no meaningful time on site.
+ */
+export function detectPhoneInsteadOfVisit(visit: ExtractedVisit): PhoneInsteadOfVisitResult | null {
+  const activityType = visit.activity_type?.trim().toLowerCase() ?? "";
+
+  if (activityType === "telefon") {
+    return { detail: "typ aktywności: telefon" };
+  }
+
+  if (activityType === "wizyta") {
+    return null;
+  }
+
+  const hasNoMeaningfulTime = visit.time_on_site_minutes === null || visit.time_on_site_minutes <= 0;
+  if (!visit.gps_enabled && hasNoMeaningfulTime) {
+    return {
+      detail: `brak GPS i czas na miejscu ${visit.time_on_site_minutes ?? 0} min (pole typ_aktywnosci puste lub nierozpoznane)`,
+    };
+  }
+
+  return null;
+}
+
 export interface RouteDeviationFlag {
   visit_id: string;
   detail: string;
