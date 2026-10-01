@@ -214,25 +214,25 @@ Brak — ten plan nie zmienia schematu bazy; wszystkie potrzebne kolumny już is
 
 #### Automated
 
-- [x] 1.1 `npm run lint` przechodzi
-- [x] 1.2 `npx astro check` przechodzi
+- [x] 1.1 `npm run lint` przechodzi — f585e25
+- [x] 1.2 `npx astro check` przechodzi — f585e25
 
 #### Manual
 
-- [x] 1.3 Ręczny przegląd `detectPhoneInsteadOfVisit` potwierdza trzy gałęzie logiki z wywiadu
+- [x] 1.3 Ręczny przegląd `detectPhoneInsteadOfVisit` potwierdza trzy gałęzie logiki z wywiadu — f585e25
 
 ### Phase 2: Integracja z endpointem uploadu
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` przechodzi
-- [ ] 2.2 `npx astro check` przechodzi
+- [x] 2.1 `npm run lint` przechodzi
+- [x] 2.2 `npx astro check` przechodzi
 
 #### Manual
 
-- [ ] 2.3 Aktywność `telefon` z GPS włączonym daje `phone_instead_of_visit` bez `missing_gps`
-- [ ] 2.4 Pusty typ z wyłączonym GPS i zerowym czasem daje obie reguły naraz
-- [ ] 2.5 Pusty typ z wyłączonym GPS i dłuższym czasem daje tylko `missing_gps`
+- [x] 2.3 Aktywność `telefon` z GPS włączonym daje `phone_instead_of_visit` bez `missing_gps`
+- [x] 2.4 Pusty typ z wyłączonym GPS i zerowym czasem daje obie reguły naraz
+- [x] 2.5 Pusty typ z wyłączonym GPS i dłuższym czasem daje tylko `missing_gps`
 
 ### Phase 3: Fixture testowy i rozszerzenie skryptu weryfikacji
 
