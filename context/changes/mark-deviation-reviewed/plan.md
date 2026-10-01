@@ -212,29 +212,29 @@ Brak — `deviations.status` i `deviations.reviewed_at` istnieją od F-01; ten p
 
 #### Automated
 
-- [x] 1.1 `npm run lint` przechodzi
-- [x] 1.2 `npx astro check` przechodzi
+- [x] 1.1 `npm run lint` przechodzi — 6252fea
+- [x] 1.2 `npx astro check` przechodzi — 6252fea
 
 #### Manual
 
-- [x] 1.3 Wywołanie endpointu dla własnego odstępstwa zwraca 200 z zaktualizowanym wierszem
-- [x] 1.4 Próba dla cudzego odstępstwa zwraca 200 z pustą tablicą `updated`
+- [x] 1.3 Wywołanie endpointu dla własnego odstępstwa zwraca 200 z zaktualizowanym wierszem — 6252fea
+- [x] 1.4 Próba dla cudzego odstępstwa zwraca 200 z pustą tablicą `updated` — 6252fea
 
 ### Phase 2: Frontend — licznik, przełączniki i lokalny stan
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` przechodzi
-- [ ] 2.2 `npx astro check` przechodzi
-- [ ] 2.3 `npm run build` kończy się bez błędów
+- [x] 2.1 `npm run lint` przechodzi
+- [x] 2.2 `npx astro check` przechodzi
+- [x] 2.3 `npm run build` kończy się bez błędów
 
 #### Manual
 
-- [ ] 2.4 Licznik "X/Y sprawdzone" i przycisk zbiorczy poprawne w wierszu podsumowania
-- [ ] 2.5 Przycisk zbiorczy oznacza/cofa wszystkie odstępstwa bez przeładowania i bez rozwijania wiersza
-- [ ] 2.6 Rozwinięty wiersz pokazuje każde odstępstwo (także bez `detail`) z własnym przyciskiem
-- [ ] 2.7 Indywidualny przełącznik zmienia tylko jedno odstępstwo, licznik aktualizuje się natychmiast
-- [ ] 2.8 Przeładowanie strony potwierdza trwałość zapisanego stanu
+- [x] 2.4 Licznik "X/Y sprawdzone" i przycisk zbiorczy poprawne w wierszu podsumowania
+- [x] 2.5 Przycisk zbiorczy oznacza/cofa wszystkie odstępstwa bez przeładowania i bez rozwijania wiersza
+- [x] 2.6 Rozwinięty wiersz pokazuje każde odstępstwo (także bez `detail`) z własnym przyciskiem
+- [x] 2.7 Indywidualny przełącznik zmienia tylko jedno odstępstwo, licznik aktualizuje się natychmiast
+- [x] 2.8 Przeładowanie strony potwierdza trwałość zapisanego stanu
 
 ### Phase 3: Testowanie — rozszerzenie weryfikacji RLS
 
