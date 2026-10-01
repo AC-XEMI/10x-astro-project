@@ -3,7 +3,7 @@ project: "Kontrola Trasówek"
 version: 1
 status: draft
 created: 2026-09-25
-updated: 2026-09-30
+updated: 2026-10-01
 prd_version: 2
 main_goal: quality
 top_blocker: time
@@ -44,7 +44,7 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 | F-01 | report-data-schema                 | (foundation) Schemat i trwałość danych raportu w Supabase, izolowane per-użytkownik | —              | Access Control, NFR (izolacja danych)                  | done |
 | S-01 | missing-gps-deviation-detection    | Kierownik wgrywa raport i widzi wizyty bez GPS oznaczone jako odstępstwo             | F-01           | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, US-01  | done |
 | S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | done |
-| S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | proposed |
+| S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | in-progress |
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | proposed |
 | S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | proposed |
 
@@ -112,7 +112,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Logika reguły jest już w pełni sprecyzowana w FR-010 (brak niejasności). Sekwencjonowana równolegle do S-02, bo obie reguły są niezależne i opierają się na tych samych fundamentach z S-01.
-- **Status:** proposed
+- **Status:** in-progress
 
 ### S-04: Kierownik usuwa błędnie wgrany raport
 
