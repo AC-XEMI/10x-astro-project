@@ -13,9 +13,10 @@ import type { Tables } from "@/types";
 
 interface Props {
   reports: Tables<"reports">[];
+  page: number;
 }
 
-export default function ReportsList({ reports }: Props) {
+export default function ReportsList({ reports, page }: Props) {
   const [deletingReport, setDeletingReport] = useState<Tables<"reports"> | null>(null);
 
   if (reports.length === 0) {
@@ -82,6 +83,7 @@ export default function ReportsList({ reports }: Props) {
                 <dd>{deletingReport.row_count ?? "—"}</dd>
               </dl>
               <form method="POST" action={`/api/reports/${deletingReport.id}/delete`}>
+                <input type="hidden" name="page" value={page} />
                 <DialogFooter>
                   <Button
                     type="button"

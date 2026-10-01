@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 
+export const prerender = false;
+
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
@@ -13,6 +15,9 @@ export const POST: APIRoute = async (context) => {
   }
 
   const { id } = context.params;
+  const formData = await context.request.formData();
+  const page = formData.get("page");
+  const pageParam = typeof page === "string" && page ? `&page=${encodeURIComponent(page)}` : "";
 
   const { data, error } = await supabase
     .from("reports")
@@ -28,5 +33,5 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(`/reports?error=${encodeURIComponent("Nie znaleziono raportu lub brak uprawnień.")}`);
   }
 
-  return context.redirect("/reports?deleted=1");
+  return context.redirect(`/reports?deleted=1${pageParam}`);
 };
