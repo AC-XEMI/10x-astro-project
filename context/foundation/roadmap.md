@@ -46,7 +46,7 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 | S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | done |
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | done |
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | done |
-| S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | in-progress |
+| S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | done |
 
 ## Baseline
 
@@ -136,7 +136,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Prosta zmiana statusu na już istniejącym rekordzie odstępstwa — niska złożoność, ale wymaga pola statusu przeglądu w schemacie z F-01. Sekwencjonowana po S-01, gdy lista odstępstw już istnieje.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -171,3 +171,4 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **S-02: Kierownik widzi na liście odstępstw wizyty, które są poza zaplanowaną trasą lub mają nadmiarowy dystans/czas przejazdu ponad próg wynikający z najkrótszej trasy.** — Archived 2026-09-30 → `context/archive/2026-09-29-route-deviation-detection/`. Lesson: —.
 - **S-03: Kierownik widzi na liście odstępstw aktywności oznaczone jako "telefon zamiast wizyty" — wprost z pola typu aktywności, albo (gdy pole nie istnieje) na podstawie braku GPS i bardzo krótkiego/zerowego czasu na miejscu.** — Archived 2026-10-01 → `context/archive/2026-10-01-phone-vs-visit-deviation-detection/`. Lesson: —.
 - **S-04: Kierownik może usunąć wgrany raport (po jawnym potwierdzeniu); raport oraz wszystkie powiązane wizyty i odstępstwa znikają z listy i bazy dla tego konta.** — Archived 2026-10-01 → `context/archive/2026-10-01-delete-uploaded-report/`. Lesson: CLAUDE.md wymagał `prerender = false` w API routes, ale żaden endpoint tego nie robił — patrz `context/foundation/lessons.md`.
+- **S-05: Kierownik może oznaczyć dowolne odstępstwo na liście jako "sprawdzone" (i cofnąć to oznaczenie); status przeglądu jest trwały i widoczny przy kolejnych powrotach do raportu.** — Archived 2026-10-01 → `context/archive/2026-10-01-mark-deviation-reviewed/`. Lesson: —.
