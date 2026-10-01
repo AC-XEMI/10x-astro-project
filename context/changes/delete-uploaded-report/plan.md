@@ -248,8 +248,8 @@ Brak — schemat bazy (w tym `ON DELETE CASCADE`) już istnieje od F-01; ten pla
 
 #### Automated
 
-- [x] 3.1 `npm run verify:rls` kończy się kodem 0
+- [x] 3.1 `npm run verify:rls` kończy się kodem 0 — 481b936
 
 #### Manual
 
-- [x] 3.2 Log skryptu pokazuje jawne asercje usunięcia własnego raportu i kaskady
+- [x] 3.2 Log skryptu pokazuje jawne asercje usunięcia własnego raportu i kaskady — 481b936
