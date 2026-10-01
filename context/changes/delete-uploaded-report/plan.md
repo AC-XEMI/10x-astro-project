@@ -220,29 +220,29 @@ Brak — schemat bazy (w tym `ON DELETE CASCADE`) już istnieje od F-01; ten pla
 
 #### Automated
 
-- [x] 1.1 `npm run lint` przechodzi
-- [x] 1.2 `npx astro check` przechodzi
+- [x] 1.1 `npm run lint` przechodzi — 0b733fa
+- [x] 1.2 `npx astro check` przechodzi — 0b733fa
 
 #### Manual
 
-- [x] 1.3 Usunięcie własnego raportu przekierowuje na `/reports?deleted=1` i usuwa dane z bazy
-- [x] 1.4 Próba usunięcia cudzego/nieistniejącego raportu kończy się błędem bez wpływu na dane
+- [x] 1.3 Usunięcie własnego raportu przekierowuje na `/reports?deleted=1` i usuwa dane z bazy — 0b733fa
+- [x] 1.4 Próba usunięcia cudzego/nieistniejącego raportu kończy się błędem bez wpływu na dane — 0b733fa
 
 ### Phase 2: Frontend — lista raportów i modal potwierdzenia
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` przechodzi
-- [ ] 2.2 `npx astro check` przechodzi
-- [ ] 2.3 `npm run build` kończy się bez błędów
+- [x] 2.1 `npm run lint` przechodzi
+- [x] 2.2 `npx astro check` przechodzi
+- [x] 2.3 `npm run build` kończy się bez błędów
 
 #### Manual
 
-- [ ] 2.4 `/reports` pokazuje listę wcześniej wgranych raportów posortowaną od najnowszych
-- [ ] 2.5 Kliknięcie "Usuń" otwiera modal z poprawnymi szczegółami raportu
-- [ ] 2.6 Potwierdzenie usuwa raport, pokazuje baner sukcesu, raport znika z listy
-- [ ] 2.7 "Anuluj" zamyka modal bez usuwania
-- [ ] 2.8 Linki paginacji poprawnie nawigują i chowają się na granicach listy
+- [x] 2.4 `/reports` pokazuje listę wcześniej wgranych raportów posortowaną od najnowszych
+- [x] 2.5 Kliknięcie "Usuń" otwiera modal z poprawnymi szczegółami raportu
+- [x] 2.6 Potwierdzenie usuwa raport, pokazuje baner sukcesu, raport znika z listy
+- [x] 2.7 "Anuluj" zamyka modal bez usuwania
+- [x] 2.8 Linki paginacji poprawnie nawigują i chowają się na granicach listy
 
 ### Phase 3: Testowanie — rozszerzenie weryfikacji RLS
 
