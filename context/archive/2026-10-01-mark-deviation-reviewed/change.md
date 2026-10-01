@@ -1,10 +1,10 @@
 ---
 change_id: mark-deviation-reviewed
 title: Oznaczanie odstępstwa jako sprawdzone
-status: impl_reviewed
+status: archived
 created: 2026-10-01
 updated: 2026-10-01
-archived_at: null
+archived_at: 2026-10-01T10:34:00Z
 ---
 
 ## Notes
