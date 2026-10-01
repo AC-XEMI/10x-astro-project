@@ -7,8 +7,8 @@ updated: 2026-10-01
 prd_version: 2
 main_goal: quality
 top_blocker: time
-milestone_id: deviation-detection-mvp
-milestone_seq: 1
+milestone_id: deviation-list-filter-export
+milestone_seq: 2
 milestone_status: open
 ---
 
@@ -20,12 +20,12 @@ milestone_status: open
 
 ## Milestone
 
-**M-1: Wykrywanie odstępstw w raportach aktywności — MVP** — Status: open
+**M-2: Filtrowanie/sortowanie i eksport listy odstępstw** — Status: open
 
-- **Intent:** Kierownik regionalny może wgrać raport aktywności i zobaczyć automatycznie wykryte odstępstwa (brak GPS, nieoptymalna trasa, telefon zamiast wizyty) z pełnym kontekstem każdej wizyty, korzystając z danych trwale zapisanych w bazie, do których może wracać.
+- **Intent:** Kierownik może zawęzić/uporządkować listę odstępstw (wg przedstawiciela, daty, reguły, statusu przeglądu) i wyeksportować ją do pliku — dwie funkcje oznaczone w PRD jako nice-to-have i świadomie odłożone poza MVP (M-1), teraz podjęte jako kolejna transza tego samego PRD.
 - **Source materials:** `context/foundation/prd.md` (v2)
-- **Done when:** F-01, S-01, S-02, S-03, S-04 i S-05 są wszystkie `done`.
-- **Scope anchors:** —
+- **Done when:** S-06 i S-07 są wszystkie `done`.
+- **Scope anchors:** FR-007, FR-008 (Secondary Success Criteria)
 
 ## Vision recap
 
@@ -33,9 +33,11 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 
 ## North star
 
-**S-01: Kierownik wgrywa raport i widzi wizyty z brakującym GPS oznaczone jako odstępstwo** — najmniejszy pełny przepływ (login → upload → ekstrakcja → zapis → detekcja → lista → szczegóły), który dowodzi, że cała koncepcja narzędzia działa, zanim zainwestujemy w bardziej złożone reguły.
+**S-01: Kierownik wgrywa raport i widzi wizyty z brakującym GPS oznaczone jako odstępstwo** (`done`, zarchiwizowane) — najmniejszy pełny przepływ (login → upload → ekstrakcja → zapis → detekcja → lista → szczegóły), który już udowodnił, że cała koncepcja narzędzia działa.
 
 > "Gwiazda przewodnia" (north star) to najmniejszy pełny wycinek funkcjonalności, który — jeśli się uda — dowodzi, że główna hipoteza produktu jest słuszna. Umieszczamy go możliwie wcześnie w kolejności, bo reszta ma sens tylko wtedy, gdy ten pierwszy przepływ faktycznie działa.
+
+M-2 nie ma nowej hipotezy produktu do udowodnienia — główna hipoteza została już potwierdzona w M-1. Pierwszym w kolejności slice'em tego milestone'u jest **S-06** (filtrowanie/sortowanie), bo jest mniejszy i bardziej fundamentalny niż eksport (S-07 może, ale nie musi, korzystać z przefiltrowanego widoku).
 
 ## At a glance
 
@@ -47,18 +49,22 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | done |
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | done |
 | S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | done |
+| S-06 | filter-sort-deviations-list        | Kierownik filtruje/sortuje listę odstępstw (wg przedstawiciela, daty, reguły, statusu) | F-01, S-01     | FR-007                                                  | ready |
+| S-07 | export-deviations-list             | Kierownik eksportuje listę odstępstw do pliku                                        | F-01, S-01     | FR-008                                                  | ready |
 
 ## Baseline
 
-Co już jest w kodzie na dzień `2026-09-25` (auto-zbadane + potwierdzone przez użytkownika).
+Co już jest w kodzie na dzień `2026-10-01` (auto-zbadane, po zamknięciu M-1).
 Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od nowa.
 
 - **Frontend:** present — Astro 7 SSR + React 19 islands, shadcn/ui (per `tech-stack.md`)
-- **Backend / API:** present — Astro SSR + istniejące trasy API (`src/pages/api/auth/*`)
-- **Data:** absent — brak `supabase/migrations/`, brak tabel własnych poza `auth.users`. Doprecyzowanie użytkownika: dane wyekstrahowane z pliku raportu mają trafiać do bazy (nie tylko do pamięci sesji), a kierownik musi móc wrócić do wcześniej wgranych raportów odczytanych z bazy.
-- **Auth:** present — Supabase Auth przez `@supabase/ssr` (`src/lib/supabase.ts`), middleware (`src/middleware.ts`) chroni obecnie tylko `/dashboard`
+- **Backend / API:** present — Astro SSR + istniejące trasy API (`src/pages/api/auth/*`, `src/pages/api/reports/*`, `src/pages/api/deviations/review.ts`)
+- **Data:** present — Supabase tabele `reports`, `visits`, `deviations` z RLS per-użytkownik (z F-01); `deviations` ma kolumny `rule`, `status`, `reviewed_at` gotowe pod filtrowanie/sortowanie
+- **Auth:** present — Supabase Auth przez `@supabase/ssr` (`src/lib/supabase.ts`), middleware (`src/middleware.ts`)
 - **Deploy / infra:** present — Cloudflare Workers, `wrangler` skonfigurowany (per `infrastructure.md`)
 - **Observability:** absent — brak biblioteki logowania, error trackingu, metryk
+- **Filtrowanie/sortowanie listy odstępstw:** absent — `src/components/reports/DeviationsList.tsx` nie ma żadnej logiki filtra/sortu (tylko ukrywa wizyty bez odstępstw); zapytanie w `src/pages/reports/[id].astro:16-19` nie przyjmuje parametrów filtra/sortu
+- **Eksport do pliku:** absent — brak jakiegokolwiek kodu CSV/Blob/download w `src/`; jedyne wystąpienie "csv" to allowlista MIME przy uploadzie (`src/pages/api/reports/upload.ts:14`)
 
 ## Foundations
 
@@ -138,16 +144,43 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Risk:** Prosta zmiana statusu na już istniejącym rekordzie odstępstwa — niska złożoność, ale wymaga pola statusu przeglądu w schemacie z F-01. Sekwencjonowana po S-01, gdy lista odstępstw już istnieje.
 - **Status:** done
 
+### S-06: Kierownik filtruje/sortuje listę odstępstw
+
+- **Outcome:** Kierownik może zawęzić i uporządkować listę odstępstw (np. wg przedstawiciela, daty, reguły która zadziałała, statusu przeglądu), zamiast przewijać całą listę ręcznie.
+- **Change ID:** filter-sort-deviations-list
+- **PRD refs:** FR-007 (Priority: nice-to-have; Secondary Success Criteria)
+- **Prerequisites:** F-01, S-01
+- **Parallel with:** S-07
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Niska złożoność — dane i kolumny pod filtr/sort (`rule`, `status`, `visit_date`, `representative_name`) już istnieją w schemacie z F-01, baseline potwierdza brak dziś jakiejkolwiek logiki filtra/sortu w `DeviationsList.tsx`. Sekwencjonowana przed eksportem, bo eksport może (opcjonalnie, do ustalenia w `/10x-plan`) korzystać z aktualnie przefiltrowanego widoku.
+- **Status:** ready
+
+### S-07: Kierownik eksportuje listę odstępstw do pliku
+
+- **Outcome:** Kierownik może wyeksportować listę odstępstw do pliku (np. CSV) na dysk lokalny.
+- **Change ID:** export-deviations-list
+- **PRD refs:** FR-008 (Priority: nice-to-have; Secondary Success Criteria)
+- **Prerequisites:** F-01, S-01
+- **Parallel with:** S-06
+- **Blockers:** —
+- **Unknowns:**
+  - Czy eksport ma respektować aktualnie zastosowany filtr/sort z S-06, czy zawsze eksportuje pełną listę? — Owner: team. Block: no (decyzja implementacyjna dla `/10x-plan`, nie blokuje sekwencjonowania na poziomie roadmapy).
+- **Risk:** Niska złożoność, niezależna od S-06 funkcjonalnie (baseline potwierdza zero istniejącego kodu eksportu w `src/`) — ale sensowniej zrobić po S-06, żeby UX decyzja o zakresie eksportu (przefiltrowany vs. pełny) miała z czego korzystać.
+- **Status:** ready
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                        | Suggested issue title                                          | Ready for `/10x-plan` | Notes                          |
 | ---------- | ---------------------------------- | ---------------------------------------------------------------- | ---------------------- | ------------------------------- |
 | F-01       | report-data-schema                 | Migracja Supabase: schemat raportów/wizyt/odstępstw z RLS       | done                   | Zaimplementowane i zarchiwizowane 2026-09-25 → `context/archive/2026-09-25-report-data-schema/` · GitHub: [#1](https://github.com/AC-XEMI/10x-astro-project/issues/1) |
 | S-01       | missing-gps-deviation-detection    | Wykrywanie braku GPS w raporcie (gwiazda przewodnia)             | done                   | Zaimplementowane i zarchiwizowane 2026-09-29 → `context/archive/2026-09-28-missing-gps-deviation-detection/` · GitHub: [#2](https://github.com/AC-XEMI/10x-astro-project/issues/2) |
-| S-02       | route-deviation-detection          | Wykrywanie nieoptymalnej trasy w raporcie                        | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan route-deviation-detection` · GitHub: [#3](https://github.com/AC-XEMI/10x-astro-project/issues/3) |
-| S-03       | phone-vs-visit-deviation-detection | Wykrywanie telefonu zamiast wizyty w raporcie                    | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan phone-vs-visit-deviation-detection` · GitHub: [#4](https://github.com/AC-XEMI/10x-astro-project/issues/4) |
-| S-04       | delete-uploaded-report             | Usuwanie błędnie wgranego raportu                                 | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan delete-uploaded-report` · GitHub: [#6](https://github.com/AC-XEMI/10x-astro-project/issues/6) |
-| S-05       | mark-deviation-reviewed            | Oznaczanie odstępstwa jako sprawdzone/fałszywy alarm              | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan mark-deviation-reviewed` · GitHub: [#7](https://github.com/AC-XEMI/10x-astro-project/issues/7) |
+| S-02       | route-deviation-detection          | Wykrywanie nieoptymalnej trasy w raporcie                        | done                   | Zaimplementowane i zarchiwizowane 2026-09-30 → `context/archive/2026-09-29-route-deviation-detection/` · GitHub: [#3](https://github.com/AC-XEMI/10x-astro-project/issues/3) |
+| S-03       | phone-vs-visit-deviation-detection | Wykrywanie telefonu zamiast wizyty w raporcie                    | done                   | Zaimplementowane i zarchiwizowane 2026-10-01 → `context/archive/2026-10-01-phone-vs-visit-deviation-detection/` · GitHub: [#4](https://github.com/AC-XEMI/10x-astro-project/issues/4) |
+| S-04       | delete-uploaded-report             | Usuwanie błędnie wgranego raportu                                 | done                   | Zaimplementowane i zarchiwizowane 2026-10-01 → `context/archive/2026-10-01-delete-uploaded-report/` · GitHub: [#6](https://github.com/AC-XEMI/10x-astro-project/issues/6) |
+| S-05       | mark-deviation-reviewed            | Oznaczanie odstępstwa jako sprawdzone/fałszywy alarm              | done                   | Zaimplementowane i zarchiwizowane 2026-10-01 → `context/archive/2026-10-01-mark-deviation-reviewed/` · GitHub: [#7](https://github.com/AC-XEMI/10x-astro-project/issues/7) |
+| S-06       | filter-sort-deviations-list        | Filtrowanie/sortowanie listy odstępstw                           | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan filter-sort-deviations-list` |
+| S-07       | export-deviations-list             | Eksport listy odstępstw do pliku                                 | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan export-deviations-list` |
 
 ## Open Roadmap Questions
 
@@ -155,14 +188,12 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 ## Parked
 
-- **Filtrowanie/sortowanie listy odstępstw (FR-007)** — Why parked: Priority nice-to-have w PRD, jawnie poza MVP.
-- **Eksport listy odstępstw (FR-008)** — Why parked: Priority nice-to-have w PRD, jawnie poza MVP.
 - **Integracja z realnym systemem firmowym** — Why parked: PRD Non-Goals — MVP działa wyłącznie na danych testowych/przykładowych.
 - **Współdzielenie danych między kierownikami / widoki zbiorcze** — Why parked: PRD Non-Goals — brak takiej funkcji w MVP.
 
 ## Milestone History
 
-(pusto — pierwszy milestone)
+- **M-1: Wykrywanie odstępstw w raportach aktywności — MVP** (`deviation-detection-mvp`) — closed 2026-10-01. Kierownik wgrywa raport, widzi odstępstwa (brak GPS, nieoptymalna trasa, telefon zamiast wizyty) z pełnym kontekstem wizyt, może oznaczać je jako sprawdzone i usuwać błędnie wgrane raporty — wszystko trwale zapisane w bazie per-użytkownik.
 
 ## Done
 
