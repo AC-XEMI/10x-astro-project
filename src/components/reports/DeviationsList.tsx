@@ -196,6 +196,11 @@ function DateField({
   );
 }
 
+/** `visit_date` comes back as a full ISO timestamp (e.g. "2026-09-02T00:00:00+00:00"); UI and date-range filtering only care about the date part. */
+function toDateOnly(isoDate: string) {
+  return isoDate.slice(0, 10);
+}
+
 /**
  * Pure filter+sort step between flaggedVisits and the rendered rows. rule/status are
  * deviation-level and must both match the SAME deviation record (see deviationMatches) —
@@ -209,8 +214,8 @@ function getVisibleVisits(visits: VisitWithDeviations[], filters: FilterState, s
 
   const visitMatches = (v: VisitWithDeviations) =>
     (filters.selectedReps.size === 0 || filters.selectedReps.has(v.representative_name)) &&
-    (!filters.dateFrom || v.visit_date >= filters.dateFrom) &&
-    (!filters.dateTo || v.visit_date <= filters.dateTo) &&
+    (!filters.dateFrom || toDateOnly(v.visit_date) >= filters.dateFrom) &&
+    (!filters.dateTo || toDateOnly(v.visit_date) <= filters.dateTo) &&
     (filters.selectedRules.size === 0 && filters.selectedStatuses.size === 0
       ? true
       : v.deviations.some(deviationMatches));
@@ -230,15 +235,25 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [sortMode, setSortMode] = useState<SortMode>("date_desc");
+  const [showOnlyDeviations, setShowOnlyDeviations] = useState(true);
 
-  const flaggedVisits = visits.filter((visit) => visit.deviations.length > 0);
-
-  if (flaggedVisits.length === 0) {
-    return <p className="text-sm text-blue-100/80">Brak wykrytych odstępstw w tym raporcie.</p>;
+  if (visits.length === 0) {
+    return <p className="text-sm text-blue-100/80">Brak wizyt w tym raporcie.</p>;
   }
 
-  const availableReps = [...new Set(flaggedVisits.map((v) => v.representative_name))];
-  const visibleVisits = getVisibleVisits(flaggedVisits, filters, sortMode);
+  const visitsWithDeviations = visits.filter((visit) => visit.deviations.length > 0);
+  const baseVisits = showOnlyDeviations ? visitsWithDeviations : visits;
+
+  const availableReps = [...new Set(baseVisits.map((v) => v.representative_name))];
+  const visibleVisits = getVisibleVisits(baseVisits, filters, sortMode);
+
+  let emptyMessage: string | null = null;
+  if (baseVisits.length === 0) {
+    emptyMessage = "Brak wykrytych odstępstw w tym raporcie.";
+  } else if (visibleVisits.length === 0) {
+    emptyMessage = "Brak wyników pasujących do filtrów.";
+  }
+
   const hasActiveFilters =
     filters.selectedRules.size > 0 ||
     filters.selectedStatuses.size > 0 ||
@@ -299,6 +314,17 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 rounded border border-white/10 p-3 text-sm">
+        <label className="flex items-center gap-2 rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20">
+          <input
+            type="checkbox"
+            checked={showOnlyDeviations}
+            onChange={(e) => {
+              setShowOnlyDeviations(e.target.checked);
+            }}
+          />
+          Wyświetl odstępstwa
+        </label>
+
         <MultiSelectDropdown
           label="Reguła"
           options={ALL_RULES.map((rule) => ({ value: rule, label: RULE_LABELS[rule] }))}
@@ -364,8 +390,8 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
         )}
       </div>
 
-      {visibleVisits.length === 0 ? (
-        <p className="text-sm text-blue-100/80">Brak odstępstw pasujących do filtra.</p>
+      {emptyMessage ? (
+        <p className="text-sm text-blue-100/80">{emptyMessage}</p>
       ) : (
         <Table>
           <TableHeader>
@@ -393,43 +419,49 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                     className="cursor-pointer"
                   >
                     <TableCell>{visit.representative_name}</TableCell>
-                    <TableCell>{visit.visit_date}</TableCell>
+                    <TableCell>{toDateOnly(visit.visit_date)}</TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span>
-                          {visit.deviations.map((deviation) => deviation.rule).join(", ")}{" "}
-                          <span className="text-blue-100/70">
-                            ({reviewedCount}/{total} sprawdzone)
+                      {total === 0 ? (
+                        <span className="text-blue-100/70">Brak odstępstw</span>
+                      ) : (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span>
+                            {visit.deviations.map((deviation) => RULE_LABELS[deviation.rule]).join(", ")}{" "}
+                            <span className="text-blue-100/70">
+                              ({reviewedCount}/{total} sprawdzone)
+                            </span>
                           </span>
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="text-foreground size-7 cursor-pointer hover:border-slate-400 hover:bg-slate-200"
-                          title={allReviewed ? "Cofnij oznaczenie wszystkich" : "Oznacz wszystkie jako sprawdzone"}
-                          aria-label={allReviewed ? "Cofnij oznaczenie wszystkich" : "Oznacz wszystkie jako sprawdzone"}
-                          disabled={isVisitPending}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void updateDeviationStatus(
-                              visit.deviations.map((deviation) => deviation.id),
-                              allReviewed ? "unreviewed" : "reviewed",
-                            );
-                          }}
-                        >
-                          {allReviewed ? <Undo2 className="size-3.5" /> : <CheckCheck className="size-3.5" />}
-                        </Button>
-                      </div>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="text-foreground size-7 cursor-pointer hover:border-slate-400 hover:bg-slate-200"
+                            title={allReviewed ? "Cofnij oznaczenie wszystkich" : "Oznacz wszystkie jako sprawdzone"}
+                            aria-label={
+                              allReviewed ? "Cofnij oznaczenie wszystkich" : "Oznacz wszystkie jako sprawdzone"
+                            }
+                            disabled={isVisitPending}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void updateDeviationStatus(
+                                visit.deviations.map((deviation) => deviation.id),
+                                allReviewed ? "unreviewed" : "reviewed",
+                              );
+                            }}
+                          >
+                            {allReviewed ? <Undo2 className="size-3.5" /> : <CheckCheck className="size-3.5" />}
+                          </Button>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                   {isExpanded && (
-                    <TableRow>
+                    <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={3}>
                         <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                           <dt className="font-medium">Przedstawiciel</dt>
                           <dd>{visit.representative_name}</dd>
                           <dt className="font-medium">Data wizyty</dt>
-                          <dd>{visit.visit_date}</dd>
+                          <dd>{toDateOnly(visit.visit_date)}</dd>
                           <dt className="font-medium">GPS włączony</dt>
                           <dd>{visit.gps_enabled ? "TAK" : "NIE"}</dd>
                           <dt className="font-medium">Typ aktywności</dt>
@@ -449,42 +481,53 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                               : "—"}
                           </dd>
                         </dl>
-                        <p className="mt-2 font-medium">Odstępstwa</p>
-                        <ul className="space-y-1 text-sm">
-                          {visit.deviations.map((deviation) => (
-                            <li key={deviation.id} className="flex flex-wrap items-center justify-between gap-2 py-1">
-                              <span>
-                                <span className="font-medium">{deviation.rule}</span>
-                                {deviation.detail ? `: ${deviation.detail}` : null}{" "}
-                                <span className="text-blue-100/70">
-                                  ({deviation.status === "reviewed" ? "Sprawdzone" : "Nieprzejrzane"})
-                                </span>
-                              </span>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="text-foreground size-7 cursor-pointer hover:border-slate-400 hover:bg-slate-200"
-                                title={deviation.status === "reviewed" ? "Cofnij oznaczenie" : "Oznacz jako sprawdzone"}
-                                aria-label={
-                                  deviation.status === "reviewed" ? "Cofnij oznaczenie" : "Oznacz jako sprawdzone"
-                                }
-                                disabled={pendingIds.has(deviation.id)}
-                                onClick={() => {
-                                  void updateDeviationStatus(
-                                    [deviation.id],
-                                    deviation.status === "reviewed" ? "unreviewed" : "reviewed",
-                                  );
-                                }}
-                              >
-                                {deviation.status === "reviewed" ? (
-                                  <Undo2 className="size-3.5" />
-                                ) : (
-                                  <Check className="size-3.5" />
-                                )}
-                              </Button>
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="mt-3 rounded border border-amber-500/30 bg-amber-500/10 p-3">
+                          <p className="font-medium text-amber-200">Odstępstwa</p>
+                          {visit.deviations.length === 0 ? (
+                            <p className="mt-1 text-sm text-blue-100/70">Brak odstępstw dla tej wizyty.</p>
+                          ) : (
+                            <ul className="mt-1 space-y-1 text-sm">
+                              {visit.deviations.map((deviation) => (
+                                <li
+                                  key={deviation.id}
+                                  className="flex flex-wrap items-center justify-between gap-2 py-1"
+                                >
+                                  <span>
+                                    <span className="font-medium">{RULE_LABELS[deviation.rule]}</span>
+                                    {deviation.detail ? `: ${deviation.detail}` : null}{" "}
+                                    <span className="text-blue-100/70">
+                                      ({deviation.status === "reviewed" ? "Sprawdzone" : "Nieprzejrzane"})
+                                    </span>
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="text-foreground size-7 cursor-pointer hover:border-slate-400 hover:bg-slate-200"
+                                    title={
+                                      deviation.status === "reviewed" ? "Cofnij oznaczenie" : "Oznacz jako sprawdzone"
+                                    }
+                                    aria-label={
+                                      deviation.status === "reviewed" ? "Cofnij oznaczenie" : "Oznacz jako sprawdzone"
+                                    }
+                                    disabled={pendingIds.has(deviation.id)}
+                                    onClick={() => {
+                                      void updateDeviationStatus(
+                                        [deviation.id],
+                                        deviation.status === "reviewed" ? "unreviewed" : "reviewed",
+                                      );
+                                    }}
+                                  >
+                                    {deviation.status === "reviewed" ? (
+                                      <Undo2 className="size-3.5" />
+                                    ) : (
+                                      <Check className="size-3.5" />
+                                    )}
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   )}
