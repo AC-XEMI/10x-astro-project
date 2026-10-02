@@ -172,18 +172,18 @@ Brak zmian w schemacie bazy ani w danych — funkcja czysto kliencka na istniej�
 
 #### Automated
 
-- [x] 1.1 Lint przechodzi
-- [x] 1.2 Type-check przechodzi
-- [x] 1.3 Build przechodzi
+- [x] 1.1 Lint przechodzi — 2522583
+- [x] 1.2 Type-check przechodzi — 2522583
+- [x] 1.3 Build przechodzi — 2522583
 
 #### Manual
 
-- [x] 1.4 Eksport CSV bez filtrów: jeden wiersz na odstępstwo, wizyta z 2 odstępstwami daje 2 wiersze
-- [x] 1.5 Eksport XLS przy tych samych warunkach daje ten sam zestaw wierszy co CSV
-- [x] 1.6 Eksport (oba formaty) z aktywnym filtrem zawiera tylko wiersze z bieżącego widoku
-- [x] 1.7 Eksport (oba formaty) z wyłączonym "Wyświetl odstępstwa": wizyta bez odstępstw ma jeden wiersz z pustymi kolumnami
-- [x] 1.8 Plik CSV otwiera się poprawnie w arkuszu kalkulacyjnym (separator, polskie znaki)
-- [x] 1.9 Plik XLS otwiera się poprawnie jako natywny skoroszyt
-- [x] 1.10 Nazwa pliku poprawna dla obu formatów (odstepstwa-raport-<id_raportu>.csv / .xlsx)
-- [x] 1.11 Dropdown eksportu wyłączony przy pustym bieżącym widoku
-- [x] 1.12 Dwuwierszowy układ paska filtrów: filtry osobno, akcje (Sortuj/Wyczyść/Eksportuj) osobno, spójny styl
+- [x] 1.4 Eksport CSV bez filtrów: jeden wiersz na odstępstwo, wizyta z 2 odstępstwami daje 2 wiersze — 2522583
+- [x] 1.5 Eksport XLS przy tych samych warunkach daje ten sam zestaw wierszy co CSV — 2522583
+- [x] 1.6 Eksport (oba formaty) z aktywnym filtrem zawiera tylko wiersze z bieżącego widoku — 2522583
+- [x] 1.7 Eksport (oba formaty) z wyłączonym "Wyświetl odstępstwa": wizyta bez odstępstw ma jeden wiersz z pustymi kolumnami — 2522583
+- [x] 1.8 Plik CSV otwiera się poprawnie w arkuszu kalkulacyjnym (separator, polskie znaki) — 2522583
+- [x] 1.9 Plik XLS otwiera się poprawnie jako natywny skoroszyt — 2522583
+- [x] 1.10 Nazwa pliku poprawna dla obu formatów (odstepstwa-raport-<id_raportu>.csv / .xlsx) — 2522583
+- [x] 1.11 Dropdown eksportu wyłączony przy pustym bieżącym widoku — 2522583
+- [x] 1.12 Dwuwierszowy układ paska filtrów: filtry osobno, akcje (Sortuj/Wyczyść/Eksportuj) osobno, spójny styl — 2522583

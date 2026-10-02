@@ -1,7 +1,7 @@
 ---
 change_id: export-deviations-list
 title: Eksport listy odstępstw do pliku
-status: implementing
+status: implemented
 created: 2026-10-02
 updated: 2026-10-02
 ---
