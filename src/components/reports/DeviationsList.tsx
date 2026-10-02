@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Check, CheckCheck, ChevronDown, Undo2, X } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import type { Tables } from "@/types";
+import { Constants, type Tables } from "@/types";
 import type { DeviationRule } from "@/lib/services/deviation-rules";
 
 export type VisitWithDeviations = Tables<"visits"> & { deviations: Tables<"deviations">[] };
@@ -30,8 +30,8 @@ const EMPTY_FILTERS: FilterState = {
   selectedStatuses: new Set(),
 };
 
-const ALL_RULES: DeviationRule[] = ["missing_gps", "route_deviation", "phone_instead_of_visit"];
-const ALL_STATUSES: DeviationStatus[] = ["unreviewed", "reviewed"];
+const ALL_RULES = Constants.public.Enums.deviation_rule;
+const ALL_STATUSES = Constants.public.Enums.deviation_review_status;
 
 const RULE_LABELS: Record<DeviationRule, string> = {
   missing_gps: "Brak GPS",
@@ -115,6 +115,8 @@ function MultiSelectDropdown({
         </button>
       )}
       {isOpen && (
+        // Opaque background is deliberate here (unlike the translucent bg-white/10 glass
+        // theme used elsewhere): this panel overlays table rows and needs to stay legible.
         <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-700 bg-slate-800 p-2 text-blue-100 shadow-lg">
           {options.map((option) => (
             <label key={option.value} className="flex items-center gap-2 py-0.5 whitespace-nowrap">
@@ -189,7 +191,6 @@ function DateField({
         }}
         className="absolute h-0 w-0 opacity-0"
         tabIndex={-1}
-        aria-hidden="true"
       />
     </div>
   );
@@ -297,7 +298,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded border border-slate-700 p-3 text-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded border border-white/10 p-3 text-sm">
         <MultiSelectDropdown
           label="Reguła"
           options={ALL_RULES.map((rule) => ({ value: rule, label: RULE_LABELS[rule] }))}

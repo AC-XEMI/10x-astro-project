@@ -1,7 +1,7 @@
 ---
 change_id: filter-sort-deviations-list
 title: Filtrowanie i sortowanie listy odstępstw
-status: implemented
+status: impl_reviewed
 created: 2026-10-01
 updated: 2026-10-02
 ---
