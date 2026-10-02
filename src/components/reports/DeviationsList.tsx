@@ -402,7 +402,9 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
   const visitsWithDeviations = visits.filter((visit) => visit.deviations.length > 0);
   const baseVisits = showOnlyDeviations ? visitsWithDeviations : visits;
 
-  const availableReps = [...new Set(baseVisits.map((v) => v.representative_name))];
+  const availableReps = [...new Set(baseVisits.map((v) => v.representative_name))].sort((a, b) =>
+    a.localeCompare(b, "pl"),
+  );
   const visibleVisits = getVisibleVisits(baseVisits, filters, sortMode);
 
   let emptyMessage: string | null = null;
