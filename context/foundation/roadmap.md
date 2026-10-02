@@ -9,7 +9,7 @@ main_goal: quality
 top_blocker: time
 milestone_id: deviation-list-filter-export
 milestone_seq: 2
-milestone_status: open
+milestone_status: done
 ---
 
 # Roadmap: Kontrola Trasówek
@@ -20,7 +20,7 @@ milestone_status: open
 
 ## Milestone
 
-**M-2: Filtrowanie/sortowanie i eksport listy odstępstw** — Status: open
+**M-2: Filtrowanie/sortowanie i eksport listy odstępstw** — Status: done
 
 - **Intent:** Kierownik może zawęzić/uporządkować listę odstępstw (wg przedstawiciela, daty, reguły, statusu przeglądu) i wyeksportować ją do pliku — dwie funkcje oznaczone w PRD jako nice-to-have i świadomie odłożone poza MVP (M-1), teraz podjęte jako kolejna transza tego samego PRD.
 - **Source materials:** `context/foundation/prd.md` (v2)
@@ -179,8 +179,8 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 | S-03       | phone-vs-visit-deviation-detection | Wykrywanie telefonu zamiast wizyty w raporcie                    | done                   | Zaimplementowane i zarchiwizowane 2026-10-01 → `context/archive/2026-10-01-phone-vs-visit-deviation-detection/` · GitHub: [#4](https://github.com/AC-XEMI/10x-astro-project/issues/4) |
 | S-04       | delete-uploaded-report             | Usuwanie błędnie wgranego raportu                                 | done                   | Zaimplementowane i zarchiwizowane 2026-10-01 → `context/archive/2026-10-01-delete-uploaded-report/` · GitHub: [#6](https://github.com/AC-XEMI/10x-astro-project/issues/6) |
 | S-05       | mark-deviation-reviewed            | Oznaczanie odstępstwa jako sprawdzone/fałszywy alarm              | done                   | Zaimplementowane i zarchiwizowane 2026-10-01 → `context/archive/2026-10-01-mark-deviation-reviewed/` · GitHub: [#7](https://github.com/AC-XEMI/10x-astro-project/issues/7) |
-| S-06       | filter-sort-deviations-list        | Filtrowanie/sortowanie listy odstępstw                           | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan filter-sort-deviations-list` |
-| S-07       | export-deviations-list             | Eksport listy odstępstw do pliku                                 | yes                    | F-01, S-01 ukończone · Uruchom `/10x-plan export-deviations-list` |
+| S-06       | filter-sort-deviations-list        | Filtrowanie/sortowanie listy odstępstw                           | done                   | Zaimplementowane i zarchiwizowane 2026-10-02 → `context/archive/2026-10-01-filter-sort-deviations-list/` |
+| S-07       | export-deviations-list             | Eksport listy odstępstw do pliku                                 | done                   | Zaimplementowane i zarchiwizowane 2026-10-02 → `context/archive/2026-10-02-export-deviations-list/` |
 
 ## Open Roadmap Questions
 
@@ -194,6 +194,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 ## Milestone History
 
 - **M-1: Wykrywanie odstępstw w raportach aktywności — MVP** (`deviation-detection-mvp`) — closed 2026-10-01. Kierownik wgrywa raport, widzi odstępstwa (brak GPS, nieoptymalna trasa, telefon zamiast wizyty) z pełnym kontekstem wizyt, może oznaczać je jako sprawdzone i usuwać błędnie wgrane raporty — wszystko trwale zapisane w bazie per-użytkownik.
+- **M-2: Filtrowanie/sortowanie i eksport listy odstępstw** (`deviation-list-filter-export`) — closed 2026-10-02. Kierownik filtruje/sortuje listę odstępstw (wg przedstawiciela, daty, reguły, statusu) i eksportuje bieżący widok do pliku CSV lub XLS.
 
 ## Done
 
