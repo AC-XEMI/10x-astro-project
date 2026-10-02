@@ -98,7 +98,7 @@ function MultiSelectDropdown({
     <div ref={containerRef} className="relative flex items-center gap-1">
       <button
         type="button"
-        className="flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100"
+        className="flex cursor-pointer items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100"
         onClick={() => {
           setIsOpen((prev) => !prev);
         }}
@@ -110,7 +110,7 @@ function MultiSelectDropdown({
         <button
           type="button"
           aria-label={`Wyczyść filtr: ${label}`}
-          className="rounded px-1 text-slate-400 hover:text-slate-700"
+          className="cursor-pointer rounded px-1 text-slate-400 hover:text-slate-700"
           onClick={() => {
             onChange(new Set());
           }}
@@ -123,13 +123,14 @@ function MultiSelectDropdown({
         // to stay legible regardless of what's behind it.
         <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-200 bg-white p-2 text-slate-700 shadow-lg">
           {options.map((option) => (
-            <label key={option.value} className="flex items-center gap-2 py-0.5 whitespace-nowrap">
+            <label key={option.value} className="flex cursor-pointer items-center gap-2 py-0.5 whitespace-nowrap">
               <input
                 type="checkbox"
                 checked={selected.has(option.value)}
                 onChange={() => {
                   toggleValue(option.value);
                 }}
+                className="cursor-pointer"
               />
               {option.label}
             </label>
@@ -169,7 +170,7 @@ function DateField({
     <div className="relative flex items-center gap-1">
       <button
         type="button"
-        className="rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100"
+        className="cursor-pointer rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100"
         onClick={openPicker}
       >
         {value ? `${label}: ${value}` : `${label}: wybierz datę`}
@@ -178,7 +179,7 @@ function DateField({
         <button
           type="button"
           aria-label={`Wyczyść: ${label}`}
-          className="rounded px-1 text-slate-400 hover:text-slate-700"
+          className="cursor-pointer rounded px-1 text-slate-400 hover:text-slate-700"
           onClick={() => {
             onChange(null);
           }}
@@ -193,7 +194,7 @@ function DateField({
         onChange={(e) => {
           onChange(e.target.value || null);
         }}
-        className="absolute h-0 w-0 opacity-0"
+        className="absolute top-full left-0 h-0 w-0 opacity-0"
         tabIndex={-1}
       />
     </div>
@@ -256,7 +257,7 @@ function ExportMenu({
             <button
               key={option.value}
               type="button"
-              className="block w-full rounded px-2 py-1 text-left whitespace-nowrap hover:bg-slate-100"
+              className="block w-full cursor-pointer rounded px-2 py-1 text-left whitespace-nowrap hover:bg-slate-100"
               onClick={() => {
                 setIsOpen(false);
                 onSelect(option.value);
@@ -504,13 +505,14 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
     <div className="space-y-4">
       <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100">
+          <label className="flex cursor-pointer items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100">
             <input
               type="checkbox"
               checked={showOnlyDeviations}
               onChange={(e) => {
                 setShowOnlyDeviations(e.target.checked);
               }}
+              className="cursor-pointer"
             />
             Wyświetl odstępstwa
           </label>

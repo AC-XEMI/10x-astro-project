@@ -6,15 +6,24 @@ const { user } = Astro.locals;
   {user ? (
     <>
       <span class="text-slate-500">{user.email}</span>
-      <div class="flex items-center gap-3">
-        <a href="/" class="text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+      <div class="flex items-center gap-1">
+        <a
+          href="/"
+          class="rounded-md px-2 py-1 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+        >
           Strona główna
         </a>
-        <a href="/reports" class="text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+        <a
+          href="/reports"
+          class="rounded-md px-2 py-1 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+        >
           Raporty
         </a>
         <form method="POST" action="/api/auth/signout">
-          <button type="submit" class="text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+          <button
+            type="submit"
+            class="cursor-pointer rounded-md px-2 py-1 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+          >
             Wyloguj
           </button>
         </form>
@@ -23,11 +32,17 @@ const { user } = Astro.locals;
   ) : (
     <>
       <span class="text-slate-500">Niezalogowany</span>
-      <div class="flex gap-3">
-        <a href="/auth/signin" class="text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+      <div class="flex gap-1">
+        <a
+          href="/auth/signin"
+          class="rounded-md px-2 py-1 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+        >
           Zaloguj się
         </a>
-        <a href="/auth/signup" class="text-indigo-600 transition-colors hover:text-indigo-700 hover:underline">
+        <a
+          href="/auth/signup"
+          class="rounded-md px-2 py-1 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+        >
           Zarejestruj się
         </a>
       </div>
