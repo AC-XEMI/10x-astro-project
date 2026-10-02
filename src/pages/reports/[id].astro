@@ -37,7 +37,7 @@ if (supabase) {
         <Banner variant="error">Nie znaleziono raportu.</Banner>
       ) : (
         <div class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
-          <DeviationsList visits={visits} client:load />
+          <DeviationsList visits={visits} reportId={id ?? ""} client:load />
         </div>
       )}
     </div>

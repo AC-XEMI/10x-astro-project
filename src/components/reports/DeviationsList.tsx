@@ -4,11 +4,15 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Button } from "@/components/ui/button";
 import { Constants, type Tables } from "@/types";
 import type { DeviationRule } from "@/lib/services/deviation-rules";
+// "xlsx" resolves to the @e965/xlsx npm mirror (see package.json) — same package already used
+// server-side in report-parser.ts for parsing uploads.
+import * as XLSX from "xlsx";
 
 export type VisitWithDeviations = Tables<"visits"> & { deviations: Tables<"deviations">[] };
 
 interface Props {
   visits: VisitWithDeviations[];
+  reportId: string;
 }
 
 type DeviationStatus = Tables<"deviations">["status"];
@@ -196,6 +200,77 @@ function DateField({
   );
 }
 
+interface ExportMenuOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * Closed-by-default action menu — unlike MultiSelectDropdown, clicking an option fires once
+ * and closes the menu immediately, rather than toggling a persistent selection.
+ */
+function ExportMenu({
+  label,
+  options,
+  disabled,
+  onSelect,
+}: {
+  label: string;
+  options: ExportMenuOption[];
+  disabled: boolean;
+  onSelect: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={containerRef} className="relative flex items-center gap-1">
+      <Button
+        variant="outline"
+        disabled={disabled}
+        className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
+        onClick={() => {
+          setIsOpen((prev) => !prev);
+        }}
+      >
+        {label}
+        <ChevronDown className="size-3.5" />
+      </Button>
+      {isOpen && (
+        // Opaque background is deliberate here, matching MultiSelectDropdown's popup panel.
+        <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-700 bg-slate-800 p-1 text-blue-100 shadow-lg">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className="block w-full rounded px-2 py-1 text-left whitespace-nowrap hover:bg-white/10"
+              onClick={() => {
+                setIsOpen(false);
+                onSelect(option.value);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** `visit_date` comes back as a full ISO timestamp (e.g. "2026-09-02T00:00:00+00:00"); UI and date-range filtering only care about the date part. */
 function toDateOnly(isoDate: string) {
   return isoDate.slice(0, 10);
@@ -208,6 +283,73 @@ function formatActivityType(value: string | null) {
   if (normalized === "wizyta") return "Wizyta";
   if (normalized === "telefon") return "Telefon";
   return `Nierozpoznany (${value})`;
+}
+
+function csvField(value: string) {
+  return /[;"\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+const EXPORT_HEADERS = [
+  "Przedstawiciel",
+  "Data wizyty",
+  "Reguła",
+  "Status",
+  "Szczegół",
+  "GPS włączony",
+  "Typ aktywności",
+  "Dystans (km)",
+  "Czas na miejscu (min)",
+];
+
+/**
+ * One row per deviation; a visit with zero deviations (only possible when showOnlyDeviations
+ * is off) still gets one row with empty Reguła/Status/Szczegół, so nothing visible on screen
+ * silently disappears from the export. Shared by both the CSV and XLSX export formats.
+ */
+function buildExportRows(visits: VisitWithDeviations[]): string[][] {
+  const rows: string[][] = [EXPORT_HEADERS];
+
+  for (const visit of visits) {
+    const representative = visit.representative_name;
+    const visitDate = toDateOnly(visit.visit_date);
+    const gpsEnabled = visit.gps_enabled ? "TAK" : "NIE";
+    const activityType = formatActivityType(visit.activity_type);
+    const distanceKm = visit.distance_km !== null ? String(visit.distance_km) : "—";
+    const timeOnSite = visit.time_on_site_minutes !== null ? String(visit.time_on_site_minutes) : "—";
+
+    if (visit.deviations.length === 0) {
+      rows.push([representative, visitDate, "—", "—", "—", gpsEnabled, activityType, distanceKm, timeOnSite]);
+    } else {
+      for (const deviation of visit.deviations) {
+        rows.push([
+          representative,
+          visitDate,
+          RULE_LABELS[deviation.rule],
+          STATUS_LABELS[deviation.status],
+          deviation.detail ?? "—",
+          gpsEnabled,
+          activityType,
+          distanceKm,
+          timeOnSite,
+        ]);
+      }
+    }
+  }
+
+  return rows;
+}
+
+function buildCsv(rows: string[][]): string {
+  const csvBody = rows.map((row) => row.map(csvField).join(";")).join("\n");
+  const byteOrderMark = String.fromCharCode(0xfeff);
+  return byteOrderMark + csvBody;
+}
+
+function buildXlsx(rows: string[][]): ArrayBuffer {
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Odstępstwa");
+  return XLSX.write(workbook, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
 }
 
 /**
@@ -238,7 +380,7 @@ function getVisibleVisits(visits: VisitWithDeviations[], filters: FilterState, s
   );
 }
 
-export default function DeviationsList({ visits: initialVisits }: Props) {
+export default function DeviationsList({ visits: initialVisits, reportId }: Props) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [visits, setVisits] = useState<VisitWithDeviations[]>(initialVisits);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -320,83 +462,121 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
     }
   }
 
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportList(format: "csv" | "xlsx") {
+    const rows = buildExportRows(visibleVisits);
+    if (format === "csv") {
+      const blob = new Blob([buildCsv(rows)], { type: "text/csv;charset=utf-8;" });
+      downloadBlob(blob, `odstepstwa-raport-${reportId}.csv`);
+    } else {
+      const blob = new Blob([buildXlsx(rows)], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      downloadBlob(blob, `odstepstwa-raport-${reportId}.xlsx`);
+    }
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded border border-white/10 p-3 text-sm">
-        <label className="flex items-center gap-2 rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20">
-          <input
-            type="checkbox"
-            checked={showOnlyDeviations}
-            onChange={(e) => {
-              setShowOnlyDeviations(e.target.checked);
+      <div className="space-y-2 rounded border border-white/10 p-3 text-sm">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20">
+            <input
+              type="checkbox"
+              checked={showOnlyDeviations}
+              onChange={(e) => {
+                setShowOnlyDeviations(e.target.checked);
+              }}
+            />
+            Wyświetl odstępstwa
+          </label>
+
+          <MultiSelectDropdown
+            label="Reguła"
+            options={ALL_RULES.map((rule) => ({ value: rule, label: RULE_LABELS[rule] }))}
+            selected={filters.selectedRules}
+            onChange={(next) => {
+              setFilters((prev) => ({ ...prev, selectedRules: next as Set<DeviationRule> }));
             }}
           />
-          Wyświetl odstępstwa
-        </label>
 
-        <MultiSelectDropdown
-          label="Reguła"
-          options={ALL_RULES.map((rule) => ({ value: rule, label: RULE_LABELS[rule] }))}
-          selected={filters.selectedRules}
-          onChange={(next) => {
-            setFilters((prev) => ({ ...prev, selectedRules: next as Set<DeviationRule> }));
-          }}
-        />
+          <MultiSelectDropdown
+            label="Status"
+            options={ALL_STATUSES.map((status) => ({ value: status, label: STATUS_LABELS[status] }))}
+            selected={filters.selectedStatuses}
+            onChange={(next) => {
+              setFilters((prev) => ({ ...prev, selectedStatuses: next as Set<DeviationStatus> }));
+            }}
+          />
 
-        <MultiSelectDropdown
-          label="Status"
-          options={ALL_STATUSES.map((status) => ({ value: status, label: STATUS_LABELS[status] }))}
-          selected={filters.selectedStatuses}
-          onChange={(next) => {
-            setFilters((prev) => ({ ...prev, selectedStatuses: next as Set<DeviationStatus> }));
-          }}
-        />
+          <MultiSelectDropdown
+            label="Przedstawiciel"
+            options={availableReps.map((rep) => ({ value: rep, label: rep }))}
+            selected={filters.selectedReps}
+            onChange={(next) => {
+              setFilters((prev) => ({ ...prev, selectedReps: next }));
+            }}
+          />
 
-        <MultiSelectDropdown
-          label="Przedstawiciel"
-          options={availableReps.map((rep) => ({ value: rep, label: rep }))}
-          selected={filters.selectedReps}
-          onChange={(next) => {
-            setFilters((prev) => ({ ...prev, selectedReps: next }));
-          }}
-        />
+          <DateField
+            label="Od"
+            value={filters.dateFrom}
+            onChange={(next) => {
+              setFilters((prev) => ({ ...prev, dateFrom: next }));
+            }}
+          />
+          <DateField
+            label="Do"
+            value={filters.dateTo}
+            onChange={(next) => {
+              setFilters((prev) => ({ ...prev, dateTo: next }));
+            }}
+          />
+        </div>
 
-        <DateField
-          label="Od"
-          value={filters.dateFrom}
-          onChange={(next) => {
-            setFilters((prev) => ({ ...prev, dateFrom: next }));
-          }}
-        />
-        <DateField
-          label="Do"
-          value={filters.dateTo}
-          onChange={(next) => {
-            setFilters((prev) => ({ ...prev, dateTo: next }));
-          }}
-        />
-
-        <Button
-          variant="outline"
-          className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
-          onClick={() => {
-            setSortMode((prev) => (prev === "date_desc" ? "representative_asc" : "date_desc"));
-          }}
-        >
-          Sortuj: {sortMode === "date_desc" ? "Data (najnowsze)" : "Przedstawiciel (A-Z)"}
-        </Button>
-
-        {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
             className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
             onClick={() => {
-              setFilters(EMPTY_FILTERS);
+              setSortMode((prev) => (prev === "date_desc" ? "representative_asc" : "date_desc"));
             }}
           >
-            Wyczyść filtry
+            Sortuj: {sortMode === "date_desc" ? "Data (najnowsze)" : "Przedstawiciel (A-Z)"}
           </Button>
-        )}
+
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
+              onClick={() => {
+                setFilters(EMPTY_FILTERS);
+              }}
+            >
+              Wyczyść filtry
+            </Button>
+          )}
+
+          <ExportMenu
+            label="Eksportuj"
+            disabled={visibleVisits.length === 0}
+            options={[
+              { value: "csv", label: "CSV" },
+              { value: "xlsx", label: "XLS" },
+            ]}
+            onSelect={(value) => {
+              exportList(value as "csv" | "xlsx");
+            }}
+          />
+        </div>
       </div>
 
       {emptyMessage ? (

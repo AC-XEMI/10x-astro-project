@@ -50,7 +50,7 @@ M-2 nie ma nowej hipotezy produktu do udowodnienia — główna hipoteza został
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | done |
 | S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | done |
 | S-06 | filter-sort-deviations-list        | Kierownik filtruje/sortuje listę odstępstw (wg przedstawiciela, daty, reguły, statusu) | F-01, S-01     | FR-007                                                  | done |
-| S-07 | export-deviations-list             | Kierownik eksportuje listę odstępstw do pliku                                        | F-01, S-01     | FR-008                                                  | ready |
+| S-07 | export-deviations-list             | Kierownik eksportuje listę odstępstw do pliku                                        | F-01, S-01     | FR-008                                                  | in-progress |
 
 ## Baseline
 
@@ -167,7 +167,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Unknowns:**
   - Czy eksport ma respektować aktualnie zastosowany filtr/sort z S-06, czy zawsze eksportuje pełną listę? — Owner: team. Block: no (decyzja implementacyjna dla `/10x-plan`, nie blokuje sekwencjonowania na poziomie roadmapy).
 - **Risk:** Niska złożoność, niezależna od S-06 funkcjonalnie (baseline potwierdza zero istniejącego kodu eksportu w `src/`) — ale sensowniej zrobić po S-06, żeby UX decyzja o zakresie eksportu (przefiltrowany vs. pełny) miała z czego korzystać.
-- **Status:** ready
+- **Status:** in-progress
 
 ## Backlog Handoff
 
