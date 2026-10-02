@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Banner from "@/components/Banner.astro";
+import Topbar from "@/components/Topbar.astro";
 import ReportsList from "@/components/reports/ReportsList";
 import { createClient } from "@/lib/supabase";
 import type { Tables } from "@/types";
@@ -36,40 +37,53 @@ if (supabase) {
 ---
 
 <Layout title="Wgraj raport">
-  <div class="bg-cosmic min-h-screen p-4 text-white">
-    <div class="mx-auto flex max-w-3xl flex-col items-center gap-8 py-8">
-      <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
-        <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
-          Wgraj raport
-        </h1>
-        {deleted && <Banner variant="info">Raport został usunięty.</Banner>}
-        {error && <Banner variant="error">{error}</Banner>}
-        <form method="POST" action="/api/reports/upload" enctype="multipart/form-data" class="space-y-4">
-          <input
-            type="file"
-            name="report_file"
-            accept=".csv,.xlsx"
-            required
-            class="block w-full text-sm text-blue-100/80 file:mr-4 file:rounded-lg file:border-0 file:bg-purple-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-purple-500"
-          />
-          <button
-            type="submit"
-            class="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-500"
-          >
-            Wgraj
-          </button>
-        </form>
-      </div>
+  <div class="min-h-screen bg-slate-50 p-4">
+    <div class="mx-auto max-w-3xl py-8">
+      <Topbar />
+      <div class="flex flex-col items-center gap-8">
+        <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h1 class="mb-6 text-center text-2xl font-bold text-slate-900">Wgraj raport</h1>
+          {deleted && <Banner variant="info">Raport został usunięty.</Banner>}
+          {error && <Banner variant="error">{error}</Banner>}
+          <form method="POST" action="/api/reports/upload" enctype="multipart/form-data" class="space-y-4">
+            <input
+              type="file"
+              name="report_file"
+              accept=".csv,.xlsx"
+              required
+              class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500"
+            />
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition-colors hover:bg-indigo-500"
+            >
+              Wgraj
+            </button>
+          </form>
+        </div>
 
-      <div class="w-full rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
-        <h2 class="mb-4 text-xl font-bold">Twoje raporty</h2>
-        <ReportsList reports={reports} page={page} client:load />
-        {count !== null && (
-          <div class="mt-4 flex justify-between text-sm text-blue-100/80">
-            {page > 1 ? <a href={`/reports?page=${page - 1}`}>Poprzednia</a> : <span />}
-            {page * PAGE_SIZE < count ? <a href={`/reports?page=${page + 1}`}>Następna</a> : <span />}
-          </div>
-        )}
+        <div class="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold text-slate-900">Twoje raporty</h2>
+          <ReportsList reports={reports} page={page} client:load />
+          {count !== null && (
+            <div class="mt-4 flex justify-between text-sm">
+              {page > 1 ? (
+                <a href={`/reports?page=${page - 1}`} class="text-indigo-600 hover:underline">
+                  Poprzednia
+                </a>
+              ) : (
+                <span />
+              )}
+              {page * PAGE_SIZE < count ? (
+                <a href={`/reports?page=${page + 1}`} class="text-indigo-600 hover:underline">
+                  Następna
+                </a>
+              ) : (
+                <span />
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   </div>

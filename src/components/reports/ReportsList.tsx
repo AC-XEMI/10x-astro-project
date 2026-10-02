@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Search, Trash2 } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,13 @@ import {
 } from "@/components/ui/dialog";
 import type { Tables } from "@/types";
 
+/** Formats as Y-m-d H:i (e.g. "2026-10-02 14:30"), independent of browser locale. */
+function formatUploadedAt(value: string) {
+  const date = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 interface Props {
   reports: Tables<"reports">[];
   page: number;
@@ -20,7 +28,7 @@ export default function ReportsList({ reports, page }: Props) {
   const [deletingReport, setDeletingReport] = useState<Tables<"reports"> | null>(null);
 
   if (reports.length === 0) {
-    return <p className="text-sm text-blue-100/80">Nie masz jeszcze żadnych wgranych raportów.</p>;
+    return <p className="text-sm text-slate-500">Nie masz jeszcze żadnych wgranych raportów.</p>;
   }
 
   return (
@@ -38,20 +46,30 @@ export default function ReportsList({ reports, page }: Props) {
           {reports.map((report) => (
             <TableRow key={report.id}>
               <TableCell>{report.original_filename}</TableCell>
-              <TableCell>{new Date(report.uploaded_at).toLocaleString("pl-PL")}</TableCell>
+              <TableCell>{formatUploadedAt(report.uploaded_at)}</TableCell>
               <TableCell>{report.row_count ?? "—"}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <a href={`/reports/${report.id}`}>Zobacz</a>
+                  <a
+                    href={`/reports/${report.id}`}
+                    className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-indigo-600 hover:bg-indigo-50"
+                    title="Zobacz raport"
+                    aria-label="Zobacz raport"
+                  >
+                    <Search className="size-4" />
+                  </a>
                   <Button
                     type="button"
                     variant="destructive"
-                    size="sm"
+                    size="icon"
+                    className="size-8 cursor-pointer"
+                    title="Usuń raport"
+                    aria-label="Usuń raport"
                     onClick={() => {
                       setDeletingReport(report);
                     }}
                   >
-                    Usuń
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               </TableCell>
@@ -78,7 +96,7 @@ export default function ReportsList({ reports, page }: Props) {
                 <dt className="font-medium">Nazwa pliku</dt>
                 <dd>{deletingReport.original_filename}</dd>
                 <dt className="font-medium">Data wgrania</dt>
-                <dd>{new Date(deletingReport.uploaded_at).toLocaleString("pl-PL")}</dd>
+                <dd>{formatUploadedAt(deletingReport.uploaded_at)}</dd>
                 <dt className="font-medium">Liczba wierszy</dt>
                 <dd>{deletingReport.row_count ?? "—"}</dd>
               </dl>

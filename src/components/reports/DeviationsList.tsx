@@ -4,7 +4,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Button } from "@/components/ui/button";
 import { Constants, type Tables } from "@/types";
 import type { DeviationRule } from "@/lib/services/deviation-rules";
-// "xlsx" resolves to the @e965/xlsx npm mirror (see package.json) — same package already used
+// "xlsx" resolves to the @e965/xlsx npm mirror (see package.json) - same package already used
 // server-side in report-parser.ts for parsing uploads.
 import * as XLSX from "xlsx";
 
@@ -54,7 +54,7 @@ interface MultiSelectOption {
 }
 
 /**
- * Closed-by-default dropdown with checkbox options — unlike a native `<select multiple>`,
+ * Closed-by-default dropdown with checkbox options - unlike a native `<select multiple>`,
  * each option toggles on a plain click (no Ctrl/Cmd required).
  */
 function MultiSelectDropdown({
@@ -98,7 +98,7 @@ function MultiSelectDropdown({
     <div ref={containerRef} className="relative flex items-center gap-1">
       <button
         type="button"
-        className="flex items-center gap-1 rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20"
+        className="flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100"
         onClick={() => {
           setIsOpen((prev) => !prev);
         }}
@@ -110,7 +110,7 @@ function MultiSelectDropdown({
         <button
           type="button"
           aria-label={`Wyczyść filtr: ${label}`}
-          className="rounded px-1 text-blue-100 hover:text-white"
+          className="rounded px-1 text-slate-400 hover:text-slate-700"
           onClick={() => {
             onChange(new Set());
           }}
@@ -119,9 +119,9 @@ function MultiSelectDropdown({
         </button>
       )}
       {isOpen && (
-        // Opaque background is deliberate here (unlike the translucent bg-white/10 glass
-        // theme used elsewhere): this panel overlays table rows and needs to stay legible.
-        <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-700 bg-slate-800 p-2 text-blue-100 shadow-lg">
+        // Opaque background is deliberate here: this panel overlays table rows and needs
+        // to stay legible regardless of what's behind it.
+        <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-200 bg-white p-2 text-slate-700 shadow-lg">
           {options.map((option) => (
             <label key={option.value} className="flex items-center gap-2 py-0.5 whitespace-nowrap">
               <input
@@ -169,7 +169,7 @@ function DateField({
     <div className="relative flex items-center gap-1">
       <button
         type="button"
-        className="rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20"
+        className="rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100"
         onClick={openPicker}
       >
         {value ? `${label}: ${value}` : `${label}: wybierz datę`}
@@ -178,7 +178,7 @@ function DateField({
         <button
           type="button"
           aria-label={`Wyczyść: ${label}`}
-          className="rounded px-1 text-blue-100 hover:text-white"
+          className="rounded px-1 text-slate-400 hover:text-slate-700"
           onClick={() => {
             onChange(null);
           }}
@@ -206,7 +206,7 @@ interface ExportMenuOption {
 }
 
 /**
- * Closed-by-default action menu — unlike MultiSelectDropdown, clicking an option fires once
+ * Closed-by-default action menu - unlike MultiSelectDropdown, clicking an option fires once
  * and closes the menu immediately, rather than toggling a persistent selection.
  */
 function ExportMenu({
@@ -241,7 +241,7 @@ function ExportMenu({
       <Button
         variant="outline"
         disabled={disabled}
-        className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
+        className="h-fit cursor-pointer"
         onClick={() => {
           setIsOpen((prev) => !prev);
         }}
@@ -251,12 +251,12 @@ function ExportMenu({
       </Button>
       {isOpen && (
         // Opaque background is deliberate here, matching MultiSelectDropdown's popup panel.
-        <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-700 bg-slate-800 p-1 text-blue-100 shadow-lg">
+        <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-200 bg-white p-1 text-slate-700 shadow-lg">
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
-              className="block w-full rounded px-2 py-1 text-left whitespace-nowrap hover:bg-white/10"
+              className="block w-full rounded px-2 py-1 text-left whitespace-nowrap hover:bg-slate-100"
               onClick={() => {
                 setIsOpen(false);
                 onSelect(option.value);
@@ -276,7 +276,7 @@ function toDateOnly(isoDate: string) {
   return isoDate.slice(0, 10);
 }
 
-/** `activity_type` is free text straight from the uploaded file's "Typ aktywności" column — only "wizyta"/"telefon" are recognized values. */
+/** `activity_type` is free text straight from the uploaded file's "Typ aktywności" column - only "wizyta"/"telefon" are recognized values. */
 function formatActivityType(value: string | null) {
   if (!value?.trim()) return "Brak danych";
   const normalized = value.trim().toLowerCase();
@@ -321,11 +321,11 @@ function buildExportRows(visits: VisitWithDeviations[]): string[][] {
     const visitDate = toDateOnly(visit.visit_date);
     const gpsEnabled = visit.gps_enabled ? "TAK" : "NIE";
     const activityType = formatActivityType(visit.activity_type);
-    const distanceKm = visit.distance_km !== null ? String(visit.distance_km) : "—";
-    const timeOnSite = visit.time_on_site_minutes !== null ? String(visit.time_on_site_minutes) : "—";
+    const distanceKm = visit.distance_km !== null ? String(visit.distance_km) : "-";
+    const timeOnSite = visit.time_on_site_minutes !== null ? String(visit.time_on_site_minutes) : "-";
 
     if (visit.deviations.length === 0) {
-      rows.push([representative, visitDate, "—", "—", "—", gpsEnabled, activityType, distanceKm, timeOnSite]);
+      rows.push([representative, visitDate, "-", "-", "-", gpsEnabled, activityType, distanceKm, timeOnSite]);
     } else {
       for (const deviation of visit.deviations) {
         rows.push([
@@ -333,7 +333,7 @@ function buildExportRows(visits: VisitWithDeviations[]): string[][] {
           visitDate,
           RULE_LABELS[deviation.rule],
           STATUS_LABELS[deviation.status],
-          deviation.detail ?? "—",
+          deviation.detail ?? "-",
           gpsEnabled,
           activityType,
           distanceKm,
@@ -361,7 +361,7 @@ function buildXlsx(rows: string[][]): ArrayBuffer {
 
 /**
  * Pure filter+sort step between flaggedVisits and the rendered rows. rule/status are
- * deviation-level and must both match the SAME deviation record (see deviationMatches) —
+ * deviation-level and must both match the SAME deviation record (see deviationMatches) -
  * independent matches across different deviations of the same visit are not enough.
  * representative_name/visit_date are visit-level and apply regardless of deviations.
  */
@@ -396,7 +396,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
   const [showOnlyDeviations, setShowOnlyDeviations] = useState(true);
 
   if (visits.length === 0) {
-    return <p className="text-sm text-blue-100/80">Brak wizyt w tym raporcie.</p>;
+    return <p className="text-sm text-slate-500">Brak wizyt w tym raporcie.</p>;
   }
 
   const visitsWithDeviations = visits.filter((visit) => visit.deviations.length > 0);
@@ -502,9 +502,9 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2 rounded border border-white/10 p-3 text-sm">
+      <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20">
+          <label className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 whitespace-nowrap text-slate-700 hover:bg-slate-100">
             <input
               type="checkbox"
               checked={showOnlyDeviations}
@@ -561,7 +561,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
         <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
-            className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
+            className="h-fit cursor-pointer"
             onClick={() => {
               setSortMode((prev) => (prev === "date_desc" ? "representative_asc" : "date_desc"));
             }}
@@ -572,7 +572,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
           {hasActiveFilters && (
             <Button
               variant="outline"
-              className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
+              className="h-fit cursor-pointer"
               onClick={() => {
                 setFilters(EMPTY_FILTERS);
               }}
@@ -596,7 +596,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
       </div>
 
       {emptyMessage ? (
-        <p className="text-sm text-blue-100/80">{emptyMessage}</p>
+        <p className="text-sm text-slate-500">{emptyMessage}</p>
       ) : (
         <Table>
           <TableHeader>
@@ -627,12 +627,12 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                     <TableCell>{toDateOnly(visit.visit_date)}</TableCell>
                     <TableCell>
                       {total === 0 ? (
-                        <span className="text-blue-100/70">Brak odstępstw</span>
+                        <span className="text-slate-500">Brak odstępstw</span>
                       ) : (
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="min-w-0 break-words">
                             {visit.deviations.map((deviation) => RULE_LABELS[deviation.rule]).join(", ")}{" "}
-                            <span className="text-blue-100/70">
+                            <span className="text-slate-500">
                               ({reviewedCount}/{total} sprawdzone)
                             </span>
                           </span>
@@ -672,24 +672,24 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                           <dt className="font-medium">Typ aktywności</dt>
                           <dd>{formatActivityType(visit.activity_type)}</dd>
                           <dt className="font-medium">Dystans (km)</dt>
-                          <dd>{visit.distance_km ?? "—"}</dd>
+                          <dd>{visit.distance_km ?? "-"}</dd>
                           <dt className="font-medium">Czas na miejscu (min)</dt>
-                          <dd>{visit.time_on_site_minutes ?? "—"}</dd>
+                          <dd>{visit.time_on_site_minutes ?? "-"}</dd>
                           <dt className="font-medium">Planowana trasa</dt>
-                          <dd>{visit.planned_route_raw ? JSON.stringify(visit.planned_route_raw) : "—"}</dd>
+                          <dd>{visit.planned_route_raw ? JSON.stringify(visit.planned_route_raw) : "-"}</dd>
                           <dt className="font-medium">Odwiedzony klient</dt>
-                          <dd>{visit.visited_client ?? "—"}</dd>
+                          <dd>{visit.visited_client ?? "-"}</dd>
                           <dt className="font-medium">Współrzędne</dt>
                           <dd>
                             {visit.visited_latitude !== null && visit.visited_longitude !== null
                               ? `${visit.visited_latitude}, ${visit.visited_longitude}`
-                              : "—"}
+                              : "-"}
                           </dd>
                         </dl>
-                        <div className="mt-3 rounded border border-amber-500/30 bg-amber-500/10 p-3">
-                          <p className="font-medium text-amber-200">Odstępstwa</p>
+                        <div className="mt-3 rounded border border-amber-300 bg-amber-50 p-3">
+                          <p className="font-medium text-amber-800">Odstępstwa</p>
                           {visit.deviations.length === 0 ? (
-                            <p className="mt-1 text-sm text-blue-100/70">Brak odstępstw dla tej wizyty.</p>
+                            <p className="mt-1 text-sm text-slate-500">Brak odstępstw dla tej wizyty.</p>
                           ) : (
                             <ul className="mt-1 space-y-1 text-sm">
                               {visit.deviations.map((deviation) => (
@@ -697,7 +697,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                                   <span className="min-w-0 break-words">
                                     <span className="font-medium">{RULE_LABELS[deviation.rule]}</span>
                                     {deviation.detail ? `: ${deviation.detail}` : null}{" "}
-                                    <span className="text-blue-100/70">
+                                    <span className="text-slate-500">
                                       ({deviation.status === "reviewed" ? "Sprawdzone" : "Nieprzejrzane"})
                                     </span>
                                   </span>
