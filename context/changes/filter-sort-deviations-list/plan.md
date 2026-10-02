@@ -204,12 +204,12 @@ Brak zmian w schemacie bazy ani w danych — funkcja czysto kliencka na istniej�
 
 #### Automated
 
-- [x] 2.1 Lint przechodzi
-- [x] 2.2 Build przechodzi
+- [x] 2.1 Lint przechodzi — 27bb59a
+- [x] 2.2 Build przechodzi — 27bb59a
 
 #### Manual
 
-- [x] 2.3 Panel filtra wizualnie spójny z ciemnym motywem aplikacji
-- [x] 2.4 Etykiety reguł/statusów są po polsku i czytelne
-- [x] 2.5 Panel filtra nie łamie układu na wąskim viewport
-- [x] 2.6 Kontrolki filtra nie wywołują przypadkowego rozwinięcia wiersza
+- [x] 2.3 Panel filtra wizualnie spójny z ciemnym motywem aplikacji — 27bb59a
+- [x] 2.4 Etykiety reguł/statusów są po polsku i czytelne — 27bb59a
+- [x] 2.5 Panel filtra nie łamie układu na wąskim viewport — 27bb59a
+- [x] 2.6 Kontrolki filtra nie wywołują przypadkowego rozwinięcia wiersza — 27bb59a
