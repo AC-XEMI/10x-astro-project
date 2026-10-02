@@ -285,8 +285,15 @@ function formatActivityType(value: string | null) {
   return `Nierozpoznany (${value})`;
 }
 
+/**
+ * Guards against CSV formula injection: source data (e.g. representative_name) is free text
+ * from the uploaded file, not system-generated. A leading =/+/-/@/tab/CR is how spreadsheet
+ * apps detect a formula in a CSV cell (no type info in the format itself, unlike XLSX), so
+ * such values get a leading apostrophe to force plain-text interpretation on open.
+ */
 function csvField(value: string) {
-  return /[;"\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[;"\n]/.test(guarded) ? `"${guarded.replace(/"/g, '""')}"` : guarded;
 }
 
 const EXPORT_HEADERS = [
@@ -464,23 +471,30 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
 
   function downloadBlob(blob: Blob, filename: string) {
     const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    try {
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
   }
 
   function exportList(format: "csv" | "xlsx") {
-    const rows = buildExportRows(visibleVisits);
-    if (format === "csv") {
-      const blob = new Blob([buildCsv(rows)], { type: "text/csv;charset=utf-8;" });
-      downloadBlob(blob, `odstepstwa-raport-${reportId}.csv`);
-    } else {
-      const blob = new Blob([buildXlsx(rows)], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      downloadBlob(blob, `odstepstwa-raport-${reportId}.xlsx`);
+    try {
+      const rows = buildExportRows(visibleVisits);
+      if (format === "csv") {
+        const blob = new Blob([buildCsv(rows)], { type: "text/csv;charset=utf-8;" });
+        downloadBlob(blob, `odstepstwa-raport-${reportId}.csv`);
+      } else {
+        const blob = new Blob([buildXlsx(rows)], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        downloadBlob(blob, `odstepstwa-raport-${reportId}.xlsx`);
+      }
+    } catch (error) {
+      console.error("Błąd podczas eksportu listy odstępstw:", error);
     }
   }
 
