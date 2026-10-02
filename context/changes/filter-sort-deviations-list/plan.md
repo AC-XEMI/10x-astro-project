@@ -185,31 +185,31 @@ Brak zmian w schemacie bazy ani w danych — funkcja czysto kliencka na istniej�
 
 #### Automated
 
-- [x] 1.1 Lint przechodzi
-- [x] 1.2 Type-check przechodzi
-- [x] 1.3 Build przechodzi
+- [x] 1.1 Lint przechodzi — 1d3c563
+- [x] 1.2 Type-check przechodzi — 1d3c563
+- [x] 1.3 Build przechodzi — 1d3c563
 
 #### Manual
 
-- [x] 1.4 Każdy filtr z osobna zawęża listę do oczekiwanych wizyt
-- [x] 1.5 Filtr reguła+status wymaga tego samego odstępstwa (wizyta z rozdzielonymi dopasowaniami nie pojawia się)
-- [x] 1.6 Multi-select w obrębie reguły działa jako OR
-- [x] 1.7 Przełącznik sortu poprawnie zmienia kolejność
-- [x] 1.8 Pusty wynik filtra pokazuje komunikat + przycisk "Wyczyść filtry", działający poprawnie
-- [x] 1.9 Raport bez odstępstw nadal pokazuje oryginalny komunikat (niezmieniony)
-- [x] 1.10 Rozwijanie wiersza i oznaczanie jako sprawdzone/nieprzejrzane działają bez regresji na przefiltrowanej liście
-- [x] 1.11 Odświeżenie strony resetuje filtr/sort
+- [x] 1.4 Każdy filtr z osobna zawęża listę do oczekiwanych wizyt — 1d3c563
+- [x] 1.5 Filtr reguła+status wymaga tego samego odstępstwa (wizyta z rozdzielonymi dopasowaniami nie pojawia się) — 1d3c563
+- [x] 1.6 Multi-select w obrębie reguły działa jako OR — 1d3c563
+- [x] 1.7 Przełącznik sortu poprawnie zmienia kolejność — 1d3c563
+- [x] 1.8 Pusty wynik filtra pokazuje komunikat + przycisk "Wyczyść filtry", działający poprawnie — 1d3c563
+- [x] 1.9 Raport bez odstępstw nadal pokazuje oryginalny komunikat (niezmieniony) — 1d3c563
+- [x] 1.10 Rozwijanie wiersza i oznaczanie jako sprawdzone/nieprzejrzane działają bez regresji na przefiltrowanej liście — 1d3c563
+- [x] 1.11 Odświeżenie strony resetuje filtr/sort — 1d3c563
 
 ### Phase 2: Kontrolki UI filtra/sortu — stylowanie i etykiety
 
 #### Automated
 
-- [ ] 2.1 Lint przechodzi
-- [ ] 2.2 Build przechodzi
+- [x] 2.1 Lint przechodzi
+- [x] 2.2 Build przechodzi
 
 #### Manual
 
-- [ ] 2.3 Panel filtra wizualnie spójny z ciemnym motywem aplikacji
-- [ ] 2.4 Etykiety reguł/statusów są po polsku i czytelne
-- [ ] 2.5 Panel filtra nie łamie układu na wąskim viewport
-- [ ] 2.6 Kontrolki filtra nie wywołują przypadkowego rozwinięcia wiersza
+- [x] 2.3 Panel filtra wizualnie spójny z ciemnym motywem aplikacji
+- [x] 2.4 Etykiety reguł/statusów są po polsku i czytelne
+- [x] 2.5 Panel filtra nie łamie układu na wąskim viewport
+- [x] 2.6 Kontrolki filtra nie wywołują przypadkowego rozwinięcia wiersza

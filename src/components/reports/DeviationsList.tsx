@@ -94,7 +94,7 @@ function MultiSelectDropdown({
     <div ref={containerRef} className="relative flex items-center gap-1">
       <button
         type="button"
-        className="text-foreground flex items-center gap-1 rounded bg-white/90 px-2 py-1 whitespace-nowrap"
+        className="flex items-center gap-1 rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20"
         onClick={() => {
           setIsOpen((prev) => !prev);
         }}
@@ -106,7 +106,7 @@ function MultiSelectDropdown({
         <button
           type="button"
           aria-label={`Wyczyść filtr: ${label}`}
-          className="text-foreground rounded px-1"
+          className="rounded px-1 text-blue-100 hover:text-white"
           onClick={() => {
             onChange(new Set());
           }}
@@ -115,7 +115,7 @@ function MultiSelectDropdown({
         </button>
       )}
       {isOpen && (
-        <div className="text-foreground absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-700 bg-white/95 p-2 shadow-lg">
+        <div className="absolute top-full left-0 z-10 mt-1 min-w-full rounded border border-slate-700 bg-slate-800 p-2 text-blue-100 shadow-lg">
           {options.map((option) => (
             <label key={option.value} className="flex items-center gap-2 py-0.5 whitespace-nowrap">
               <input
@@ -163,7 +163,7 @@ function DateField({
     <div className="relative flex items-center gap-1">
       <button
         type="button"
-        className="text-foreground rounded bg-white/90 px-2 py-1 whitespace-nowrap"
+        className="rounded border border-white/10 bg-white/10 px-2 py-1 whitespace-nowrap text-blue-100 backdrop-blur-xl hover:bg-white/20"
         onClick={openPicker}
       >
         {value ? `${label}: ${value}` : `${label}: wybierz datę`}
@@ -172,7 +172,7 @@ function DateField({
         <button
           type="button"
           aria-label={`Wyczyść: ${label}`}
-          className="text-foreground rounded px-1"
+          className="rounded px-1 text-blue-100 hover:text-white"
           onClick={() => {
             onChange(null);
           }}
@@ -342,7 +342,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
 
         <Button
           variant="outline"
-          className="text-foreground h-fit cursor-pointer"
+          className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
           onClick={() => {
             setSortMode((prev) => (prev === "date_desc" ? "representative_asc" : "date_desc"));
           }}
@@ -353,7 +353,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
         {hasActiveFilters && (
           <Button
             variant="outline"
-            className="text-foreground h-fit cursor-pointer"
+            className="h-fit cursor-pointer border-white/10 bg-white/10 text-blue-100 backdrop-blur-xl hover:bg-white/20 hover:text-white"
             onClick={() => {
               setFilters(EMPTY_FILTERS);
             }}
