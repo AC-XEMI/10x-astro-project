@@ -40,7 +40,7 @@ export function detectPhoneInsteadOfVisit(visit: ExtractedVisit): PhoneInsteadOf
   const hasNoMeaningfulTime = visit.time_on_site_minutes === null || visit.time_on_site_minutes <= 0;
   if (!visit.gps_enabled && hasNoMeaningfulTime) {
     return {
-      detail: `brak GPS i czas na miejscu ${visit.time_on_site_minutes ?? 0} min (pole typ_aktywnosci puste lub nierozpoznane)`,
+      detail: `brak GPS i czas na miejscu ${visit.time_on_site_minutes ?? 0} min (typ aktywności: brak danych lub nierozpoznany)`,
     };
   }
 

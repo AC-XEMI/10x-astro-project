@@ -201,6 +201,15 @@ function toDateOnly(isoDate: string) {
   return isoDate.slice(0, 10);
 }
 
+/** `activity_type` is free text straight from the uploaded file's "Typ aktywności" column — only "wizyta"/"telefon" are recognized values. */
+function formatActivityType(value: string | null) {
+  if (!value?.trim()) return "Brak danych";
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "wizyta") return "Wizyta";
+  if (normalized === "telefon") return "Telefon";
+  return `Nierozpoznany (${value})`;
+}
+
 /**
  * Pure filter+sort step between flaggedVisits and the rendered rows. rule/status are
  * deviation-level and must both match the SAME deviation record (see deviationMatches) —
@@ -425,7 +434,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                         <span className="text-blue-100/70">Brak odstępstw</span>
                       ) : (
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span>
+                          <span className="min-w-0 break-words">
                             {visit.deviations.map((deviation) => RULE_LABELS[deviation.rule]).join(", ")}{" "}
                             <span className="text-blue-100/70">
                               ({reviewedCount}/{total} sprawdzone)
@@ -456,8 +465,8 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                   </TableRow>
                   {isExpanded && (
                     <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={3}>
-                        <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <TableCell colSpan={3} className="whitespace-normal">
+                        <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm [&_dd]:break-words">
                           <dt className="font-medium">Przedstawiciel</dt>
                           <dd>{visit.representative_name}</dd>
                           <dt className="font-medium">Data wizyty</dt>
@@ -465,7 +474,7 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                           <dt className="font-medium">GPS włączony</dt>
                           <dd>{visit.gps_enabled ? "TAK" : "NIE"}</dd>
                           <dt className="font-medium">Typ aktywności</dt>
-                          <dd>{visit.activity_type ?? "—"}</dd>
+                          <dd>{formatActivityType(visit.activity_type)}</dd>
                           <dt className="font-medium">Dystans (km)</dt>
                           <dd>{visit.distance_km ?? "—"}</dd>
                           <dt className="font-medium">Czas na miejscu (min)</dt>
@@ -488,11 +497,8 @@ export default function DeviationsList({ visits: initialVisits }: Props) {
                           ) : (
                             <ul className="mt-1 space-y-1 text-sm">
                               {visit.deviations.map((deviation) => (
-                                <li
-                                  key={deviation.id}
-                                  className="flex flex-wrap items-center justify-between gap-2 py-1"
-                                >
-                                  <span>
+                                <li key={deviation.id} className="flex items-start justify-between gap-2 py-1">
+                                  <span className="min-w-0 break-words">
                                     <span className="font-medium">{RULE_LABELS[deviation.rule]}</span>
                                     {deviation.detail ? `: ${deviation.detail}` : null}{" "}
                                     <span className="text-blue-100/70">
