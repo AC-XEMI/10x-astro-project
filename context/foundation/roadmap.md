@@ -49,7 +49,7 @@ M-2 nie ma nowej hipotezy produktu do udowodnienia — główna hipoteza został
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | done |
 | S-04 | delete-uploaded-report             | Kierownik usuwa błędnie wgrany raport wraz z powiązanymi danymi                      | F-01, S-01     | FR-011, US-02                                           | done |
 | S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | done |
-| S-06 | filter-sort-deviations-list        | Kierownik filtruje/sortuje listę odstępstw (wg przedstawiciela, daty, reguły, statusu) | F-01, S-01     | FR-007                                                  | ready |
+| S-06 | filter-sort-deviations-list        | Kierownik filtruje/sortuje listę odstępstw (wg przedstawiciela, daty, reguły, statusu) | F-01, S-01     | FR-007                                                  | in-progress |
 | S-07 | export-deviations-list             | Kierownik eksportuje listę odstępstw do pliku                                        | F-01, S-01     | FR-008                                                  | ready |
 
 ## Baseline
@@ -154,7 +154,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Niska złożoność — dane i kolumny pod filtr/sort (`rule`, `status`, `visit_date`, `representative_name`) już istnieją w schemacie z F-01, baseline potwierdza brak dziś jakiejkolwiek logiki filtra/sortu w `DeviationsList.tsx`. Sekwencjonowana przed eksportem, bo eksport może (opcjonalnie, do ustalenia w `/10x-plan`) korzystać z aktualnie przefiltrowanego widoku.
-- **Status:** ready
+- **Status:** in-progress
 
 ### S-07: Kierownik eksportuje listę odstępstw do pliku
 
