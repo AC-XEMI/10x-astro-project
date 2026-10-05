@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { translateAuthError } from "@/lib/auth-errors";
 
 export const prerender = false;
 
@@ -15,7 +16,7 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+    return context.redirect(`/auth/signin?error=${encodeURIComponent(translateAuthError(error.message))}`);
   }
 
   return context.redirect("/reports");

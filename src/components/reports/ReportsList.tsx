@@ -106,13 +106,14 @@ export default function ReportsList({ reports, page }: Props) {
                   <Button
                     type="button"
                     variant="outline"
+                    className="cursor-pointer"
                     onClick={() => {
                       setDeletingReport(null);
                     }}
                   >
                     Anuluj
                   </Button>
-                  <Button type="submit" variant="destructive">
+                  <Button type="submit" variant="destructive" className="cursor-pointer">
                     Tak, usuń
                   </Button>
                 </DialogFooter>

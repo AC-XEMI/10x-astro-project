@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { translateAuthError } from "@/lib/auth-errors";
 
 export const prerender = false;
 
@@ -15,7 +16,7 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
+    return context.redirect(`/auth/signup?error=${encodeURIComponent(translateAuthError(error.message))}`);
   }
 
   return context.redirect("/auth/confirm-email");
