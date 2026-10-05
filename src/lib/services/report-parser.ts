@@ -111,21 +111,26 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
     }
   });
 
-  const przedstawicielIndex = columnIndex.get("przedstawiciel");
-  if (przedstawicielIndex === undefined) {
-    return { error: "Brak wymaganej kolumny: przedstawiciel." };
-  }
-  const dataWizytyIndex = columnIndex.get("data_wizyty");
-  if (dataWizytyIndex === undefined) {
-    return { error: "Brak wymaganej kolumny: data_wizyty." };
-  }
-  const gpsWlaczonyIndex = columnIndex.get("gps_wlaczony");
-  if (gpsWlaczonyIndex === undefined) {
-    return { error: "Brak wymaganej kolumny: gps_wlaczony." };
-  }
-  const odwiedzonyKlientIndex = columnIndex.get("odwiedzony_klient");
-  if (odwiedzonyKlientIndex === undefined) {
-    return { error: "Brak wymaganej kolumny: odwiedzony_klient." };
+  const przedstawicielIdx = columnIndex.get("przedstawiciel");
+  const dataWizytyIdx = columnIndex.get("data_wizyty");
+  const gpsWlaczonyIdx = columnIndex.get("gps_wlaczony");
+  const odwiedzonyKlientIdx = columnIndex.get("odwiedzony_klient");
+
+  if (
+    przedstawicielIdx === undefined ||
+    dataWizytyIdx === undefined ||
+    gpsWlaczonyIdx === undefined ||
+    odwiedzonyKlientIdx === undefined
+  ) {
+    const missingColumns = [
+      ["przedstawiciel", przedstawicielIdx],
+      ["data_wizyty", dataWizytyIdx],
+      ["gps_wlaczony", gpsWlaczonyIdx],
+      ["odwiedzony_klient", odwiedzonyKlientIdx],
+    ]
+      .filter(([, index]) => index === undefined)
+      .map(([name]) => name);
+    return { error: `Brak wymaganych kolumn: ${missingColumns.join(", ")}.` };
   }
 
   const dataRows = sheetRows.slice(1);
@@ -146,12 +151,12 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
     const row = dataRows[i] ?? [];
     const rowNumber = i + 1;
 
-    const representativeName = cellToText(row[przedstawicielIndex]);
+    const representativeName = cellToText(row[przedstawicielIdx]);
     if (!representativeName) {
       return { error: `Wiersz ${rowNumber}: brak wartości w kolumnie przedstawiciel.` };
     }
 
-    const visitDate = cellToText(row[dataWizytyIndex]);
+    const visitDate = cellToText(row[dataWizytyIdx]);
     if (!visitDate) {
       return { error: `Wiersz ${rowNumber}: brak wartości w kolumnie data_wizyty.` };
     }
@@ -161,7 +166,7 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
       };
     }
 
-    const gpsEnabled = parseGpsEnabled(cellToText(row[gpsWlaczonyIndex]));
+    const gpsEnabled = parseGpsEnabled(cellToText(row[gpsWlaczonyIdx]));
     if (gpsEnabled === null) {
       return { error: `Wiersz ${rowNumber}: nierozpoznana wartość gps_wlaczony (oczekiwano TAK/NIE).` };
     }
@@ -182,7 +187,7 @@ export function parseReportFile(bytes: ArrayBuffer, filename: string): ParsedRep
         : null;
     }
 
-    const visitedClient = cellToText(row[odwiedzonyKlientIndex]) || null;
+    const visitedClient = cellToText(row[odwiedzonyKlientIdx]) || null;
 
     let visitedLatitude: number | null = null;
     let visitedLongitude: number | null = null;
