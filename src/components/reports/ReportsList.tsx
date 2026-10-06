@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Trash2 } from "lucide-react";
+import { FileText, Search, Trash2 } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,13 @@ function formatUploadedAt(value: string) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** null = count not stored (e.g. the count update failed after upload) - shown as unknown, never as "Brak". */
+function DeviationCount({ count }: { count: number | null }) {
+  if (count === null) return <span className="text-muted-foreground">—</span>;
+  if (count === 0) return <span className="text-muted-foreground">Brak</span>;
+  return <span className="text-destructive font-medium">{count}</span>;
+}
+
 interface Props {
   reports: Tables<"reports">[];
   page: number;
@@ -28,7 +35,16 @@ export default function ReportsList({ reports, page }: Props) {
   const [deletingReport, setDeletingReport] = useState<Tables<"reports"> | null>(null);
 
   if (reports.length === 0) {
-    return <p className="text-muted-foreground text-sm">Nie masz jeszcze żadnych wgranych raportów.</p>;
+    return (
+      <div className="flex flex-col items-center gap-2 py-16 text-center">
+        <FileText className="text-muted-foreground size-8" />
+        <p className="font-medium">Nie masz jeszcze żadnych wgranych raportów</p>
+        <p className="text-muted-foreground max-w-md text-sm">
+          Wgraj pierwszy plik z trasówkami powyżej — po przetworzeniu zobaczysz tu listę raportów i liczbę wykrytych
+          odstępstw.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -38,26 +54,34 @@ export default function ReportsList({ reports, page }: Props) {
           <TableRow>
             <TableHead>Nazwa pliku</TableHead>
             <TableHead>Data wgrania</TableHead>
-            <TableHead>Liczba wierszy</TableHead>
-            <TableHead>Akcje</TableHead>
+            <TableHead className="text-right">Liczba wierszy</TableHead>
+            <TableHead className="text-right">Odstępstwa</TableHead>
+            <TableHead className="text-right">Akcje</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {reports.map((report) => (
             <TableRow key={report.id}>
-              <TableCell>{report.original_filename}</TableCell>
-              <TableCell>{formatUploadedAt(report.uploaded_at)}</TableCell>
-              <TableCell>{report.row_count ?? "—"}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
-                  <a
-                    href={`/reports/${report.id}`}
-                    className="text-primary hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors"
-                    title="Zobacz raport"
-                    aria-label="Zobacz raport"
-                  >
-                    <Search className="size-4" />
-                  </a>
+                  <FileText className="text-muted-foreground size-4" />
+                  <span>{report.original_filename}</span>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground tabular-nums">
+                {formatUploadedAt(report.uploaded_at)}
+              </TableCell>
+              <TableCell className="text-right tabular-nums">{report.row_count ?? "—"}</TableCell>
+              <TableCell className="text-right tabular-nums">
+                <DeviationCount count={report.deviation_count} />
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center justify-end gap-2">
+                  <Button asChild variant="ghost" size="icon" className="text-primary size-8">
+                    <a href={`/reports/${report.id}`} title="Zobacz raport" aria-label="Zobacz raport">
+                      <Search />
+                    </a>
+                  </Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -69,7 +93,7 @@ export default function ReportsList({ reports, page }: Props) {
                       setDeletingReport(report);
                     }}
                   >
-                    <Trash2 className="size-4" />
+                    <Trash2 />
                   </Button>
                 </div>
               </TableCell>

@@ -4,6 +4,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Banner from "@/components/Banner.astro";
 import ReportsList from "@/components/reports/ReportsList";
+import ReportUpload from "@/components/reports/ReportUpload";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Search, Trash2 } from "lucide-react";
@@ -13,6 +14,7 @@ const sampleReports: Tables<"reports">[] = [
   {
     id: "11111111-1111-1111-1111-111111111111",
     created_at: "2026-10-01T10:00:00Z",
+    deviation_count: 37,
     original_filename: "raport_wrzesien.csv",
     row_count: 128,
     uploaded_at: "2026-10-01T10:00:00Z",
@@ -21,6 +23,7 @@ const sampleReports: Tables<"reports">[] = [
   {
     id: "22222222-2222-2222-2222-222222222222",
     created_at: "2026-09-28T09:15:00Z",
+    deviation_count: 0,
     original_filename: "raport_sierpien.xlsx",
     row_count: 342,
     uploaded_at: "2026-09-28T09:15:00Z",
@@ -29,6 +32,7 @@ const sampleReports: Tables<"reports">[] = [
   {
     id: "33333333-3333-3333-3333-333333333333",
     created_at: "2026-09-20T14:45:00Z",
+    deviation_count: null,
     original_filename: "raport_lipiec.csv",
     row_count: null,
     uploaded_at: "2026-09-20T14:45:00Z",
@@ -115,20 +119,13 @@ const sampleReports: Tables<"reports">[] = [
           </Table>
         </section>
 
-        <!-- 4. Disabled -->
-        <section class="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">4. Wyłączony (disabled)</h2>
-          <div class="space-y-4">
-            <input
-              type="file"
-              disabled
-              accept=".csv,.xlsx"
-              class="block w-full text-sm text-muted-foreground file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90 disabled:opacity-50"
-            />
-            <Button type="button" className="w-full" disabled>
-              Wgraj
-            </Button>
-          </div>
+        <!-- 4. Upload card -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">4. Karta wgrywania</h2>
+          <p class="text-muted-foreground mb-4 text-sm">
+            Stany przeciągania i wgrywania (pasek postępu, Anuluj) pojawiają się dopiero po wybraniu pliku.
+          </p>
+          <ReportUpload client:load />
         </section>
 
         <!-- 5. Error -->

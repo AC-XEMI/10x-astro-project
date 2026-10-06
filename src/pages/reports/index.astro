@@ -3,7 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
 import ReportsList from "@/components/reports/ReportsList";
-import { Button } from "@/components/ui/button";
+import ReportUpload from "@/components/reports/ReportUpload";
 import { createClient } from "@/lib/supabase";
 import type { Tables } from "@/types";
 
@@ -37,52 +37,43 @@ if (supabase) {
 }
 ---
 
-<Layout title="Wgraj raport">
-  <div class="min-h-screen p-4">
-    <div class="mx-auto max-w-3xl py-8">
-      <Topbar />
-      <div class="flex flex-col items-center gap-8">
-        <div class="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h1 class="mb-6 text-center text-2xl font-bold">Wgraj raport</h1>
-          {deleted && <Banner variant="info">Raport został usunięty.</Banner>}
-          {error && <Banner variant="error">{error}</Banner>}
-          <form method="POST" action="/api/reports/upload" enctype="multipart/form-data" class="space-y-4">
-            <input
-              type="file"
-              name="report_file"
-              accept=".csv,.xlsx"
-              required
-              class="block w-full text-sm text-muted-foreground file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
-            />
-            <Button type="submit" className="w-full">
-              Wgraj
-            </Button>
-          </form>
-        </div>
+<Layout title="Raporty">
+  <Topbar />
+  <main class="mx-auto max-w-[1100px] space-y-6 p-6">
+    <div class="space-y-1">
+      <h1 class="text-2xl font-semibold tracking-tight">Raporty</h1>
+      <p class="text-sm text-muted-foreground">
+        Wgraj trasówki przedstawicieli, aby sprawdzić odstępstwa: brak GPS, telefon zamiast wizyty, odchylenie od trasy.
+      </p>
+    </div>
 
-        <div class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">Twoje raporty</h2>
-          <ReportsList reports={reports} page={page} client:load />
-          {count !== null && (
-            <div class="mt-4 flex justify-between text-sm">
-              {page > 1 ? (
-                <a href={`/reports?page=${page - 1}`} class="text-primary hover:underline">
-                  Poprzednia
-                </a>
-              ) : (
-                <span />
-              )}
-              {page * PAGE_SIZE < count ? (
-                <a href={`/reports?page=${page + 1}`} class="text-primary hover:underline">
-                  Następna
-                </a>
-              ) : (
-                <span />
-              )}
-            </div>
+    {deleted && <Banner variant="info">Raport został usunięty.</Banner>}
+    {error && <Banner variant="error">{error}</Banner>}
+
+    <div>
+      <ReportUpload client:load />
+    </div>
+
+    <div class="rounded-lg border border-border bg-card p-4">
+      <ReportsList reports={reports} page={page} client:load />
+      {count !== null && (page > 1 || page * PAGE_SIZE < count) && (
+        <div class="mt-4 flex justify-between text-sm">
+          {page > 1 ? (
+            <a href={`/reports?page=${page - 1}`} class="text-primary hover:underline">
+              Poprzednia
+            </a>
+          ) : (
+            <span />
+          )}
+          {page * PAGE_SIZE < count ? (
+            <a href={`/reports?page=${page + 1}`} class="text-primary hover:underline">
+              Następna
+            </a>
+          ) : (
+            <span />
           )}
         </div>
-      </div>
+      )}
     </div>
-  </div>
+  </main>
 </Layout>

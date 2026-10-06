@@ -75,6 +75,7 @@ export type Database = {
       reports: {
         Row: {
           created_at: string
+          deviation_count: number | null
           id: string
           original_filename: string
           row_count: number | null
@@ -83,6 +84,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deviation_count?: number | null
           id?: string
           original_filename: string
           row_count?: number | null
@@ -91,6 +93,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deviation_count?: number | null
           id?: string
           original_filename?: string
           row_count?: number | null

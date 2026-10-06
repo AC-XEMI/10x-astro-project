@@ -113,5 +113,15 @@ export const POST: APIRoute = async (context) => {
     }
   }
 
+  // Denormalized count for the reports list. Not worth rolling back over: the visits and
+  // deviations are complete, and a null count only renders as "—" in the list.
+  const { error: countError } = await supabase
+    .from("reports")
+    .update({ deviation_count: deviationsToInsert.length })
+    .eq("id", report.id);
+  if (countError) {
+    console.error("Failed to store report deviation count:", countError);
+  }
+
   return context.redirect(`/reports/${report.id}`);
 };

@@ -1,46 +1,33 @@
 ---
-import { Home, FileText, LogOut } from "lucide-react";
+import { FileText, LogOut, MapPin } from "lucide-react";
 
 const { user } = Astro.locals;
+const navLink =
+  "text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors";
 ---
 
-<div class="mb-4 flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2 text-sm shadow-sm">
-  {user ? (
-    <>
-      <span class="text-muted-foreground">{user.email}</span>
-      <div class="flex items-center gap-1">
-        <a
-          href="/"
-          title="Strona główna"
-          aria-label="Strona główna"
-          class="rounded-md p-2 text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
-        >
-          <Home className="size-4" />
-        </a>
-        <a
-          href="/reports"
-          title="Raporty"
-          aria-label="Raporty"
-          class="rounded-md p-2 text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
-        >
-          <FileText className="size-4" />
-        </a>
-        <form method="POST" action="/api/auth/signout">
-          <button
-            type="submit"
-            title="Wyloguj"
-            aria-label="Wyloguj"
-            class="cursor-pointer rounded-md p-2 text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            <LogOut className="size-4" />
-          </button>
-        </form>
+<header class="border-b border-border bg-card">
+  <div class="mx-auto flex max-w-[1100px] items-center justify-between gap-4 px-6 py-3">
+    <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
+      <MapPin className="size-4 text-primary" />
+      <span>Kontrola Trasówek</span>
+    </a>
+    {user ? (
+      <div class="flex items-center gap-3 text-sm">
+        <span class="truncate text-muted-foreground">{user.email}</span>
+        <div class="flex items-center gap-1">
+          <a href="/reports" title="Raporty" aria-label="Raporty" class:list={navLink}>
+            <FileText className="size-4" />
+          </a>
+          <form method="POST" action="/api/auth/signout">
+            <button type="submit" title="Wyloguj" aria-label="Wyloguj" class:list={navLink}>
+              <LogOut className="size-4" />
+            </button>
+          </form>
+        </div>
       </div>
-    </>
-  ) : (
-    <>
-      <span class="text-muted-foreground">Niezalogowany</span>
-      <div class="flex gap-1">
+    ) : (
+      <div class="flex items-center gap-1 text-sm">
         <a
           href="/auth/signin"
           class="rounded-md px-2 py-1 text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
@@ -54,6 +41,6 @@ const { user } = Astro.locals;
           Zarejestruj się
         </a>
       </div>
-    </>
-  )}
-</div>
+    )}
+  </div>
+</header>
