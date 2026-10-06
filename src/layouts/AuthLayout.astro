@@ -1,0 +1,53 @@
+---
+// Split-screen shell for sign-in, sign-up and email confirmation: brand panel on the left
+// (hidden below md), the page's form/content centered on the right.
+import { CircleAlert, MapPin, Phone } from "lucide-react";
+import Layout from "@/layouts/Layout.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<Layout title={title}>
+  <div class="grid min-h-screen bg-background text-foreground md:grid-cols-[400px_1fr]">
+    <aside class="hidden flex-col justify-between bg-primary p-10 text-primary-foreground md:flex">
+      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-primary-foreground">
+        <MapPin className="size-5" />
+        <span>Kontrola Trasówek</span>
+      </a>
+      <div class="space-y-6">
+        <div class="space-y-3">
+          <p class="text-3xl font-semibold tracking-tight text-balance">
+            Sprawdzaj trasówki przedstawicieli w kilka minut
+          </p>
+          <p class="text-sm text-pretty">
+            Wgraj raport wizyt z pliku CSV lub XLSX, a aplikacja sama wskaże wizyty, którym warto się przyjrzeć.
+          </p>
+        </div>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-center gap-3">
+            <MapPin className="size-4" /> Brak GPS
+          </li>
+          <li class="flex items-center gap-3">
+            <Phone className="size-4" /> Telefon zamiast wizyty
+          </li>
+          <li class="flex items-center gap-3">
+            <CircleAlert className="size-4" /> Odchylenie od trasy powyżej 1,5×
+          </li>
+        </ul>
+      </div>
+      <div class="text-xs">Dla kierowników regionów sprzedaży</div>
+    </aside>
+
+    <main class="flex flex-col items-center justify-center gap-8 p-6 md:p-10">
+      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground md:hidden">
+        <MapPin className="size-5 text-primary" />
+        <span>Kontrola Trasówek</span>
+      </a>
+      <slot />
+    </main>
+  </div>
+</Layout>

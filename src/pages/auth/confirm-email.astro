@@ -1,32 +1,73 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import { CircleCheck, Mail } from "lucide-react";
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import Banner from "@/components/Banner.astro";
+import { buttonVariants } from "@/components/ui/button";
+import { getPendingSignupEmail } from "@/lib/pending-signup";
 
-const isAutoConfirmed = import.meta.env.DEV;
-
-const content = isAutoConfirmed
-  ? {
-      emoji: "✅",
-      heading: "Rejestracja zakończona",
-      description: "Twoje konto zostało utworzone. Możesz się teraz zalogować.",
-      linkText: "Przejdź do logowania",
-    }
-  : {
-      emoji: "📧",
-      heading: "Sprawdź swoją skrzynkę",
-      description: "Wysłaliśmy link potwierdzający na Twój adres e-mail. Kliknij go, żeby aktywować konto.",
-      linkText: "Powrót do logowania",
-    };
+// With email confirmations disabled (local Supabase, see supabase/config.toml) signUp() already
+// returns a session, so the user arrives here signed in and confirmed - nothing to wait for.
+const user = Astro.locals.user;
+const isConfirmed = Boolean(user?.email_confirmed_at);
+const email = getPendingSignupEmail(Astro.cookies);
+const error = Astro.url.searchParams.get("error");
+const resent = Astro.url.searchParams.has("resent");
 ---
 
-<Layout title={content.heading}>
-  <div class="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-    <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-      <div class="mb-4 text-5xl">{content.emoji}</div>
-      <h1 class="mb-3 text-2xl font-bold text-slate-900">{content.heading}</h1>
-      <p class="mb-6 text-slate-600">{content.description}</p>
-      <a href="/auth/signin" class="text-sm text-indigo-600 hover:underline">
-        {content.linkText}
-      </a>
-    </div>
+<AuthLayout title={isConfirmed ? "Konto założone" : "Sprawdź skrzynkę"}>
+  <div class="w-full max-w-[360px] space-y-6 text-center">
+    {isConfirmed ? (
+      <>
+        <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-success/10 text-success">
+          <CircleCheck className="size-6" />
+        </div>
+        <div class="space-y-2">
+          <h1 class="text-2xl font-semibold tracking-tight">Konto założone</h1>
+          <p class="text-sm text-pretty text-muted-foreground">
+            Twoje konto jest aktywne. Możesz od razu przejść do raportów.
+          </p>
+        </div>
+        <a href="/reports" class:list={buttonVariants({ className: "w-full" })}>
+          Przejdź do raportów
+        </a>
+      </>
+    ) : (
+      <>
+        <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Mail className="size-6" />
+        </div>
+        <div class="space-y-2">
+          <h1 class="text-2xl font-semibold tracking-tight">Sprawdź skrzynkę</h1>
+          <p class="text-sm text-pretty text-muted-foreground">
+            {email ? (
+              <>
+                Wysłaliśmy link aktywacyjny na adres <span class="font-medium text-foreground">{email}</span>.
+              </>
+            ) : (
+              "Wysłaliśmy link aktywacyjny na podany adres email."
+            )}{" "}
+            Kliknij go, aby potwierdzić email i dokończyć zakładanie konta.
+          </p>
+        </div>
+        {resent && <Banner variant="success">Wysłaliśmy link ponownie.</Banner>}
+        {error && <Banner variant="error">{error}</Banner>}
+        <div class="rounded-md bg-muted p-3 text-left text-sm text-pretty text-muted-foreground">
+          Link jest ważny przez ograniczony czas. Nie widzisz wiadomości? Sprawdź folder Spam lub Oferty.
+        </div>
+        <div class="grid gap-2">
+          {email && (
+            <form method="POST" action="/api/auth/resend-confirmation" class="grid">
+              <button type="submit" class:list={buttonVariants({ variant: "outline", className: "cursor-pointer" })}>
+                <Mail />
+                Wyślij link ponownie
+              </button>
+            </form>
+          )}
+          <a href="/auth/signin" class:list={buttonVariants({ variant: "link" })}>
+            Wróć do logowania
+          </a>
+        </div>
+      </>
+    )}
   </div>
-</Layout>
+</AuthLayout>

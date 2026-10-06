@@ -1,21 +1,24 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AuthLayout from "@/layouts/AuthLayout.astro";
 import SignUpForm from "@/components/auth/SignUpForm";
 
 const error = Astro.url.searchParams.get("error");
 ---
 
-<Layout title="Zarejestruj się">
-  <div class="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-    <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 class="mb-6 text-center text-2xl font-bold text-slate-900">Zarejestruj się</h1>
-      <SignUpForm serverError={error} client:load />
-      <p class="mt-4 text-center text-sm text-slate-500">
-        Masz już konto?{" "}
-        <a href="/auth/signin" class="text-indigo-600 hover:underline">
-          Zaloguj się
-        </a>
+<AuthLayout title="Załóż konto">
+  <div class="w-full max-w-[340px] space-y-6">
+    <div class="space-y-1">
+      <h1 class="text-2xl font-semibold tracking-tight">Załóż konto</h1>
+      <p class="text-sm text-muted-foreground">
+        Konto dla kierownika regionu. Na podany email wyślemy link aktywacyjny.
       </p>
     </div>
+    <SignUpForm serverError={error} client:load />
+    <p class="text-center text-sm text-muted-foreground">
+      Masz już konto?{" "}
+      <a href="/auth/signin" class="text-primary hover:underline">
+        Zaloguj się
+      </a>
+    </p>
   </div>
-</Layout>
+</AuthLayout>

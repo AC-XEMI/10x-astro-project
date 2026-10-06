@@ -4,14 +4,8 @@ import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
-
-const MIN_PASSWORD_LENGTH = 6;
-
-function pluralizeChars(n: number) {
-  if (n === 1) return "znak";
-  if (n >= 2 && n <= 4) return "znaki";
-  return "znaków";
-}
+import { usePendingSubmit } from "@/hooks/usePendingSubmit";
+import { PASSWORD_HINT, validateEmail, validatePassword } from "@/lib/auth-validation";
 
 interface Props {
   serverError?: string | null;
@@ -20,32 +14,16 @@ interface Props {
 export default function SignUpForm({ serverError }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [pending, setPending] = usePendingSubmit();
 
   function validate() {
     const next: typeof errors = {};
-
-    if (!email.trim()) {
-      next.email = "Adres e-mail jest wymagany";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = "Podaj prawidłowy adres e-mail";
-    }
-
-    if (!password) {
-      next.password = "Hasło jest wymagane";
-    } else if (password.length < MIN_PASSWORD_LENGTH) {
-      next.password = `Hasło musi mieć co najmniej ${MIN_PASSWORD_LENGTH} znaków`;
-    }
-
-    if (!confirmPassword) {
-      next.confirmPassword = "Potwierdź hasło";
-    } else if (password !== confirmPassword) {
-      next.confirmPassword = "Hasła nie są takie same";
-    }
-
+    const emailError = validateEmail(email);
+    if (emailError) next.email = emailError;
+    const passwordError = validatePassword(password);
+    if (passwordError) next.password = passwordError;
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -55,83 +33,62 @@ export default function SignUpForm({ serverError }: Props) {
   }
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    if (!validate()) {
+    if (pending || !validate()) {
       e.preventDefault();
+      return;
     }
+    setPending(true);
   }
 
-  const passwordHint =
-    !errors.password && password.length > 0 && password.length < MIN_PASSWORD_LENGTH ? (
-      <p className="mt-1 text-xs text-slate-400">
-        Potrzeba jeszcze {MIN_PASSWORD_LENGTH - password.length} {pluralizeChars(MIN_PASSWORD_LENGTH - password.length)}
-      </p>
-    ) : undefined;
-
   return (
-    <form method="POST" action="/api/auth/signup" className="space-y-4" onSubmit={handleSubmit} noValidate>
-      <FormField
-        id="email"
-        type="email"
-        label="E-mail"
-        value={email}
-        onChange={(v) => {
-          setEmail(v);
-          clearError("email");
-        }}
-        placeholder="Adres e-mail"
-        error={errors.email}
-        icon={<Mail className="size-4" />}
-      />
-
-      <FormField
-        id="password"
-        label="Hasło"
-        type={showPassword ? "text" : "password"}
-        value={password}
-        onChange={(v) => {
-          setPassword(v);
-          clearError("password");
-        }}
-        placeholder="Min. 6 znaków"
-        error={errors.password}
-        hint={passwordHint}
-        icon={<Lock className="size-4" />}
-        endContent={
-          <PasswordToggle
-            visible={showPassword}
-            onToggle={() => {
-              setShowPassword(!showPassword);
-            }}
-          />
-        }
-      />
-
-      <FormField
-        id="confirmPassword"
-        name="confirmPassword"
-        label="Potwierdź hasło"
-        type={showConfirmPassword ? "text" : "password"}
-        value={confirmPassword}
-        onChange={(v) => {
-          setConfirmPassword(v);
-          clearError("confirmPassword");
-        }}
-        placeholder="Powtórz hasło"
-        error={errors.confirmPassword}
-        icon={<Lock className="size-4" />}
-        endContent={
-          <PasswordToggle
-            visible={showConfirmPassword}
-            onToggle={() => {
-              setShowConfirmPassword(!showConfirmPassword);
-            }}
-          />
-        }
-      />
-
+    <form method="POST" action="/api/auth/signup" className="space-y-6" onSubmit={handleSubmit} noValidate>
       <ServerError message={serverError} />
 
-      <SubmitButton pendingText="Tworzenie konta..." icon={<UserPlus className="size-4" />}>
+      <div className="space-y-4">
+        <FormField
+          id="email"
+          type="email"
+          label="Email"
+          autoComplete="email"
+          value={email}
+          onChange={(v) => {
+            setEmail(v);
+            clearError("email");
+          }}
+          placeholder="jan.kowalski@firma.pl"
+          error={errors.email}
+          busy={pending}
+          icon={<Mail />}
+        />
+
+        <FormField
+          id="password"
+          label="Hasło"
+          type={showPassword ? "text" : "password"}
+          autoComplete="new-password"
+          value={password}
+          onChange={(v) => {
+            setPassword(v);
+            clearError("password");
+          }}
+          placeholder="Twoje hasło"
+          error={errors.password}
+          hint={PASSWORD_HINT}
+          busy={pending}
+          icon={<Lock />}
+          endContent={
+            <PasswordToggle
+              visible={showPassword}
+              disabled={pending}
+              onToggle={() => {
+                setShowPassword(!showPassword);
+              }}
+            />
+          }
+        />
+      </div>
+
+      <SubmitButton pending={pending} pendingText="Zakładanie konta…" icon={<UserPlus />}>
         Załóż konto
       </SubmitButton>
     </form>
