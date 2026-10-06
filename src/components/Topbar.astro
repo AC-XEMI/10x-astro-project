@@ -1,7 +1,11 @@
 ---
-import { FileText, LogOut, MapPin } from "lucide-react";
+import { LogOut, MapPin } from "lucide-react";
 
 const { user } = Astro.locals;
+// Signup collects only email + password, so a display name exists only if one was set in
+// Supabase user_metadata (e.g. via the dashboard); otherwise fall back to the email.
+const metadataName: unknown = user?.user_metadata.full_name ?? user?.user_metadata.name;
+const displayName = typeof metadataName === "string" && metadataName.trim() ? metadataName.trim() : user?.email;
 const navLink =
   "text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors";
 ---
@@ -13,18 +17,13 @@ const navLink =
       <span>Kontrola Trasówek</span>
     </a>
     {user ? (
-      <div class="flex items-center gap-3 text-sm">
-        <span class="truncate text-muted-foreground">{user.email}</span>
-        <div class="flex items-center gap-1">
-          <a href="/reports" title="Raporty" aria-label="Raporty" class:list={navLink}>
-            <FileText className="size-4" />
-          </a>
-          <form method="POST" action="/api/auth/signout">
-            <button type="submit" title="Wyloguj" aria-label="Wyloguj" class:list={navLink}>
-              <LogOut className="size-4" />
-            </button>
-          </form>
-        </div>
+      <div class="flex min-w-0 items-center gap-2 text-sm">
+        <span class="truncate text-muted-foreground">{displayName}</span>
+        <form method="POST" action="/api/auth/signout">
+          <button type="submit" title="Wyloguj" aria-label="Wyloguj" class:list={navLink}>
+            <LogOut className="size-4" />
+          </button>
+        </form>
       </div>
     ) : (
       <div class="flex items-center gap-1 text-sm">
