@@ -434,29 +434,29 @@ Not applicable — no data or schema changes.
 
 #### Automated
 
-- [x] 1.1 `npm run lint` passes
-- [x] 1.2 `npm run build` passes
-- [x] 1.3 Hardcoded-value scan on Topbar.astro/Banner.astro returns 0 matches (excluding documented `warning` literal)
+- [x] 1.1 `npm run lint` passes — 24f1307
+- [x] 1.2 `npm run build` passes — 24f1307
+- [x] 1.3 Hardcoded-value scan on Topbar.astro/Banner.astro returns 0 matches (excluding documented `warning` literal) — 24f1307
 
 #### Manual
 
-- [x] 1.4 Welcome.astro and reports/[id].astro Topbar render consistent with reports/index.astro
-- [x] 1.5 Banner.astro info/error variants render with visibly distinct correct colors
-- [x] 1.6 Topbar nav icons render in brand indigo color on default state, not black
+- [x] 1.4 Welcome.astro and reports/[id].astro Topbar render consistent with reports/index.astro — 24f1307
+- [x] 1.5 Banner.astro info/error variants render with visibly distinct correct colors — 24f1307
+- [x] 1.6 Topbar nav icons render in brand indigo color on default state, not black — 24f1307
 
 ### Phase 2: reports/index.astro + ReportsList.tsx
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npm run build` passes
-- [ ] 2.3 Hardcoded-value scan on index.astro/ReportsList.tsx returns 0 matches
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npm run build` passes
+- [x] 2.3 Hardcoded-value scan on index.astro/ReportsList.tsx returns 0 matches
 
 #### Manual
 
-- [ ] 2.4 Upload submit button shows visible focus ring on Tab
-- [ ] 2.5 "Zobacz raport"/"Usuń raport" read as one coherent action group
-- [ ] 2.6 No visible background seam at page root
+- [x] 2.4 Upload submit button shows visible focus ring on Tab
+- [x] 2.5 "Zobacz raport"/"Usuń raport" read as one coherent action group
+- [x] 2.6 No visible background seam at page root
 
 ### Phase 3: 7-state matrix + visual gate
 

@@ -28,7 +28,7 @@ export default function ReportsList({ reports, page }: Props) {
   const [deletingReport, setDeletingReport] = useState<Tables<"reports"> | null>(null);
 
   if (reports.length === 0) {
-    return <p className="text-sm text-slate-500">Nie masz jeszcze żadnych wgranych raportów.</p>;
+    return <p className="text-muted-foreground text-sm">Nie masz jeszcze żadnych wgranych raportów.</p>;
   }
 
   return (
@@ -52,7 +52,7 @@ export default function ReportsList({ reports, page }: Props) {
                 <div className="flex items-center gap-2">
                   <a
                     href={`/reports/${report.id}`}
-                    className="inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-indigo-600 hover:bg-indigo-50"
+                    className="text-primary hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors"
                     title="Zobacz raport"
                     aria-label="Zobacz raport"
                   >
