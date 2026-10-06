@@ -1,0 +1,184 @@
+---
+// Dev-only kitchen sink: every state of the upload card + reports table, side by side.
+// Not linked from product nav, not in PROTECTED_ROUTES (src/middleware.ts) — no auth needed.
+import Layout from "@/layouts/Layout.astro";
+import Banner from "@/components/Banner.astro";
+import ReportsList from "@/components/reports/ReportsList";
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Search, Trash2 } from "lucide-react";
+import type { Tables } from "@/types";
+
+const sampleReports: Tables<"reports">[] = [
+  {
+    id: "11111111-1111-1111-1111-111111111111",
+    created_at: "2026-10-01T10:00:00Z",
+    original_filename: "raport_wrzesien.csv",
+    row_count: 128,
+    uploaded_at: "2026-10-01T10:00:00Z",
+    user_id: "00000000-0000-0000-0000-000000000001",
+  },
+  {
+    id: "22222222-2222-2222-2222-222222222222",
+    created_at: "2026-09-28T09:15:00Z",
+    original_filename: "raport_sierpien.xlsx",
+    row_count: 342,
+    uploaded_at: "2026-09-28T09:15:00Z",
+    user_id: "00000000-0000-0000-0000-000000000001",
+  },
+  {
+    id: "33333333-3333-3333-3333-333333333333",
+    created_at: "2026-09-20T14:45:00Z",
+    original_filename: "raport_lipiec.csv",
+    row_count: null,
+    uploaded_at: "2026-09-20T14:45:00Z",
+    user_id: "00000000-0000-0000-0000-000000000001",
+  },
+];
+---
+
+<Layout title="Kitchen sink – Lista raportów">
+  <div class="min-h-screen p-4">
+    <div class="mx-auto max-w-3xl py-8">
+      <h1 class="mb-2 text-center text-2xl font-bold">Kitchen sink: karta wgrywania i lista raportów</h1>
+      <p class="text-muted-foreground mb-8 text-center text-sm">
+        Strona deweloperska — prezentuje wszystkie 7 stanów komponentów bez potrzeby realnych danych z Supabase.
+      </p>
+
+      <div class="flex flex-col gap-8">
+        <!-- 1. Default -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">1. Domyślny (default)</h2>
+          <ReportsList reports={sampleReports} page={1} client:load />
+        </section>
+
+        <!-- 2. Hover -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">2. Najechanie (hover)</h2>
+          <p class="text-muted-foreground mb-4 text-sm">
+            Statyczny zrzut ekranu nie utrwali stanu <code>:hover</code>. Wiersze tabeli przechodzą w
+            <code>hover:bg-muted/50</code>, link „Zobacz raport” w{" "}
+            <code>hover:bg-accent hover:text-accent-foreground</code>, a przycisk „Usuń raport” w{" "}
+            <code>hover:bg-destructive/90</code> — najedź kursorem ręcznie, aby zweryfikować.
+          </p>
+          <ReportsList reports={sampleReports} page={1} client:load />
+        </section>
+
+        <!-- 3. Focus-visible -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">3. Widoczny fokus (focus-visible)</h2>
+          <p class="text-muted-foreground mb-4 text-sm">
+            Statyczny zrzut ekranu nie utrwali stanu <code>:focus-visible</code>. Przejdź klawiszem Tab do linku „Zobacz
+            raport” poniżej — pokaże domyślny fokus przeglądarki, pokolorowany tokenem <code>--ring</code>
+            przez globalną regułę <code>outline-ring/50</code> (src/styles/global.css), tak jak każdy inny element w
+            apce. Przycisk „Usuń raport” (prawdziwy <code>&lt;Button&gt;</code>) dodatkowo ma własny
+            <code>focus-visible:ring-ring/50</code>.
+          </p>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nazwa pliku</TableHead>
+                <TableHead>Data wgrania</TableHead>
+                <TableHead>Liczba wierszy</TableHead>
+                <TableHead>Akcje</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>{sampleReports[0].original_filename}</TableCell>
+                <TableCell>2026-10-01 10:00</TableCell>
+                <TableCell>{sampleReports[0].row_count}</TableCell>
+                <TableCell>
+                  <div class="flex items-center gap-2">
+                    <a
+                      href={`/reports/${sampleReports[0].id}`}
+                      class="text-primary hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors"
+                      title="Zobacz raport"
+                      aria-label="Zobacz raport"
+                    >
+                      <Search className="size-4" />
+                    </a>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="size-8 cursor-pointer"
+                      title="Usuń raport"
+                      aria-label="Usuń raport"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </section>
+
+        <!-- 4. Disabled -->
+        <section class="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">4. Wyłączony (disabled)</h2>
+          <div class="space-y-4">
+            <input
+              type="file"
+              disabled
+              accept=".csv,.xlsx"
+              class="block w-full text-sm text-muted-foreground file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90 disabled:opacity-50"
+            />
+            <Button type="button" className="w-full" disabled>
+              Wgraj
+            </Button>
+          </div>
+        </section>
+
+        <!-- 5. Error -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">5. Błąd (error)</h2>
+          <Banner variant="error">Nie udało się przetworzyć pliku: brak wymaganej kolumny.</Banner>
+        </section>
+
+        <!-- 6. Empty -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">6. Pusty (empty)</h2>
+          <ReportsList reports={[]} page={1} client:load />
+        </section>
+
+        <!-- 7. Loading -->
+        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h2 class="mb-4 text-xl font-bold">7. Ładowanie (loading)</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nazwa pliku</TableHead>
+                <TableHead>Data wgrania</TableHead>
+                <TableHead>Liczba wierszy</TableHead>
+                <TableHead>Akcje</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[0, 1, 2].map((i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <div class="bg-muted h-4 w-32 animate-pulse rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div class="bg-muted h-4 w-28 animate-pulse rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div class="bg-muted h-4 w-10 animate-pulse rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <div class="flex items-center gap-2">
+                      <div class="bg-muted size-8 animate-pulse rounded-md" />
+                      <div class="bg-muted size-8 animate-pulse rounded-md" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </section>
+      </div>
+    </div>
+  </div>
+</Layout>

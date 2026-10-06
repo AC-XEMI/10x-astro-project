@@ -448,27 +448,27 @@ Not applicable — no data or schema changes.
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npm run build` passes
-- [x] 2.3 Hardcoded-value scan on index.astro/ReportsList.tsx returns 0 matches
+- [x] 2.1 `npm run lint` passes — 49437bc
+- [x] 2.2 `npm run build` passes — 49437bc
+- [x] 2.3 Hardcoded-value scan on index.astro/ReportsList.tsx returns 0 matches — 49437bc
 
 #### Manual
 
-- [x] 2.4 Upload submit button shows visible focus ring on Tab
-- [x] 2.5 "Zobacz raport"/"Usuń raport" read as one coherent action group
-- [x] 2.6 No visible background seam at page root
+- [x] 2.4 Upload submit button shows visible focus ring on Tab — 49437bc
+- [x] 2.5 "Zobacz raport"/"Usuń raport" read as one coherent action group — 49437bc
+- [x] 2.6 No visible background seam at page root — 49437bc
 
 ### Phase 3: 7-state matrix + visual gate
 
 #### Automated
 
-- [ ] 3.1 `npm run build` succeeds with new kitchen-sink route
-- [ ] 3.2 Hardcoded-value scan on all 5 touched files returns 0 matches (excluding documented exception)
+- [x] 3.1 `npm run build` succeeds with new kitchen-sink route
+- [x] 3.2 Hardcoded-value scan on all 5 touched files returns 0 matches (excluding documented exception)
 
 #### Manual
 
-- [ ] 3.3 All 7 states visible on /dev/kitchen-sink/reports-list without errors
-- [ ] 3.4 Desktop + mobile screenshots show no layout jump and no two states rendering identically
+- [x] 3.3 All 7 states visible on /dev/kitchen-sink/reports-list without errors
+- [x] 3.4 Desktop + mobile screenshots show no layout jump and no two states rendering identically
 
 ### Phase 4: Make it stick
 
