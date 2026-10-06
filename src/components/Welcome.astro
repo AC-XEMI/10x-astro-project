@@ -1,118 +1,372 @@
 ---
-import Topbar from "@/components/Topbar.astro";
+import {
+  CheckCheck,
+  CircleAlert,
+  Download,
+  Eye,
+  FileText,
+  Lock,
+  LogIn,
+  MapPin,
+  Phone,
+  Search,
+  UserPlus,
+} from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle.astro";
+import { buttonVariants } from "@/components/ui/button";
 
 const { user } = Astro.locals;
+
+const NAV = [
+  { href: "#jak", label: "Jak to działa" },
+  { href: "#reguly", label: "Co sprawdzamy" },
+  { href: "#mozliwosci", label: "Możliwości" },
+  { href: "#plik", label: "Przygotowanie pliku" },
+];
+
+// Static product preview - illustrative numbers, not real data.
+const PREVIEW = [
+  {
+    rep: "Anna Kowalska",
+    date: "28.09",
+    client: "Groszek, Pułtusk",
+    rules: ["Odchylenie od trasy", "Telefon zamiast wizyty"],
+  },
+  { rep: "Piotr Nowak", date: "24.09", client: "Dino, Wyszków", rules: ["Brak GPS"] },
+  { rep: "Katarzyna Wiśniewska", date: "19.09", client: "Lewiatan, Mińsk Maz.", rules: ["Odchylenie od trasy"] },
+];
+
+const STEPS = [
+  { title: "Załóż konto", text: "Podaj służbowy email i hasło. Potwierdzisz adres linkiem z wiadomości." },
+  { title: "Zaloguj się", text: "Po potwierdzeniu emaila zaloguj się i przejdź do listy raportów." },
+  { title: "Wgraj raport", text: "Przeciągnij plik CSV lub XLSX z wizytami. Analiza trwa kilka sekund." },
+  {
+    title: "Przejrzyj odstępstwa",
+    text: "Wizyty są pogrupowane po przedstawicielu. Każde odstępstwo oznaczasz jako sprawdzone.",
+  },
+];
+
+const RULES = [
+  {
+    icon: MapPin,
+    title: "Brak GPS",
+    text: "Wizyta zgłoszona bez lokalizacji. Bez współrzędnych nie da się potwierdzić, że przedstawiciel był u klienta.",
+    example: ["gps_wlaczony = ", "NIE"],
+  },
+  {
+    icon: Phone,
+    title: "Telefon zamiast wizyty",
+    text: "Aktywność oznaczona jako telefon albo wizyta bez GPS i bez czasu spędzonego u klienta.",
+    example: ["typ_aktywnosci = ", "telefon"],
+  },
+  {
+    icon: CircleAlert,
+    title: "Odchylenie od trasy",
+    text: "Przejechany dystans jest dłuższy niż 1,5× odległości w linii prostej między kolejnymi punktami.",
+    example: ["", "23,4 km przy 11,2 km w linii prostej (2,1×)"],
+  },
+];
+
+const FEATURES = [
+  {
+    icon: Eye,
+    title: "Ranking przedstawicieli",
+    text: "Od razu widzisz, kto ma najwięcej odstępstw w miesiącu i jak to się zmienia.",
+  },
+  {
+    icon: Search,
+    title: "Filtry i sortowanie",
+    text: "Po przedstawicielu, typie odstępstwa, statusie przeglądu i dacie wizyty.",
+  },
+  {
+    icon: CheckCheck,
+    title: "Status przeglądu",
+    text: "Każde odstępstwo oznaczasz jako sprawdzone, a w razie pomyłki cofasz.",
+  },
+  {
+    icon: Download,
+    title: "Eksport CSV i XLSX",
+    text: "Wyniki kontroli wyślesz dalej albo dołączysz do raportu miesięcznego.",
+  },
+  {
+    icon: FileText,
+    title: "Historia raportów",
+    text: "Wszystkie wgrane pliki w jednym miejscu, z porównaniem miesiąc do miesiąca.",
+  },
+  {
+    icon: Lock,
+    title: "Dostęp po zalogowaniu",
+    text: "Konto z potwierdzonym emailem: Twoje raporty widzisz tylko Ty.",
+  },
+];
+
+// Mirrors the required headers in report-parser.ts - keep in sync if they change.
+const COLUMNS = [
+  { name: "przedstawiciel", desc: "Imię i nazwisko przedstawiciela" },
+  { name: "data_wizyty", desc: "Data wizyty w formacie RRRR-MM-DD" },
+  { name: "gps_wlaczony", desc: "Czy wizyta ma lokalizację GPS: TAK / NIE" },
+  { name: "odwiedzony_klient", desc: "Nazwa lub kod odwiedzonego klienta" },
+];
+
+const section = "mx-auto max-w-[1100px] scroll-mt-16";
+const navLink = "text-muted-foreground transition-colors hover:text-foreground";
 ---
 
-<div class="min-h-screen w-full bg-slate-50">
-  <Topbar />
-  <div class="p-4">
-    <!-- Hero section -->
-    <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 pt-8 pb-20 text-center sm:pt-12 sm:pb-28">
-      <p class="mb-4 text-sm font-semibold tracking-wide text-indigo-600 uppercase">Kontrola Trasówek</p>
-      <h1 class="mb-6 max-w-3xl text-4xl leading-tight font-bold text-slate-900 sm:text-5xl">
-        Odstępstwa w raportach aktywności - widoczne w kilka sekund
-      </h1>
-      <p class="mb-10 max-w-2xl text-lg text-slate-600">
-        Wgraj raport zespołu i automatycznie zobacz wizyty bez GPS, z nieoptymalną trasą albo telefonem zamiast wizyty -
-        z pełnym kontekstem każdej z nich.
-      </p>
-      <div class="flex flex-col gap-4 sm:flex-row">
+<div class="min-h-screen bg-background text-foreground">
+  <header class="sticky top-0 z-10 border-b border-border bg-card">
+    <div class="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-4 px-6 py-3">
+      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
+        <MapPin className="size-4 text-primary" />
+        <span>Kontrola Trasówek</span>
+      </a>
+      <nav class="hidden items-center gap-6 text-sm md:flex" aria-label="Sekcje strony">
+        {NAV.map((item) => (
+          <a href={item.href} class:list={navLink}>
+            {item.label}
+          </a>
+        ))}
+      </nav>
+      <div class="flex items-center gap-2">
         {user ? (
-          <a
-            href="/reports"
-            class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-indigo-500"
-          >
-            Przejdź do raportów
+          <a href="/dashboard" class:list={buttonVariants({ size: "sm" })}>
+            Przejdź do pulpitu
           </a>
         ) : (
           <>
-            <a
-              href="/auth/signin"
-              class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-indigo-500"
-            >
+            <a href="/auth/signin" class:list={buttonVariants({ variant: "ghost", size: "sm" })}>
+              <LogIn />
               Zaloguj się
             </a>
-            <a
-              href="/auth/signup"
-              class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-base font-medium text-slate-700 transition-colors hover:bg-slate-100"
-            >
+            <a href="/auth/signup" class:list={buttonVariants({ size: "sm" })}>
               Załóż konto
             </a>
           </>
         )}
+        <ThemeToggle />
       </div>
     </div>
+  </header>
 
-    <!-- Feature cards -->
-    <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 px-4 pb-24 sm:grid-cols-3">
-      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-indigo-600"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" x2="12" y1="8" y2="12"></line>
-          <line x1="12" x2="12.01" y1="16" y2="16"></line>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-slate-900">Automatyczne wykrywanie odstępstw</h3>
-        <p class="text-sm leading-relaxed text-slate-600">
-          Brak GPS, nieoptymalna trasa, telefon zamiast wizyty - wychwycone automatycznie po wgraniu raportu.
-        </p>
-      </div>
+  <main>
+    <section class="mx-auto max-w-[1100px] px-6 py-16 md:py-[72px]">
+      <div class="grid items-center gap-12 lg:grid-cols-2">
+        <div class="space-y-6">
+          <div class="text-sm font-medium text-primary">Dla kierowników regionów sprzedaży</div>
+          <h1 class="text-4xl leading-[1.1] font-semibold tracking-tight text-balance md:text-[44px]">
+            Sprawdzaj trasówki przedstawicieli w kilka minut, a nie godzin
+          </h1>
+          <p class="max-w-[520px] text-lg text-pretty text-muted-foreground">
+            Wgraj raport wizyt z pliku CSV lub XLSX. Kontrola Trasówek sama wskaże wizyty bez GPS, telefony zamiast
+            spotkań i podejrzanie długie trasy, a Ty tylko je przejrzysz.
+          </p>
+          <div class="flex flex-wrap items-center gap-3">
+            {user ? (
+              <>
+                <a href="/dashboard" class:list={buttonVariants({ size: "lg" })}>
+                  Przejdź do pulpitu
+                </a>
+                <a href="/reports" class:list={buttonVariants({ size: "lg", variant: "outline" })}>
+                  Raporty
+                </a>
+              </>
+            ) : (
+              <>
+                <a href="/auth/signup" class:list={buttonVariants({ size: "lg" })}>
+                  <UserPlus />
+                  Załóż darmowe konto
+                </a>
+                <a href="/auth/signin" class:list={buttonVariants({ size: "lg", variant: "outline" })}>
+                  Mam już konto
+                </a>
+              </>
+            )}
+          </div>
+          {!user && (
+            <p class="text-sm text-muted-foreground">
+              Rejestracja zajmuje minutę: email, hasło i potwierdzenie linkiem.
+            </p>
+          )}
+        </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-indigo-600"
-        >
-          <path d="M3 6h18"></path>
-          <path d="M7 12h10"></path>
-          <path d="M10 18h4"></path>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-slate-900">Filtrowanie, sortowanie i eksport</h3>
-        <p class="text-sm leading-relaxed text-slate-600">
-          Zawęź listę do tego, co ważne, posortuj po dacie lub przedstawicielu i wyeksportuj do CSV albo XLS.
-        </p>
+        <figure class="space-y-4 rounded-xl border border-border bg-card p-5 shadow-lg" aria-label="Podgląd aplikacji">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-2 text-sm font-semibold">
+              <FileText className="size-4 shrink-0 text-muted-foreground" />
+              <span class="truncate">trasowki-wrzesien-2026.xlsx</span>
+            </div>
+            <span class="text-xs text-muted-foreground">248 wizyt</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            {[
+              ["Brak GPS", 9],
+              ["Telefon", 8],
+              ["Trasa > 1,5×", 24],
+            ].map(([label, count]) => (
+              <div class="rounded-md bg-muted/50 p-3">
+                <div class="text-xs text-muted-foreground">{label}</div>
+                <div class="text-xl font-semibold text-destructive tabular-nums">{count}</div>
+              </div>
+            ))}
+          </div>
+          <div class="rounded-md border border-border">
+            {PREVIEW.map((row) => (
+              <div class="flex items-start justify-between gap-3 border-b border-border px-3 py-2.5">
+                <div class="min-w-0">
+                  <div class="text-sm font-medium">{row.rep}</div>
+                  <div class="text-xs text-muted-foreground tabular-nums">
+                    {row.date} · {row.client}
+                  </div>
+                </div>
+                <div class="space-y-1 text-right">
+                  {row.rules.map((rule) => (
+                    <div class="text-xs font-medium text-destructive">{rule}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div class="flex items-center gap-2 px-3 py-2.5 text-xs text-muted-foreground">
+              <CheckCheck className="size-4 text-primary" />
+              14 z 41 odstępstw sprawdzonych
+            </div>
+          </div>
+        </figure>
       </div>
+    </section>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-indigo-600"
-        >
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-slate-900">Dane widoczne tylko dla Ciebie</h3>
-        <p class="text-sm leading-relaxed text-slate-600">
-          Każdy kierownik widzi wyłącznie raporty, które sam wgrał - pełna izolacja danych między kontami.
-        </p>
+    <section id="jak" class="border-t border-border bg-muted/50 px-6 py-16">
+      <div class:list={[section, "space-y-8"]}>
+        <div class="space-y-2">
+          <h2 class="text-3xl font-semibold tracking-tight">Jak to działa</h2>
+          <p class="text-muted-foreground">Od rejestracji do pierwszego przejrzanego raportu w czterech krokach.</p>
+        </div>
+        <ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((step, i) => (
+            <li class="space-y-3 rounded-lg border border-border bg-card p-5">
+              <div class="flex size-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                {i + 1}
+              </div>
+              <div class="font-semibold">{step.title}</div>
+              <p class="text-sm text-pretty text-muted-foreground">{step.text}</p>
+            </li>
+          ))}
+        </ol>
       </div>
+    </section>
+
+    <section id="reguly" class="px-6 py-16">
+      <div class:list={[section, "space-y-8"]}>
+        <div class="space-y-2">
+          <h2 class="text-3xl font-semibold tracking-tight">Co sprawdzamy</h2>
+          <p class="max-w-[640px] text-pretty text-muted-foreground">
+            Każda wizyta z raportu przechodzi przez trzy reguły. Jedna wizyta może złamać kilka z nich naraz i wtedy
+            widzisz wszystkie przy jednym wierszu.
+          </p>
+        </div>
+        <div class="grid gap-4 md:grid-cols-3">
+          {RULES.map((rule) => (
+            <div class="space-y-4 rounded-lg border border-border bg-card p-6">
+              <div class="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <rule.icon className="size-5" />
+              </div>
+              <div class="space-y-2">
+                <div class="text-lg font-semibold">{rule.title}</div>
+                <p class="text-sm text-pretty text-muted-foreground">{rule.text}</p>
+              </div>
+              <div class="rounded-md bg-muted/50 p-3 text-sm">
+                <span class="text-muted-foreground">Przykład:</span> {rule.example[0]}
+                <span class="font-medium">{rule.example[1]}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="mozliwosci" class="border-t border-border bg-muted/50 px-6 py-16">
+      <div class:list={[section, "space-y-8"]}>
+        <div class="space-y-2">
+          <h2 class="text-3xl font-semibold tracking-tight">Możliwości</h2>
+          <p class="text-muted-foreground">Wszystko, czego potrzebujesz do comiesięcznej kontroli zespołu.</p>
+        </div>
+        <div class="grid gap-x-8 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((feature) => (
+            <div class="flex items-start gap-4">
+              <div class="flex size-9 flex-none items-center justify-center rounded-md bg-primary/10 text-primary">
+                <feature.icon className="size-4" />
+              </div>
+              <div class="space-y-1">
+                <div class="font-semibold">{feature.title}</div>
+                <p class="text-sm text-pretty text-muted-foreground">{feature.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="plik" class="px-6 py-16">
+      <div class:list={[section, "grid items-start gap-10 lg:grid-cols-2"]}>
+        <div class="space-y-3">
+          <h2 class="text-3xl font-semibold tracking-tight">Przygotowanie pliku</h2>
+          <p class="text-pretty text-muted-foreground">
+            Wystarczy eksport wizyt z Twojego systemu CRM albo arkusz od przedstawicieli. Plik CSV lub XLSX do 5 MB, z
+            nagłówkami w pierwszym wierszu.
+          </p>
+          <p class="text-sm text-pretty text-muted-foreground">
+            Jeśli czegoś brakuje, przy wgrywaniu zobaczysz, którą kolumnę poprawić.
+          </p>
+          <a href="/wzor-raportu.xlsx" download class:list={buttonVariants({ variant: "outline", size: "sm" })}>
+            <Download />
+            Pobierz wzór pliku
+          </a>
+        </div>
+        <div class="rounded-lg border border-border bg-card">
+          <div class="border-b border-border px-4 py-3 text-sm font-semibold">Wymagane kolumny</div>
+          {COLUMNS.map((column) => (
+            <div class="flex items-start gap-4 border-b border-border px-4 py-3 text-sm last:border-b-0">
+              <code class="w-[150px] flex-none font-mono font-medium">{column.name}</code>
+              <span class="text-muted-foreground">{column.desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {!user && (
+      <section class="px-6 pb-[72px]">
+        <div class="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-6 rounded-xl bg-primary p-10 text-primary-foreground">
+          <div class="space-y-2">
+            <h2 class="text-2xl font-semibold tracking-tight">Zacznij od pierwszego raportu</h2>
+            <p class="text-sm">Załóż konto, potwierdź email i wgraj trasówki z ostatniego miesiąca.</p>
+          </div>
+          <a href="/auth/signup" class:list={buttonVariants({ size: "lg", variant: "secondary" })}>
+            <UserPlus />
+            Załóż konto
+          </a>
+        </div>
+      </section>
+    )}
+  </main>
+
+  <footer class="border-t border-border px-6 py-6">
+    <div class="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+      <span>© 2026 Kontrola Trasówek</span>
+      {!user && (
+        <span>
+          Masz już konto?{" "}
+          <a href="/auth/signin" class="text-primary hover:underline">
+            Zaloguj się
+          </a>
+        </span>
+      )}
     </div>
-  </div>
+  </footer>
 </div>
+
+<style is:global>
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+</style>
