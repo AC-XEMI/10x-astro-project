@@ -8,7 +8,15 @@ interface Props {
 const { variant = "info" } = Astro.props;
 ---
 
-<div class:list={["banner", `banner--${variant}`]} role={variant === "error" ? "alert" : "status"}>
+<div
+  class:list={[
+    "banner",
+    variant === "error" && "border-destructive bg-destructive/10 text-destructive",
+    variant === "info" && "border-border bg-accent text-accent-foreground",
+    variant === "warning" && "banner--warning",
+  ]}
+  role={variant === "error" ? "alert" : "status"}
+>
   <slot />
 </div>
 
@@ -25,19 +33,10 @@ const { variant = "info" } = Astro.props;
     text-decoration: underline;
     font-weight: 600;
   }
-  .banner--info {
-    background: #dbeafe;
-    color: #1e3a8a;
-    border-color: #3b82f6;
-  }
+  /* No `warning` token exists yet — kept as a scoped literal until one is added. */
   .banner--warning {
     background: #fef3c7;
     color: #78350f;
     border-color: #f59e0b;
-  }
-  .banner--error {
-    background: #fee2e2;
-    color: #7f1d1d;
-    border-color: #dc2626;
   }
 </style>

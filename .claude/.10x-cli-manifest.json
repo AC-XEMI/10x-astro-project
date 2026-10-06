@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.25.1",
   "manifestVersion": 3,
-  "lastApplied": "2026-10-06T08:01:44.679Z",
-  "lessonId": "m2l5",
+  "lastApplied": "2026-10-06T08:21:13.341Z",
+  "lessonId": "m3l1",
   "course": "10xdevs4",
   "tool": "claude-code",
   "files": {
@@ -1137,7 +1137,7 @@
       "installedManifestHash": "af0beb2ee7f7f2e44a0ae20c7ccc90c1cb34885b68219a3a15a6630156f4c6b7"
     },
     "m3l1": {
-      "appliedAt": "2026-10-06T08:01:04.375Z",
+      "appliedAt": "2026-10-06T08:21:13.341Z",
       "skills": {
         "10x-idea-check": {
           "files": [
@@ -1316,6 +1316,12 @@
         "m1l5-4-store-plan.md"
       ],
       "configs": [],
+      "representation": {
+        "lang": "en",
+        "tool": "claude-code",
+        "courseRules": true,
+        "rules": true
+      },
       "installedReleaseId": "r-369e036bfa63a2c9b525bd6fc5e644639864717354dc5943c23a507ac0232a18",
       "installedManifestHash": "21cc1edd90b227f1d0d950574cc4762e46f5a0ba408e712067f8d58d52c8ee33"
     },
@@ -1507,10 +1513,10 @@
     "path": "CLAUDE.md",
     "begin": "<!-- BEGIN @przeprogramowani/10x-cli -->",
     "end": "<!-- END @przeprogramowani/10x-cli -->",
-    "upstreamHash": "22d20fe04f7820744f8d3ddf83e22fb2738a95764c56b08f0c10491207a436af"
+    "upstreamHash": "64dd32ad11c5a5ae8c576c808bd7d39c5c7642c0b14abab431acc3c2e75f73c4"
   },
   "toolkit": {
     "version": "v2.59.3",
-    "recordedAt": "2026-10-06T08:01:44.760Z"
+    "recordedAt": "2026-10-06T08:21:13.431Z"
   }
 }
