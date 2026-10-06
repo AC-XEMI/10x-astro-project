@@ -462,21 +462,21 @@ Not applicable — no data or schema changes.
 
 #### Automated
 
-- [x] 3.1 `npm run build` succeeds with new kitchen-sink route
-- [x] 3.2 Hardcoded-value scan on all 5 touched files returns 0 matches (excluding documented exception)
+- [x] 3.1 `npm run build` succeeds with new kitchen-sink route — 952d6e3
+- [x] 3.2 Hardcoded-value scan on all 5 touched files returns 0 matches (excluding documented exception) — 952d6e3
 
 #### Manual
 
-- [x] 3.3 All 7 states visible on /dev/kitchen-sink/reports-list without errors
-- [x] 3.4 Desktop + mobile screenshots show no layout jump and no two states rendering identically
+- [x] 3.3 All 7 states visible on /dev/kitchen-sink/reports-list without errors — 952d6e3
+- [x] 3.4 Desktop + mobile screenshots show no layout jump and no two states rendering identically — 952d6e3
 
 ### Phase 4: Make it stick
 
 #### Automated
 
-- [ ] 4.1 CLAUDE.md remains valid markdown
+- [x] 4.1 CLAUDE.md remains valid markdown
 
 #### Manual
 
-- [ ] 4.2 New rule reads clearly, no duplication/contradiction with existing bullets
-- [ ] 4.3 Rule sits outside the toolkit BEGIN/END markers
+- [x] 4.2 New rule reads clearly, no duplication/contradiction with existing bullets
+- [x] 4.3 Rule sits outside the toolkit BEGIN/END markers
