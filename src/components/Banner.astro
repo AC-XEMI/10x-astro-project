@@ -1,5 +1,5 @@
 ---
-type Variant = "info" | "warning" | "error";
+type Variant = "info" | "success" | "warning" | "error";
 
 interface Props {
   variant?: Variant;
@@ -13,6 +13,7 @@ const { variant = "info" } = Astro.props;
     "banner",
     variant === "error" && "border-destructive bg-destructive/10 text-destructive",
     variant === "info" && "border-border bg-accent text-accent-foreground",
+    variant === "success" && "border-success/30 bg-success/10 text-success",
     variant === "warning" && "banner--warning",
   ]}
   role={variant === "error" ? "alert" : "status"}

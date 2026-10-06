@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Search, Trash2 } from "lucide-react";
+import { CircleAlert, FileText, Search, Trash2 } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,49 @@ function formatUploadedAt(value: string) {
   const date = new Date(value);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Polish noun plural: 1 -> one, 2-4 (not 12-14) -> few, else many. */
+function plural(n: number, one: string, few: string, many: string) {
+  if (n === 1) return one;
+  const lastDigit = n % 10;
+  const lastTwo = n % 100;
+  return lastDigit >= 2 && lastDigit <= 4 && (lastTwo < 12 || lastTwo > 14) ? few : many;
+}
+
+/**
+ * What the cascade delete takes with it. row_count = visits (one visit per parsed row),
+ * deviation_count = deviation records; either can be null (not stored), which falls back
+ * to wording without a number rather than a wrong one.
+ */
+function DeleteWarning({ report }: { report: Tables<"reports"> }) {
+  const visits =
+    report.row_count === null
+      ? "wszystkie wizyty"
+      : `${report.row_count} ${plural(report.row_count, "wizyta", "wizyty", "wizyt")}`;
+  const deviations =
+    report.deviation_count === null
+      ? "wszystkie wykryte odstępstwa"
+      : report.deviation_count === 0
+        ? null
+        : `${report.deviation_count} ${plural(report.deviation_count, "wykryte odstępstwo", "wykryte odstępstwa", "wykrytych odstępstw")}`;
+
+  return (
+    <div className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-md p-3 text-sm">
+      <CircleAlert className="mt-0.5 size-4 flex-none" />
+      <span>
+        Razem z raportem znikną wszystkie jego dane: <strong>{visits}</strong>
+        {deviations ? (
+          <>
+            {" "}
+            i <strong>{deviations}</strong>, także te już oznaczone jako sprawdzone.
+          </>
+        ) : (
+          "."
+        )}
+      </span>
+    </div>
+  );
 }
 
 /** null = count not stored (e.g. the count update failed after upload) - shown as unknown, never as "Brak". */
@@ -120,10 +163,11 @@ export default function ReportsList({ reports, page }: Props) {
                 <dt className="font-medium">Nazwa pliku</dt>
                 <dd>{deletingReport.original_filename}</dd>
                 <dt className="font-medium">Data wgrania</dt>
-                <dd>{formatUploadedAt(deletingReport.uploaded_at)}</dd>
+                <dd className="tabular-nums">{formatUploadedAt(deletingReport.uploaded_at)}</dd>
                 <dt className="font-medium">Liczba wierszy</dt>
-                <dd>{deletingReport.row_count ?? "—"}</dd>
+                <dd className="tabular-nums">{deletingReport.row_count ?? "—"}</dd>
               </dl>
+              <DeleteWarning report={deletingReport} />
               <form method="POST" action={`/api/reports/${deletingReport.id}/delete`}>
                 <input type="hidden" name="page" value={page} />
                 <DialogFooter>
@@ -138,7 +182,7 @@ export default function ReportsList({ reports, page }: Props) {
                     Anuluj
                   </Button>
                   <Button type="submit" variant="destructive" className="cursor-pointer">
-                    Tak, usuń
+                    <Trash2 /> Tak, usuń raport
                   </Button>
                 </DialogFooter>
               </form>

@@ -8,6 +8,7 @@ import ReportUpload from "@/components/reports/ReportUpload";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Search, Trash2 } from "lucide-react";
+import { checkRequiredColumns } from "@/lib/services/report-columns";
 import type { Tables } from "@/types";
 
 const sampleReports: Tables<"reports">[] = [
@@ -131,7 +132,26 @@ const sampleReports: Tables<"reports">[] = [
         <!-- 5. Error -->
         <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
           <h2 class="mb-4 text-xl font-bold">5. Błąd (error)</h2>
-          <Banner variant="error">Nie udało się przetworzyć pliku: brak wymaganej kolumny.</Banner>
+          <p class="text-muted-foreground mb-4 text-sm">
+            Karty błędów wgrywania wykrywanych w przeglądarce (za duży plik, zły format, brak wymaganych kolumn), a pod
+            nimi baner dla błędów zwracanych przez serwer (<code>?error=</code>).
+          </p>
+          <div class="space-y-4">
+            <ReportUpload
+              initialError={{ kind: "too_large", fileName: "trasowki-q3-2026.xlsx", size: 8178892 }}
+              client:load
+            />
+            <ReportUpload initialError={{ kind: "bad_format", fileName: "trasowki-wrzesien-2026.pdf" }} client:load />
+            <ReportUpload
+              initialError={{
+                kind: "missing_columns",
+                fileName: "trasowki-wrzesien-2026.xlsx",
+                columns: checkRequiredColumns(["przedstawiciel", "Klient", "Data wizyty", "gps_wlaczony"]),
+              }}
+              client:load
+            />
+            <Banner variant="error">Wiersz 12: nierozpoznana wartość gps_wlaczony (oczekiwano TAK/NIE).</Banner>
+          </div>
         </section>
 
         <!-- 6. Empty -->
