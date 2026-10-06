@@ -18,13 +18,13 @@ const { title = "Kontrola Trasówek" } = Astro.props;
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
     <script is:inline>
-      // Runs before first paint to avoid a light flash: saved choice (ThemeToggle.astro), else OS preference.
+      // Runs before first paint to avoid a light flash: saved choice (ThemeToggle.astro), else light - OS preference is deliberately ignored.
       (function () {
         var theme = null;
         try {
           theme = localStorage.getItem("theme");
         } catch (e) {}
-        var dark = theme ? theme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var dark = theme === "dark";
         document.documentElement.classList.toggle("dark", dark);
         document.documentElement.style.colorScheme = dark ? "dark" : "light";
       })();
