@@ -3,6 +3,7 @@
 // (hidden below md), the page's form/content centered on the right.
 import { CircleAlert, MapPin, Phone } from "lucide-react";
 import Layout from "@/layouts/Layout.astro";
+import ThemeToggle from "@/components/ThemeToggle.astro";
 
 interface Props {
   title: string;
@@ -42,12 +43,13 @@ const { title } = Astro.props;
       <div class="text-xs">Dla kierowników regionów sprzedaży</div>
     </aside>
 
-    <main class="flex flex-col items-center justify-center gap-8 p-6 md:p-10">
+    <main class="relative flex flex-col items-center justify-center gap-8 p-6 md:p-10">
       <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground md:hidden">
         <MapPin className="size-5 text-primary" />
         <span>Kontrola Trasówek</span>
       </a>
       <slot />
+      <ThemeToggle class="absolute top-4 right-4" />
     </main>
   </div>
 </Layout>

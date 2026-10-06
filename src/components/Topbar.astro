@@ -1,5 +1,6 @@
 ---
 import { LogOut, MapPin } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle.astro";
 import { buttonVariants } from "@/components/ui/button";
 
 const { user } = Astro.locals;
@@ -46,6 +47,7 @@ const navLink =
             <LogOut className="size-4" />
           </button>
         </form>
+        <ThemeToggle />
       </div>
     ) : (
       <div class="flex items-center gap-1 text-sm">
@@ -61,6 +63,7 @@ const navLink =
         >
           Zarejestruj się
         </a>
+        <ThemeToggle />
       </div>
     )}
   </div>

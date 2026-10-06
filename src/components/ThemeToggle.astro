@@ -1,0 +1,53 @@
+---
+// Light/dark switch. The initial theme is applied before first paint by the inline script in
+// Layout.astro (same storage key); this button only flips it and remembers the choice.
+import { Moon, Sun } from "lucide-react";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  title="Przełącz motyw"
+  aria-label="Włącz ciemny motyw"
+  class:list={[
+    "inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
+    className,
+  ]}
+>
+  <Moon className="size-4 dark:hidden" />
+  <Sun className="hidden size-4 dark:block" />
+</button>
+
+<script>
+  const STORAGE_KEY = "theme";
+  const root = document.documentElement;
+
+  function syncLabels() {
+    const dark = root.classList.contains("dark");
+    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
+      button.setAttribute("aria-label", dark ? "Włącz jasny motyw" : "Włącz ciemny motyw");
+      button.setAttribute("aria-pressed", String(dark));
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const dark = root.classList.toggle("dark");
+      root.style.colorScheme = dark ? "dark" : "light";
+      try {
+        localStorage.setItem(STORAGE_KEY, dark ? "dark" : "light");
+      } catch {
+        // Storage blocked (private mode etc.) - the theme still switches for this page view.
+      }
+      syncLabels();
+    });
+  });
+
+  syncLabels();
+</script>
