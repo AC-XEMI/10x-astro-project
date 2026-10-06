@@ -3,6 +3,7 @@ import { Check, CheckCheck, ChevronDown, CircleAlert, Download, MapPin, Phone, U
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { buildCsv, downloadBlob } from "@/lib/export-file";
 import { Constants, type Tables } from "@/types";
 import type { DeviationRule } from "@/lib/services/deviation-rules";
 // "xlsx" resolves to the @e965/xlsx npm mirror (see package.json) - same package already used
@@ -130,17 +131,6 @@ function isVisitReviewed(visit: VisitWithDeviations) {
   return visit.deviations.every(isReviewed);
 }
 
-/**
- * Guards against CSV formula injection: source data (e.g. representative_name) is free text
- * from the uploaded file, not system-generated. A leading =/+/-/@/tab/CR is how spreadsheet
- * apps detect a formula in a CSV cell (no type info in the format itself, unlike XLSX), so
- * such values get a leading apostrophe to force plain-text interpretation on open.
- */
-function csvField(value: string) {
-  const guarded = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
-  return /[;"\n]/.test(guarded) ? `"${guarded.replace(/"/g, '""')}"` : guarded;
-}
-
 const EXPORT_HEADERS = [
   "Przedstawiciel",
   "Data wizyty",
@@ -174,12 +164,6 @@ function buildExportRows(visits: VisitWithDeviations[]): string[][] {
   }
 
   return rows;
-}
-
-function buildCsv(rows: string[][]): string {
-  const csvBody = rows.map((row) => row.map(csvField).join(";")).join("\n");
-  const byteOrderMark = String.fromCharCode(0xfeff);
-  return byteOrderMark + csvBody;
 }
 
 function buildXlsx(rows: string[][]): ArrayBuffer {
@@ -348,18 +332,6 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
         ids.forEach((id) => next.delete(id));
         return next;
       });
-    }
-  }
-
-  function downloadBlob(blob: Blob, filename: string) {
-    const url = URL.createObjectURL(blob);
-    try {
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = filename;
-      anchor.click();
-    } finally {
-      URL.revokeObjectURL(url);
     }
   }
 

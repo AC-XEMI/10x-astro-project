@@ -1,0 +1,358 @@
+---
+import { FileText } from "lucide-react";
+import Layout from "@/layouts/Layout.astro";
+import Banner from "@/components/Banner.astro";
+import Topbar from "@/components/Topbar.astro";
+import { buttonVariants } from "@/components/ui/button";
+import DashboardExport from "@/components/dashboard/DashboardExport";
+import RankingTable from "@/components/dashboard/RankingTable";
+import { createClient } from "@/lib/supabase";
+import { plural } from "@/lib/utils";
+import {
+  PERIODS,
+  TREND_MONTHS,
+  computeDashboardStats,
+  formatDelta,
+  monthLowerBound,
+  monthName,
+  monthNameInstrumental,
+  toMonthIndex,
+  type DashboardStats,
+  type DashboardVisit,
+  type PeriodKey,
+} from "@/lib/services/dashboard-stats";
+import type { Tables } from "@/types";
+
+const PAGE_SIZE = 1000; // PostgREST default max rows per request
+
+const periodParam = Astro.url.searchParams.get("okres");
+const period: PeriodKey = periodParam && periodParam in PERIODS ? (periodParam as PeriodKey) : "1m";
+const periodMonths = PERIODS[period];
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let stats: DashboardStats | null = null;
+let recent: (Tables<"reports"> & { unreviewed: number | null })[] = [];
+let loadError = false;
+
+if (supabase) {
+  const [latestResult, recentResult] = await Promise.all([
+    supabase.from("visits").select("visit_date").order("visit_date", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("reports").select("*").order("uploaded_at", { ascending: false }).limit(3),
+  ]);
+
+  if (latestResult.error || recentResult.error) {
+    console.error("Failed to load dashboard:", latestResult.error ?? recentResult.error);
+    loadError = true;
+  } else {
+    if (latestResult.data) {
+      const refMonth = toMonthIndex(latestResult.data.visit_date);
+      // Enough history for both the previous comparison window and the trend chart.
+      const firstMonth = refMonth - Math.max(2 * periodMonths, TREND_MONTHS) + 1;
+      const visits: DashboardVisit[] = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await supabase
+          .from("visits")
+          .select("representative_name, visit_date, deviations(rule, status)")
+          .gte("visit_date", monthLowerBound(firstMonth))
+          .order("id")
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) {
+          console.error("Failed to load dashboard visits:", error);
+          loadError = true;
+          break;
+        }
+        visits.push(...data);
+        if (data.length < PAGE_SIZE) break;
+      }
+      if (!loadError) stats = computeDashboardStats(visits, refMonth, periodMonths);
+    }
+
+    recent = await Promise.all(
+      recentResult.data.map(async (report) => {
+        const { count, error } = await supabase
+          .from("deviations")
+          .select("id, visits!inner(report_id)", { count: "exact", head: true })
+          .eq("status", "unreviewed")
+          .eq("visits.report_id", report.id);
+        if (error) console.error("Failed to count unreviewed deviations:", error);
+        return { ...report, unreviewed: error ? null : count };
+      }),
+    );
+  }
+}
+
+const PERIOD_LABELS: Record<PeriodKey, string> = { "1m": "Ostatni miesiąc", "3m": "3 miesiące", "6m": "6 miesięcy" };
+
+const periodLinks = (Object.keys(PERIODS) as PeriodKey[]).map((key) => ({
+  key,
+  href: key === "1m" ? "/dashboard" : `/dashboard?okres=${key}`,
+  label: PERIOD_LABELS[key],
+}));
+
+let periodLabel = "";
+let comparisonShort = "";
+let comparisonSentence = "";
+if (stats) {
+  const { refMonth } = stats;
+  periodLabel =
+    periodMonths === 1 ? monthName(refMonth) : `${monthName(refMonth - periodMonths + 1)} – ${monthName(refMonth)}`;
+  comparisonShort =
+    periodMonths === 1 ? `vs ${monthName(refMonth - 1).split(" ")[0]}` : `vs poprz. ${periodMonths} mies.`;
+  comparisonSentence =
+    periodMonths === 1
+      ? `porównanie z ${monthNameInstrumental(refMonth - 1)}`
+      : `porównanie z poprzednimi ${periodMonths} ${plural(periodMonths, "miesiącem", "miesiącami", "miesiącami")}`;
+}
+
+const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) * 100) : 0);
+const reviewedPct = stats?.current.deviations
+  ? pct(stats.current.deviations - stats.current.unreviewed, stats.current.deviations)
+  : null;
+const todoTarget = recent.find((r) => r.unreviewed)?.id;
+
+const maxTrend = stats ? Math.max(1, ...stats.trend.map((m) => m.total)) : 1;
+const cleanMonths = stats ? stats.trend.filter((m) => m.hasVisits && m.total === 0) : [];
+const emptyMonths = stats ? stats.trend.filter((m) => !m.hasVisits) : [];
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const legend = [
+  { label: "Brak GPS", className: "bg-primary" },
+  { label: "Telefon", className: "bg-primary/55" },
+  { label: "Trasa", className: "bg-primary/25" },
+];
+
+const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
+  timeZone: "Europe/Warsaw",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+function reportStatus(report: (typeof recent)[number]) {
+  if (report.deviation_count === 0) return "Brak odstępstw";
+  if (report.unreviewed === null) return "—";
+  return report.unreviewed ? `${report.unreviewed} do przeglądu` : "Przejrzany";
+}
+---
+
+<Layout title="Pulpit">
+  <Topbar />
+  <main class="mx-auto max-w-[1100px] space-y-6 p-6">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div class="space-y-1">
+        <h1 class="text-2xl font-semibold tracking-tight">Pulpit</h1>
+        {stats && (
+          <p class="text-sm text-muted-foreground">
+            {stats.ranking.length}{" "}
+            {plural(stats.ranking.length, "przedstawiciel", "przedstawicieli", "przedstawicieli")}
+            {" · "}
+            {periodLabel} · {comparisonSentence}
+          </p>
+        )}
+      </div>
+      {stats && (
+        <div class="flex items-center gap-2">
+          <nav class="flex items-center gap-1 rounded-md border border-border bg-card p-0.5" aria-label="Okres">
+            {periodLinks.map((link) => (
+              <a
+                href={link.href}
+                aria-current={link.key === period ? "page" : undefined}
+                class:list={buttonVariants({ variant: link.key === period ? "secondary" : "ghost", size: "sm" })}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <DashboardExport
+            ranking={stats.ranking}
+            periodLabel={periodLabel}
+            comparisonLabel={comparisonShort}
+            filename={`pulpit-${period}-${monthName(stats.refMonth).replace(" ", "-")}.csv`}
+            client:load
+          />
+        </div>
+      )}
+    </div>
+
+    {loadError && <Banner variant="error">Nie udało się wczytać danych pulpitu. Odśwież stronę.</Banner>}
+
+    {!loadError && !stats && (
+      <div class="space-y-3 rounded-lg border border-border bg-card p-8 text-center">
+        <p class="font-semibold">Brak danych do podsumowania</p>
+        <p class="text-sm text-muted-foreground">
+          Wgraj pierwszy raport, aby zobaczyć ranking przedstawicieli i trendy.
+        </p>
+        <a href="/reports" class:list={buttonVariants({ size: "sm" })}>
+          Przejdź do raportów
+        </a>
+      </div>
+    )}
+
+    {stats && (
+      <>
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div class="space-y-1 rounded-lg border border-border bg-card p-4">
+            <div class="text-sm text-muted-foreground">Wizyty</div>
+            <div class="text-2xl font-semibold tabular-nums">{stats.current.visits}</div>
+            <div class="text-xs text-muted-foreground">
+              {formatDelta(stats.current.visits - stats.previous.visits)} {comparisonShort} ({stats.previous.visits})
+            </div>
+          </div>
+          <div class="space-y-1 rounded-lg border border-border bg-card p-4">
+            <div class="text-sm text-muted-foreground">Odstępstwa</div>
+            <div
+              class:list={["text-2xl font-semibold tabular-nums", stats.current.deviations > 0 && "text-destructive"]}
+            >
+              {stats.current.deviations}
+            </div>
+            <div class="text-xs text-muted-foreground">
+              <span
+                class:list={{ "font-medium text-destructive": stats.current.deviations > stats.previous.deviations }}
+              >
+                {formatDelta(stats.current.deviations - stats.previous.deviations)}
+              </span>{" "}
+              {comparisonShort} · {pct(stats.current.flaggedVisits, stats.current.visits)}% wizyt
+              {stats.previous.visits > 0 && ` (było ${pct(stats.previous.flaggedVisits, stats.previous.visits)}%)`}
+            </div>
+          </div>
+          <div class="space-y-1 rounded-lg border border-border bg-card p-4">
+            <div class="text-sm text-muted-foreground">Przejrzane</div>
+            <div class="text-2xl font-semibold tabular-nums">{reviewedPct === null ? "—" : `${reviewedPct}%`}</div>
+            <div
+              class="h-1.5 overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-label="Przejrzane odstępstwa"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={reviewedPct ?? 0}
+            >
+              <div class="h-full rounded-full bg-primary" style={{ width: `${reviewedPct ?? 0}%` }}></div>
+            </div>
+          </div>
+          <div
+            class:list={[
+              "flex flex-col justify-between gap-2 rounded-lg border bg-card p-4",
+              stats.current.unreviewed > 0 ? "border-destructive" : "border-border",
+            ]}
+          >
+            <div class="space-y-1">
+              <div class="text-sm text-muted-foreground">Czeka na przegląd</div>
+              <div
+                class:list={["text-2xl font-semibold tabular-nums", stats.current.unreviewed > 0 && "text-destructive"]}
+              >
+                {stats.current.unreviewed}
+              </div>
+            </div>
+            <a
+              href={todoTarget ? `/reports/${todoTarget}` : "/reports"}
+              class:list={buttonVariants({ size: "sm", variant: stats.current.unreviewed > 0 ? "default" : "outline" })}
+            >
+              Przejdź do listy
+            </a>
+          </div>
+        </div>
+
+        <div class="space-y-3 rounded-lg border border-border bg-card p-5">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <div class="font-semibold">Ranking przedstawicieli</div>
+            <div class="text-xs text-muted-foreground">{periodLabel} · sortowane wg liczby odstępstw</div>
+          </div>
+          <RankingTable ranking={stats.ranking} comparisonLabel={comparisonShort} />
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <div class="space-y-4 rounded-lg border border-border bg-card p-5">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <div class="font-semibold">Odstępstwa w kolejnych miesiącach</div>
+              <div class="flex items-center gap-3 text-xs text-muted-foreground">
+                {legend.map((item) => (
+                  <span class="flex items-center gap-1">
+                    <span class:list={["size-2 rounded-full", item.className]}></span>
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div class="flex h-[180px] items-end gap-6 px-2">
+              {stats.trend.map((m) => (
+                <div class="flex h-full flex-1 flex-col items-center justify-end gap-2">
+                  <span class:list={["text-xs font-semibold tabular-nums", !m.hasVisits && "text-muted-foreground"]}>
+                    {m.hasVisits ? m.total : "—"}
+                  </span>
+                  {m.hasVisits && (
+                    <div
+                      class:list={[
+                        "flex w-full max-w-14 flex-col gap-0.5 overflow-hidden rounded-md",
+                        m.total === 0 && "bg-muted",
+                      ]}
+                      style={{ height: `${Math.max(2, Math.round((m.total / maxTrend) * 130))}px` }}
+                      aria-label={`${monthName(m.month)}: brak GPS ${m.missing_gps}, telefon ${m.phone_instead_of_visit}, trasa ${m.route_deviation}`}
+                    >
+                      <div class="bg-primary/25" style={{ flex: m.route_deviation }}></div>
+                      <div class="bg-primary/55" style={{ flex: m.phone_instead_of_visit }}></div>
+                      <div class="bg-primary" style={{ flex: m.missing_gps }}></div>
+                    </div>
+                  )}
+                  <span class="text-xs text-muted-foreground">{m.label}</span>
+                </div>
+              ))}
+            </div>
+            {(cleanMonths.length > 0 || emptyMonths.length > 0) && (
+              <p class="text-xs text-muted-foreground">
+                {cleanMonths.length > 0 &&
+                  `${capitalize(cleanMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: wizyty bez wykrytych odstępstw. `}
+                {emptyMonths.length > 0 &&
+                  `${capitalize(emptyMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: brak wgranych wizyt.`}
+              </p>
+            )}
+          </div>
+
+          <div class="space-y-4 rounded-lg border border-border bg-card p-5">
+            <div class="flex items-baseline justify-between">
+              <div class="font-semibold">Ostatnie raporty</div>
+              <a href="/reports" class="text-xs text-primary hover:underline">
+                Wszystkie
+              </a>
+            </div>
+            <div class="space-y-1">
+              {recent.map((report) => (
+                <a
+                  href={`/reports/${report.id}`}
+                  class="flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50"
+                >
+                  <FileText className="size-4 shrink-0 text-muted-foreground" />
+                  <div class="min-w-0 flex-1">
+                    <div class="truncate text-sm font-medium">{report.original_filename}</div>
+                    <div class="text-xs text-muted-foreground tabular-nums">
+                      {dateFormatter.format(new Date(report.uploaded_at))}
+                      {report.row_count !== null &&
+                        ` · ${report.row_count} ${plural(report.row_count, "wiersz", "wiersze", "wierszy")}`}
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div
+                      class:list={[
+                        "text-sm tabular-nums",
+                        report.deviation_count ? "font-semibold text-destructive" : "text-muted-foreground",
+                      ]}
+                    >
+                      {report.deviation_count === null
+                        ? "—"
+                        : report.deviation_count === 0
+                          ? "Brak"
+                          : `${report.deviation_count} ${plural(report.deviation_count, "odstępstwo", "odstępstwa", "odstępstw")}`}
+                    </div>
+                    <div class="text-xs text-muted-foreground">{reportStatus(report)}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
+    )}
+  </main>
+</Layout>

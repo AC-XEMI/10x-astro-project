@@ -1,21 +1,43 @@
 ---
 import { LogOut, MapPin } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 
 const { user } = Astro.locals;
 // Signup collects only email + password, so a display name exists only if one was set in
 // Supabase user_metadata (e.g. via the dashboard); otherwise fall back to the email.
 const metadataName: unknown = user?.user_metadata.full_name ?? user?.user_metadata.name;
 const displayName = typeof metadataName === "string" && metadataName.trim() ? metadataName.trim() : user?.email;
+const NAV = [
+  { href: "/dashboard", label: "Pulpit" },
+  { href: "/reports", label: "Raporty" },
+];
+const { pathname } = Astro.url;
+const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 const navLink =
   "text-muted-foreground hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors";
 ---
 
 <header class="border-b border-border bg-card">
   <div class="mx-auto flex max-w-[1100px] items-center justify-between gap-4 px-6 py-3">
-    <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
-      <MapPin className="size-4 text-primary" />
-      <span>Kontrola Trasówek</span>
-    </a>
+    <div class="flex items-center gap-6">
+      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
+        <MapPin className="size-4 text-primary" />
+        <span>Kontrola Trasówek</span>
+      </a>
+      {user && (
+        <nav class="flex items-center gap-1" aria-label="Nawigacja główna">
+          {NAV.map((item) => (
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              class:list={buttonVariants({ variant: isActive(item.href) ? "secondary" : "ghost", size: "sm" })}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      )}
+    </div>
     {user ? (
       <div class="flex min-w-0 items-center gap-2 text-sm">
         <span class="truncate text-muted-foreground">{displayName}</span>

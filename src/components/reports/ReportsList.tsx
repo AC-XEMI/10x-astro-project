@@ -11,20 +11,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import type { Tables } from "@/types";
+import { plural } from "@/lib/utils";
 
 /** Formats as Y-m-d H:i (e.g. "2026-10-02 14:30"), independent of browser locale. */
 function formatUploadedAt(value: string) {
   const date = new Date(value);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-/** Polish noun plural: 1 -> one, 2-4 (not 12-14) -> few, else many. */
-function plural(n: number, one: string, few: string, many: string) {
-  if (n === 1) return one;
-  const lastDigit = n % 10;
-  const lastTwo = n % 100;
-  return lastDigit >= 2 && lastDigit <= 4 && (lastTwo < 12 || lastTwo > 14) ? few : many;
 }
 
 /**
