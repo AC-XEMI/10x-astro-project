@@ -474,9 +474,9 @@ Not applicable — no data or schema changes.
 
 #### Automated
 
-- [x] 4.1 CLAUDE.md remains valid markdown
+- [x] 4.1 CLAUDE.md remains valid markdown — f908969
 
 #### Manual
 
-- [x] 4.2 New rule reads clearly, no duplication/contradiction with existing bullets
-- [x] 4.3 Rule sits outside the toolkit BEGIN/END markers
+- [x] 4.2 New rule reads clearly, no duplication/contradiction with existing bullets — f908969
+- [x] 4.3 Rule sits outside the toolkit BEGIN/END markers — f908969
