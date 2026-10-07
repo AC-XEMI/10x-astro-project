@@ -527,24 +527,24 @@ Old bookmarked `?error=<text>` links show the generic message.
 
 #### Automated
 
-- [x] 5.1 Type check passes: `npx astro check`
-- [x] 5.2 Lint passes: `npm run lint`
-- [x] 5.3 `/dev/kitchen-sink/reports-list` returns HTTP 200 from the dev server
-- [x] 5.4 `grep -c "<Table" src/pages/dev/kitchen-sink/reports-list.astro` returns 0
-- [x] 5.5 Both screenshots exist and the 390 run reports `sw` = 390
+- [x] 5.1 Type check passes: `npx astro check` — 868c937
+- [x] 5.2 Lint passes: `npm run lint` — 868c937
+- [x] 5.3 `/dev/kitchen-sink/reports-list` returns HTTP 200 from the dev server — 868c937
+- [x] 5.4 `grep -c "<Table" src/pages/dev/kitchen-sink/reports-list.astro` returns 0 — 868c937
+- [x] 5.5 Both screenshots exist and the 390 run reports `sw` = 390 — 868c937
 
 #### Manual
 
-- [x] 5.6 The screenshots show every listed state in light and dark, N/A frames with their reason
+- [x] 5.6 The screenshots show every listed state in light and dark, N/A frames with their reason — 868c937
 
 ### Phase 6: Guard
 
 #### Automated
 
-- [ ] 6.1 `npm run check:ui-tokens` exits 0 and lists the 4 added files
-- [ ] 6.2 `npm run check:ui-tokens` exits non-zero when `bg-slate-100` is temporarily added to `ReportsList.tsx` (revert after)
-- [ ] 6.3 Lint passes: `npm run lint`
+- [x] 6.1 `npm run check:ui-tokens` exits 0 and lists the 4 added files
+- [x] 6.2 `npm run check:ui-tokens` exits non-zero when `bg-slate-100` is temporarily added to `ReportsList.tsx` (revert after)
+- [x] 6.3 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 6.4 The `CLAUDE.md` bullet reads correctly and points at files that exist
+- [x] 6.4 The `CLAUDE.md` bullet reads correctly and points at files that exist

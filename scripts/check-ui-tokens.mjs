@@ -1,4 +1,4 @@
-// UI token check for the dashboard (Pulpit): fails when a dashboard file gains a colour literal,
+// UI token check for the dashboard (Pulpit) and the reports list (Raporty): fails when a dashboard file gains a colour literal,
 // a Tailwind palette class, an unlisted arbitrary value, or an opacity step of --primary used as a
 // colour (series colours must come from the --rule-* tokens via src/lib/rule-series.ts).
 // Patterns follow the /10x-ui hardcoded-value scan; see context/archive/2026-10-07-dashboard-ui-tokens/.
@@ -16,6 +16,11 @@ const files = [
   ...readdirSync(path.join(root, dashboardDir))
     .filter((name) => /\.(astro|tsx)$/.test(name))
     .map((name) => `${dashboardDir}/${name}`),
+  // Reports list (context/changes/reports-list-ui-contract/).
+  "src/pages/reports/index.astro",
+  "src/components/reports/ReportsList.tsx",
+  "src/components/reports/ReportUpload.tsx",
+  "src/components/ui/alert.tsx",
 ];
 
 const PALETTE =
@@ -30,8 +35,9 @@ const RULES = [
     name: "primary opacity step (use a --rule-* token for series)",
     re: /\b(bg|text|border|fill|stroke)-primary\/\d+/g,
   },
-  // Any Tailwind arbitrary value (px, %, fr, var(), calc() ...), not just px/rem.
-  { name: "arbitrary value", re: /[\w-]+-\[[^\]\s]+\]/g },
+  // Any Tailwind arbitrary value (px, %, fr, var(), calc() ...), not just px/rem. A bracket followed by
+  // ":" is a variant selector (has-[>svg]:, data-[slot=x]:), not a value, so it is skipped.
+  { name: "arbitrary value", re: /[\w-]+-\[[^\]\s]+\](?!:)/g },
 ];
 
 // Known, reviewed arbitrary values (context/archive/2026-10-07-dashboard-ui-tokens/research.md, Deferred).
@@ -41,6 +47,17 @@ const ALLOWED_ARBITRARY = new Set([
   "w-[150px]", // ranking "Struktura" column, coupled to MAX_BAR_PX
   "ring-[3px]", // focus ring width, same as src/components/ui/button.tsx
   "grid-cols-[1.4fr_1fr]", // trend chart vs recent reports split, from the Claude Design mockup
+  // Reports list upload card, kept at the Claude Design ("Dialogi i błędy") dimensions on request.
+  "pl-[18px]", // fix-list indent
+  "border-[1.5px]", // dashed drop-zone outline
+  // shadcn alert layout (src/components/ui/alert.tsx), as generated.
+  "grid-cols-[0_1fr]",
+  "grid-cols-[calc(var(--spacing)*4)_1fr]",
+]);
+
+// Opacity steps of --primary that are tints, not data-series colours (series use --rule-*).
+const ALLOWED_PRIMARY_TINTS = new Set([
+  "bg-primary/10", // upload icon chip and drag-over fill from the Claude Design upload card
 ]);
 
 const hits = [];
@@ -50,6 +67,7 @@ for (const file of files) {
     for (const rule of RULES) {
       for (const match of line.matchAll(rule.re)) {
         if (rule.name === "arbitrary value" && ALLOWED_ARBITRARY.has(match[0])) continue;
+        if (rule.name.startsWith("primary opacity step") && ALLOWED_PRIMARY_TINTS.has(match[0])) continue;
         hits.push(`${file}:${index + 1}  ${rule.name}: ${match[0]}`);
       }
     }
