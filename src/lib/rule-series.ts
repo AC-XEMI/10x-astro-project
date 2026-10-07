@@ -3,7 +3,7 @@ import type { DeviationRule } from "@/lib/services/deviation-rules";
 /**
  * Single source for how each deviation rule is drawn as a data series (dashboard legend,
  * trend chart segments, ranking structure bar). Colours are the --rule-* tokens in
- * src/styles/global.css (values and contrast: context/changes/dashboard-ui-tokens/token-source.md).
+ * src/styles/global.css (values and contrast: context/archive/2026-10-07-dashboard-ui-tokens/token-source.md).
  * Class names stay full literals so Tailwind's scanner generates them.
  */
 export const RULE_SERIES: Record<DeviationRule, { label: string; className: string }> = {

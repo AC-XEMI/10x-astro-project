@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 // Density tightened from shadcn defaults (py-6/px-6/gap-6) to match the pre-Card dashboard
-// spacing - see context/changes/dashboard-ui-tokens (phase 3 feedback).
+// spacing - see context/archive/2026-10-07-dashboard-ui-tokens (phase 3 feedback).
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

@@ -1,7 +1,7 @@
 // UI token check for the dashboard (Pulpit): fails when a dashboard file gains a colour literal,
 // a Tailwind palette class, an unlisted arbitrary value, or an opacity step of --primary used as a
 // colour (series colours must come from the --rule-* tokens via src/lib/rule-series.ts).
-// Patterns follow the /10x-ui hardcoded-value scan; see context/changes/dashboard-ui-tokens/.
+// Patterns follow the /10x-ui hardcoded-value scan; see context/archive/2026-10-07-dashboard-ui-tokens/.
 // Zero dependencies. Not wired into CI or lint-staged - run with `npm run check:ui-tokens`.
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -34,7 +34,7 @@ const RULES = [
   { name: "arbitrary value", re: /[\w-]+-\[[^\]\s]+\]/g },
 ];
 
-// Known, reviewed arbitrary values (context/changes/dashboard-ui-tokens/research.md, Deferred).
+// Known, reviewed arbitrary values (context/archive/2026-10-07-dashboard-ui-tokens/research.md, Deferred).
 const ALLOWED_ARBITRARY = new Set([
   "max-w-[1100px]", // page width shared by 5 views - layout change, not this view's
   "h-[180px]", // trend chart height, coupled to the 130px max bar
