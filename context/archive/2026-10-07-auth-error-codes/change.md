@@ -1,10 +1,10 @@
 ---
 change_id: auth-error-codes
 title: Auth errors travel as codes, not free text
-status: implemented
+status: archived
 created: 2026-10-07
 updated: 2026-10-07
-archived_at: null
+archived_at: 2026-10-07T20:18:08Z
 ---
 
 ## Notes
