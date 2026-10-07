@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { Check, CircleAlert, Download, FileText, RotateCw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +11,9 @@ import { checkRequiredColumns, REQUIRED_COLUMNS, type ColumnCheck } from "@/lib/
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = [".csv", ".xlsx"];
 const TEMPLATE_URL = "/wzor-raportu.xlsx";
+
+/** Visible focus for elements that only receive programmatic focus (tabIndex={-1}). */
+const FOCUS_TARGET_CLASS = "rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
 export type UploadError =
   | { kind: "too_large"; fileName: string; size: number }
@@ -95,23 +98,27 @@ function columnNote(column: ColumnCheck) {
 
 function ErrorCard({
   title,
+  titleRef,
   fileName,
   children,
   footer,
 }: {
   title: string;
+  titleRef: Ref<HTMLDivElement>;
   fileName?: string;
   children?: ReactNode;
   footer: ReactNode;
 }) {
   return (
-    <Card className="border-destructive px-4" role="alert">
+    <Card className="border-destructive gap-4 rounded-lg p-5 shadow-none" role="alert">
       <div className="flex items-start gap-3">
         <div className="bg-destructive/10 text-destructive flex size-9 flex-none items-center justify-center rounded-full">
           <CircleAlert className="size-5" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
-          <div className="font-semibold">{title}</div>
+          <div ref={titleRef} tabIndex={-1} className={cn("font-semibold", FOCUS_TARGET_CLASS)}>
+            {title}
+          </div>
           {fileName && (
             <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-sm">
               <FileText className="size-4 flex-none" />
@@ -130,7 +137,7 @@ function FixList({ heading, children }: { heading: string; children: ReactNode }
   return (
     <div className="space-y-2 text-sm">
       <div className="font-medium">{heading}</div>
-      <ul className="text-muted-foreground list-disc space-y-1 pl-5">{children}</ul>
+      <ul className="text-muted-foreground list-disc space-y-1 pl-[18px]">{children}</ul>
     </div>
   );
 }
@@ -147,6 +154,34 @@ export default function ReportUpload({ initialError }: Props) {
   const lastFileRef = useRef<File | null>(null);
   const [state, setState] = useState<UploadState>({ kind: "idle", error: initialError });
   const [dragging, setDragging] = useState(false);
+
+  // Focus targets, so focus never falls to <body> when the card swaps its content.
+  const statusRef = useRef<HTMLDivElement>(null);
+  const errorTitleRef = useRef<HTMLDivElement>(null);
+  const uploadButtonRef = useRef<HTMLButtonElement>(null);
+  // State seen by the previous effect run; null until the first render has been committed.
+  const previousStateRef = useRef<UploadState | null>(null);
+
+  useEffect(() => {
+    const previous = previousStateRef.current;
+    previousStateRef.current = state;
+    // Initial render (idle on page load, or initialError in the kitchen sink): don't steal focus.
+    if (previous === null) return;
+    if (state.kind !== "idle") {
+      // Entering progress from idle, or a stage change removed the focused control (Anuluj).
+      if (previous.kind === "idle" || (previous.kind !== state.kind && document.activeElement === document.body)) {
+        statusRef.current?.focus();
+      }
+      return;
+    }
+    const previousError = previous.kind === "idle" ? previous.error : undefined;
+    if (state.error) {
+      if (state.error !== previousError) errorTitleRef.current?.focus();
+    } else if (previous.kind !== "idle" || previousError) {
+      // Error dismissed ("Zamknij") or upload cancelled: back to "Wgraj raport".
+      uploadButtonRef.current?.focus();
+    }
+  }, [state]);
 
   function pickFile() {
     inputRef.current?.click();
@@ -255,8 +290,14 @@ export default function ReportUpload({ initialError }: Props) {
     const percent =
       state.kind === "uploading" ? (state.total > 0 ? Math.round((state.loaded / state.total) * 100) : 0) : 100;
     const isUploading = state.kind === "uploading";
+    const valueText =
+      state.kind === "uploading"
+        ? `Wysyłanie ${percent}%`
+        : state.kind === "checking"
+          ? "Sprawdzanie kolumn"
+          : "Przetwarzanie";
     return (
-      <Card className="flex-row items-center gap-4 px-4">
+      <Card className="flex-row items-center gap-6 rounded-lg p-6 shadow-none">
         <div className="bg-primary/10 text-primary flex size-11 flex-none items-center justify-center rounded-full">
           <FileText className="size-5" />
         </div>
@@ -278,13 +319,23 @@ export default function ReportUpload({ initialError }: Props) {
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={isUploading ? percent : undefined}
+            aria-valuetext={valueText}
           >
             <div
-              className={cn("bg-primary h-full rounded-full transition-all", state.kind === "checking" && "opacity-40")}
+              className={cn(
+                "bg-primary h-full rounded-full transition-all",
+                !isUploading && "animate-pulse motion-reduce:animate-none",
+              )}
               style={{ width: `${percent}%` }}
             />
           </div>
-          <div className="text-muted-foreground text-xs">
+          <div
+            ref={statusRef}
+            tabIndex={-1}
+            role="status"
+            aria-live="polite"
+            className={cn("text-muted-foreground text-xs", FOCUS_TARGET_CLASS)}
+          >
             {isUploading
               ? "Wgrywanie… Po zakończeniu sprawdzimy wiersze pod kątem odstępstw."
               : state.kind === "checking"
@@ -313,6 +364,7 @@ export default function ReportUpload({ initialError }: Props) {
     return (
       <>
         <ErrorCard
+          titleRef={errorTitleRef}
           title={`Plik jest za duży: ${formatSize(error.size)} (limit 5 MB)`}
           fileName={error.fileName}
           footer={pickAnotherFooter("Wybierz inny plik")}
@@ -333,6 +385,7 @@ export default function ReportUpload({ initialError }: Props) {
     return (
       <>
         <ErrorCard
+          titleRef={errorTitleRef}
           title={extension ? `Nieobsługiwany format pliku: ${extension}` : "Nieobsługiwany format pliku"}
           fileName={error.fileName}
           footer={pickAnotherFooter("Wybierz inny plik")}
@@ -355,6 +408,7 @@ export default function ReportUpload({ initialError }: Props) {
     return (
       <>
         <ErrorCard
+          titleRef={errorTitleRef}
           title={reportErrorMessage(error.code)}
           fileName={error.fileName}
           footer={pickAnotherFooter("Wybierz inny plik")}
@@ -370,6 +424,7 @@ export default function ReportUpload({ initialError }: Props) {
     return (
       <>
         <ErrorCard
+          titleRef={errorTitleRef}
           title="Nie udało się wgrać pliku"
           fileName={error.fileName}
           footer={
@@ -381,7 +436,7 @@ export default function ReportUpload({ initialError }: Props) {
             </div>
           }
         >
-          <p className="text-muted-foreground text-sm">Sprawdź połączenie z internetem i spróbuj ponownie.</p>
+          <p className="text-muted-foreground text-sm">Sprawdź połączenie i spróbuj ponownie.</p>
         </ErrorCard>
         {fileInput}
       </>
@@ -393,6 +448,7 @@ export default function ReportUpload({ initialError }: Props) {
     return (
       <>
         <ErrorCard
+          titleRef={errorTitleRef}
           title={`Brakuje ${missingCount} z ${error.columns.length} wymaganych kolumn`}
           fileName={error.fileName}
           footer={
@@ -427,7 +483,7 @@ export default function ReportUpload({ initialError }: Props) {
                 </span>
                 <code
                   className={cn(
-                    "w-40 flex-none font-mono",
+                    "w-[150px] flex-none font-mono",
                     column.found ? "text-muted-foreground" : "text-destructive font-medium",
                   )}
                 >
@@ -448,7 +504,7 @@ export default function ReportUpload({ initialError }: Props) {
   return (
     <div
       className={cn(
-        "bg-card border-muted-foreground flex flex-wrap items-center justify-between gap-6 rounded-xl border-2 border-dashed p-4 transition-colors",
+        "bg-card border-muted-foreground flex flex-wrap items-center justify-between gap-6 rounded-lg border-[1.5px] border-dashed p-6 transition-colors",
         dragging && "border-primary bg-primary/10",
       )}
       onDragOver={(event) => {
@@ -475,7 +531,7 @@ export default function ReportUpload({ initialError }: Props) {
           <div className="text-muted-foreground text-sm">CSV lub XLSX · maks. 5 MB</div>
         </div>
       </div>
-      <Button type="button" onClick={pickFile}>
+      <Button ref={uploadButtonRef} type="button" onClick={pickFile}>
         <Upload /> Wgraj raport
       </Button>
       {fileInput}

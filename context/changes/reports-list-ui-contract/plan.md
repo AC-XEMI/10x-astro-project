@@ -497,31 +497,31 @@ Old bookmarked `?error=<text>` links show the generic message.
 
 #### Automated
 
-- [x] 3.1 Type check passes: `npx astro check`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 `grep -nE "rounded-lg border" src/pages/reports/index.astro src/components/reports/ReportUpload.tsx` returns nothing
-- [x] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/pages/reports/index.astro src/components/reports/ReportUpload.tsx src/components/reports/ReportsList.tsx` lists only `max-w-[1100px]` (and `ring-[3px]` if used)
-- [x] 3.5 `grep -n "<Banner" src/pages/reports/index.astro` returns nothing
+- [x] 3.1 Type check passes: `npx astro check` — 136da36
+- [x] 3.2 Lint passes: `npm run lint` — 136da36
+- [x] 3.3 `grep -nE "rounded-lg border" src/pages/reports/index.astro src/components/reports/ReportUpload.tsx` returns nothing — 136da36
+- [x] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/pages/reports/index.astro src/components/reports/ReportUpload.tsx src/components/reports/ReportsList.tsx` lists only `max-w-[1100px]` (and `ring-[3px]` if used) — 136da36
+- [x] 3.5 `grep -n "<Banner" src/pages/reports/index.astro` returns nothing — 136da36
 
 #### Manual
 
-- [x] 3.6 Uploading a file with a bad row shows "Wiersz N: …" inside the upload card with no page reload
-- [x] 3.7 `/reports?page=99` lands on the last existing page; deleting the only report on the last page lands on the new last page with the success message
-- [x] 3.8 Pagination shows "Strona X z Y" and both links take keyboard focus with the ring
-- [x] 3.9 The drop zone's dashed border is clearly visible in light and dark
+- [x] 3.6 Uploading a file with a bad row shows "Wiersz N: …" inside the upload card with no page reload — 136da36
+- [x] 3.7 `/reports?page=99` lands on the last existing page; deleting the only report on the last page lands on the new last page with the success message — 136da36
+- [x] 3.8 Pagination shows "Strona X z Y" and both links take keyboard focus with the ring — 136da36
+- [x] 3.9 The drop zone's dashed border is clearly visible in light and dark — 136da36
 
 ### Phase 4: Upload states and focus
 
 #### Automated
 
-- [ ] 4.1 Type check passes: `npx astro check`
-- [ ] 4.2 Lint passes: `npm run lint`
-- [ ] 4.3 `grep -c "opacity-40" src/components/reports/ReportUpload.tsx` returns 0 and `grep -c 'role="status"' src/components/reports/ReportUpload.tsx` returns at least 1
+- [x] 4.1 Type check passes: `npx astro check`
+- [x] 4.2 Lint passes: `npm run lint`
+- [x] 4.3 `grep -c "opacity-40" src/components/reports/ReportUpload.tsx` returns 0 and `grep -c 'role="status"' src/components/reports/ReportUpload.tsx` returns at least 1
 
 #### Manual
 
-- [ ] 4.4 Keyboard only: after "Wgraj raport" focus is on the status; after an error on its title; after "Zamknij" on "Wgraj raport"
-- [ ] 4.5 During "Sprawdzanie kolumn" and "Przetwarzanie" the bar visibly animates
+- [x] 4.4 Keyboard only: after "Wgraj raport" focus is on the status; after an error on its title; after "Zamknij" on "Wgraj raport"
+- [x] 4.5 During "Sprawdzanie kolumn" and "Przetwarzanie" the bar visibly animates
 
 ### Phase 5: Kitchen sink and visual gate
 
