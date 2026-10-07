@@ -329,6 +329,14 @@ Visible change limited to dark mode: primary fills become lighter with dark text
 - Card-with-design-dimensions precedent: `context/archive/2026-10-07-reports-list-ui-contract/`
 - Wording rule: `CLAUDE.md:177`
 
+## Deviations during implementation
+
+Each was approved by the user during implementation; Progress rows were not renamed.
+
+- **Phase 2 — mobile navigation (user request):** instead of the planned always-visible wrapping nav, below `md` the header keeps one row (logo · theme toggle · menu button) and the four section links plus the auth links sit in a toggled panel (`aria-expanded` / `aria-controls`, closes on Esc with focus back on the button, on link click and when the viewport grows to `md`). Criterion 2.5 ("no `hidden md:flex`") is satisfied literally only — the desktop nav still uses `hidden … md:flex`, and phones reach the same links through the menu. Criterion 2.6 was checked as "same words, plus one duplicated block of menu links in the hidden panel".
+- **Phase 3:** six full landing renders are too tall for a 390px Chrome capture, so the kitchen sink has `?compact=1` (frames clipped to header + menu + hero); the full mobile layout is the real `/` in `landing-390.png`. A dev-only `menuOpen` prop was added next to `user` to render the open menu.
+- **Phase 4:** `check:ui-tokens` tint allowance became "class → list of files" so `bg-primary/10` is allowed in the upload card and the landing, still flagged on the dashboard.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.
@@ -366,23 +374,23 @@ Visible change limited to dark mode: primary fills become lighter with dark text
 
 #### Automated
 
-- [x] 3.1 Type check passes: `npx astro check`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 `/dev/kitchen-sink/landing` returns HTTP 200
-- [x] 3.4 The three screenshots exist and the 390 runs report `sw` = 390
+- [x] 3.1 Type check passes: `npx astro check` — 573b032
+- [x] 3.2 Lint passes: `npm run lint` — 573b032
+- [x] 3.3 `/dev/kitchen-sink/landing` returns HTTP 200 — 573b032
+- [x] 3.4 The three screenshots exist and the 390 runs report `sw` = 390 — 573b032
 
 #### Manual
 
-- [x] 3.5 The screenshots show logged-out and logged-in variants in light and dark, and the N/A cells with their reasons
+- [x] 3.5 The screenshots show logged-out and logged-in variants in light and dark, and the N/A cells with their reasons — 573b032
 
 ### Phase 4: Guard
 
 #### Automated
 
-- [ ] 4.1 `npm run check:ui-tokens` exits 0 and lists `src/components/Welcome.astro`
-- [ ] 4.2 `npm run check:ui-tokens` exits non-zero when `text-indigo-600` is temporarily added to `Welcome.astro` (revert after)
-- [ ] 4.3 Lint passes: `npm run lint`
+- [x] 4.1 `npm run check:ui-tokens` exits 0 and lists `src/components/Welcome.astro`
+- [x] 4.2 `npm run check:ui-tokens` exits non-zero when `text-indigo-600` is temporarily added to `Welcome.astro` (revert after)
+- [x] 4.3 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 4.4 The CLAUDE.md bullet reads correctly and points at files that exist
+- [x] 4.4 The CLAUDE.md bullet reads correctly and points at files that exist

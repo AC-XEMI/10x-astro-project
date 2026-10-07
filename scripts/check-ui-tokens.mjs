@@ -21,6 +21,8 @@ const files = [
   "src/components/reports/ReportsList.tsx",
   "src/components/reports/ReportUpload.tsx",
   "src/components/ui/alert.tsx",
+  // Landing page (context/changes/landing-ui-contract/).
+  "src/components/Welcome.astro",
 ];
 
 const PALETTE =
@@ -53,13 +55,16 @@ const ALLOWED_ARBITRARY = new Set([
   // shadcn alert layout (src/components/ui/alert.tsx), as generated.
   "grid-cols-[0_1fr]",
   "grid-cols-[calc(var(--spacing)*4)_1fr]",
+  // Landing headline from the Claude Design file (no Tailwind scale equivalent).
+  "text-[44px]",
+  "leading-[1.1]",
 ]);
 
 // Opacity steps of --primary that are tints, not data-series colours (series use --rule-*).
 // Keyed by file, so the dashboard keeps the strict "no primary/NN" rule for its series colours.
 const ALLOWED_PRIMARY_TINTS = new Map([
-  // upload icon chip and drag-over fill from the Claude Design upload card
-  ["bg-primary/10", "src/components/reports/ReportUpload.tsx"],
+  // upload icon chip / drag-over fill (Claude Design upload card) and landing feature icon chips
+  ["bg-primary/10", ["src/components/reports/ReportUpload.tsx", "src/components/Welcome.astro"]],
 ]);
 
 const hits = [];
@@ -69,7 +74,8 @@ for (const file of files) {
     for (const rule of RULES) {
       for (const match of line.matchAll(rule.re)) {
         if (rule.name === "arbitrary value" && ALLOWED_ARBITRARY.has(match[0])) continue;
-        if (rule.name.startsWith("primary opacity step") && ALLOWED_PRIMARY_TINTS.get(match[0]) === file) continue;
+        if (rule.name.startsWith("primary opacity step") && ALLOWED_PRIMARY_TINTS.get(match[0])?.includes(file))
+          continue;
         hits.push(`${file}:${index + 1}  ${rule.name}: ${match[0]}`);
       }
     }
