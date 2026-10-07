@@ -1,9 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
 import ReportsList from "@/components/reports/ReportsList";
 import ReportUpload from "@/components/reports/ReportUpload";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase";
 import { reportErrorMessage } from "@/lib/report-errors";
 import type { Tables } from "@/types";
@@ -18,6 +20,7 @@ const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let reports: Tables<"reports">[] = [];
 let count: number | null = null;
+let loadError = false;
 
 if (supabase) {
   const {
@@ -29,13 +32,38 @@ if (supabase) {
     .select("*", { count: "exact" })
     .order("uploaded_at", { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-  if (fetchError) {
+  if (fetchError?.code === "PGRST103") {
+    // Offset past the last row: PostgREST answers 416 and supabase-js drops the count, so ask
+    // for the count alone - the out-of-range redirect below needs it.
+    const { error: countError, count: totalCount } = await supabase
+      .from("reports")
+      .select("*", { count: "exact", head: true });
+    if (countError) {
+      console.error("Failed to count reports:", countError);
+      loadError = true;
+    } else {
+      count = totalCount;
+    }
+  } else if (fetchError) {
     console.error("Failed to fetch reports list:", fetchError);
+    loadError = true;
   } else {
     reports = data;
     count = fetchCount;
   }
 }
+
+const lastPage = count === null ? 1 : Math.max(1, Math.ceil(count / PAGE_SIZE));
+
+if (count !== null && page > lastPage) {
+  const params = new URLSearchParams();
+  if (lastPage > 1) params.set("page", String(lastPage));
+  if (deleted) params.set("deleted", "1");
+  const query = params.toString();
+  return Astro.redirect(query ? `/reports?${query}` : "/reports");
+}
+
+const paginationLink = buttonVariants({ variant: "outline", size: "sm" });
 ---
 
 <Layout title="Raporty">
@@ -48,33 +76,52 @@ if (supabase) {
       </p>
     </div>
 
-    {deleted && <Banner variant="success">Raport został usunięty.</Banner>}
-    {error && <Banner variant="error">{reportErrorMessage(error)}</Banner>}
+    {deleted && (
+      <Alert variant="success" role="status">
+        <AlertDescription className="text-current">Raport został usunięty.</AlertDescription>
+      </Alert>
+    )}
+    {error && (
+      <Alert variant="destructive">
+        <AlertDescription className="text-current">{reportErrorMessage(error)}</AlertDescription>
+      </Alert>
+    )}
 
     <div>
       <ReportUpload client:load />
     </div>
 
-    <div class="rounded-lg border border-border bg-card p-4">
-      <ReportsList reports={reports} page={page} client:load />
-      {count !== null && (page > 1 || page * PAGE_SIZE < count) && (
-        <div class="mt-4 flex justify-between text-sm">
-          {page > 1 ? (
-            <a href={`/reports?page=${page - 1}`} class="text-primary hover:underline">
-              Poprzednia
-            </a>
-          ) : (
-            <span />
-          )}
-          {page * PAGE_SIZE < count ? (
-            <a href={`/reports?page=${page + 1}`} class="text-primary hover:underline">
-              Następna
-            </a>
-          ) : (
-            <span />
-          )}
-        </div>
-      )}
-    </div>
+    {loadError ? (
+      <Alert variant="destructive">
+        <AlertDescription className="text-current">
+          Nie udało się wczytać listy raportów. Odśwież stronę.
+        </AlertDescription>
+      </Alert>
+    ) : (
+      <Card>
+        <CardContent>
+          <ReportsList reports={reports} page={page} client:load />
+        </CardContent>
+        {count !== null && lastPage > 1 && (
+          <CardFooter className="justify-between gap-4 text-sm">
+            {page > 1 ? (
+              <a href={`/reports?page=${page - 1}`} class:list={paginationLink}>
+                Poprzednia
+              </a>
+            ) : (
+              <span />
+            )}
+            <span class="text-muted-foreground tabular-nums">{`Strona ${page} z ${lastPage}`}</span>
+            {page < lastPage ? (
+              <a href={`/reports?page=${page + 1}`} class:list={paginationLink}>
+                Następna
+              </a>
+            ) : (
+              <span />
+            )}
+          </CardFooter>
+        )}
+      </Card>
+    )}
   </main>
 </Layout>

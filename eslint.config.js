@@ -67,6 +67,10 @@ const astroConfig = defineConfig({
     "astro/no-set-html-directive": "error",
     "astro/no-unused-css-selector": "warn",
     "astro/prefer-class-list-directive": "warn",
+    // Astro frontmatter allows a top-level `return Astro.redirect(...)`; the `returns` sub-check
+    // assumes every return has an enclosing function and crashes ESLint on it. Everything else
+    // in the rule stays on for .astro files.
+    "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: { attributes: false, returns: false } }],
   },
 });
 

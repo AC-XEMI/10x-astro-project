@@ -481,34 +481,34 @@ Old bookmarked `?error=<text>` links show the generic message.
 
 #### Automated
 
-- [x] 2.1 Type check passes: `npx astro check`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 `grep -nE "encodeURIComponent\([^)]*\.message" src/pages/api/reports/upload.ts "src/pages/api/reports/[id]/delete.ts"` returns nothing
-- [x] 2.4 `grep -n getHours src/components/reports/ReportsList.tsx "src/pages/reports/[id].astro" src/components/dashboard/DashboardView.astro` returns nothing
-- [x] 2.5 A Node one-off run of `formatDateTime` returns `02.10.2026, 14:30` for `2026-10-02T12:30:00Z` and `16.01.2026, 00:30` for `2026-01-15T23:30:00Z`
-- [x] 2.6 `npm run check:ui-tokens` still passes
+- [x] 2.1 Type check passes: `npx astro check` — 208a957
+- [x] 2.2 Lint passes: `npm run lint` — 208a957
+- [x] 2.3 `grep -nE "encodeURIComponent\([^)]*\.message" src/pages/api/reports/upload.ts "src/pages/api/reports/[id]/delete.ts"` returns nothing — 208a957
+- [x] 2.4 `grep -n getHours src/components/reports/ReportsList.tsx "src/pages/reports/[id].astro" src/components/dashboard/DashboardView.astro` returns nothing — 208a957
+- [x] 2.5 A Node one-off run of `formatDateTime` returns `02.10.2026, 14:30` for `2026-10-02T12:30:00Z` and `16.01.2026, 00:30` for `2026-01-15T23:30:00Z` — 208a957
+- [x] 2.6 `npm run check:ui-tokens` still passes — 208a957
 
 #### Manual
 
-- [x] 2.7 One report shows the same upload date and time on the list, its details page and the dashboard
-- [x] 2.8 `/reports?error=dowolny tekst` shows the generic message, not the text
+- [x] 2.7 One report shows the same upload date and time on the list, its details page and the dashboard — 208a957
+- [x] 2.8 `/reports?error=dowolny tekst` shows the generic message, not the text — 208a957
 
 ### Phase 3: The view on the contract
 
 #### Automated
 
-- [ ] 3.1 Type check passes: `npx astro check`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 `grep -nE "rounded-lg border" src/pages/reports/index.astro src/components/reports/ReportUpload.tsx` returns nothing
-- [ ] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/pages/reports/index.astro src/components/reports/ReportUpload.tsx src/components/reports/ReportsList.tsx` lists only `max-w-[1100px]` (and `ring-[3px]` if used)
-- [ ] 3.5 `grep -n "<Banner" src/pages/reports/index.astro` returns nothing
+- [x] 3.1 Type check passes: `npx astro check`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 `grep -nE "rounded-lg border" src/pages/reports/index.astro src/components/reports/ReportUpload.tsx` returns nothing
+- [x] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/pages/reports/index.astro src/components/reports/ReportUpload.tsx src/components/reports/ReportsList.tsx` lists only `max-w-[1100px]` (and `ring-[3px]` if used)
+- [x] 3.5 `grep -n "<Banner" src/pages/reports/index.astro` returns nothing
 
 #### Manual
 
-- [ ] 3.6 Uploading a file with a bad row shows "Wiersz N: …" inside the upload card with no page reload
-- [ ] 3.7 `/reports?page=99` lands on the last existing page; deleting the only report on the last page lands on the new last page with the success message
-- [ ] 3.8 Pagination shows "Strona X z Y" and both links take keyboard focus with the ring
-- [ ] 3.9 The drop zone's dashed border is clearly visible in light and dark
+- [x] 3.6 Uploading a file with a bad row shows "Wiersz N: …" inside the upload card with no page reload
+- [x] 3.7 `/reports?page=99` lands on the last existing page; deleting the only report on the last page lands on the new last page with the success message
+- [x] 3.8 Pagination shows "Strona X z Y" and both links take keyboard focus with the ring
+- [x] 3.9 The drop zone's dashed border is clearly visible in light and dark
 
 ### Phase 4: Upload states and focus
 

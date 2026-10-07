@@ -1,6 +1,8 @@
 import { useRef, useState, type ReactNode } from "react";
-import { Check, CircleAlert, Download, FileText, Upload, X } from "lucide-react";
+import { Check, CircleAlert, Download, FileText, RotateCw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { reportErrorMessage } from "@/lib/report-errors";
 import { cn } from "@/lib/utils";
 import { checkRequiredColumns, REQUIRED_COLUMNS, type ColumnCheck } from "@/lib/services/report-columns";
 
@@ -14,7 +16,9 @@ export type UploadError =
   | { kind: "too_large"; fileName: string; size: number }
   | { kind: "bad_format"; fileName: string }
   | { kind: "missing_columns"; fileName: string; columns: ColumnCheck[] }
-  | { kind: "network" };
+  // The endpoint redirected to /reports?error=<code>[&detail=…]; shown here instead of navigating.
+  | { kind: "server"; code: string; detail?: string; fileName?: string }
+  | { kind: "network"; fileName?: string };
 
 type UploadState =
   | { kind: "idle"; error?: UploadError }
@@ -96,27 +100,29 @@ function ErrorCard({
   footer,
 }: {
   title: string;
-  fileName: string;
-  children: ReactNode;
+  fileName?: string;
+  children?: ReactNode;
   footer: ReactNode;
 }) {
   return (
-    <div className="border-destructive bg-card space-y-4 rounded-lg border p-5" role="alert">
+    <Card className="border-destructive px-4" role="alert">
       <div className="flex items-start gap-3">
         <div className="bg-destructive/10 text-destructive flex size-9 flex-none items-center justify-center rounded-full">
           <CircleAlert className="size-5" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
           <div className="font-semibold">{title}</div>
-          <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-sm">
-            <FileText className="size-4 flex-none" />
-            <span className="truncate">{fileName}</span>
-          </div>
+          {fileName && (
+            <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-sm">
+              <FileText className="size-4 flex-none" />
+              <span className="truncate">{fileName}</span>
+            </div>
+          )}
         </div>
       </div>
       {children}
       {footer}
-    </div>
+    </Card>
   );
 }
 
@@ -124,7 +130,7 @@ function FixList({ heading, children }: { heading: string; children: ReactNode }
   return (
     <div className="space-y-2 text-sm">
       <div className="font-medium">{heading}</div>
-      <ul className="text-muted-foreground list-disc space-y-1 pl-[18px]">{children}</ul>
+      <ul className="text-muted-foreground list-disc space-y-1 pl-5">{children}</ul>
     </div>
   );
 }
@@ -137,6 +143,8 @@ interface Props {
 export default function ReportUpload({ initialError }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
+  // The file of the last attempt, so a network failure can be retried without picking it again.
+  const lastFileRef = useRef<File | null>(null);
   const [state, setState] = useState<UploadState>({ kind: "idle", error: initialError });
   const [dragging, setDragging] = useState(false);
 
@@ -148,7 +156,12 @@ export default function ReportUpload({ initialError }: Props) {
     setState({ kind: "idle" });
   }
 
+  function retryUpload() {
+    if (lastFileRef.current) void startUpload(lastFileRef.current);
+  }
+
   async function startUpload(file: File) {
+    lastFileRef.current = file;
     const error = validate(file);
     if (error) {
       setState({ kind: "idle", error });
@@ -179,12 +192,23 @@ export default function ReportUpload({ initialError }: Props) {
     };
     // The endpoint answers with a redirect (report page on success, /reports?error=… on
     // failure); XHR follows it, so responseURL is where a plain form POST would have landed.
+    // A failure redirect is shown in this card instead of reloading the page.
     xhr.onload = () => {
+      const target = xhr.responseURL ? new URL(xhr.responseURL) : null;
+      const code = target?.pathname === "/reports" ? target.searchParams.get("error") : null;
+      if (target && code !== null) {
+        xhrRef.current = null;
+        setState({
+          kind: "idle",
+          error: { kind: "server", code, detail: target.searchParams.get("detail") ?? undefined, fileName: file.name },
+        });
+        return;
+      }
       window.location.assign(xhr.responseURL || "/reports");
     };
     xhr.onerror = () => {
       xhrRef.current = null;
-      setState({ kind: "idle", error: { kind: "network" } });
+      setState({ kind: "idle", error: { kind: "network", fileName: file.name } });
     };
     xhr.onabort = () => {
       xhrRef.current = null;
@@ -232,7 +256,7 @@ export default function ReportUpload({ initialError }: Props) {
       state.kind === "uploading" ? (state.total > 0 ? Math.round((state.loaded / state.total) * 100) : 0) : 100;
     const isUploading = state.kind === "uploading";
     return (
-      <div className="bg-card flex items-center gap-6 rounded-lg border p-6">
+      <Card className="flex-row items-center gap-4 px-4">
         <div className="bg-primary/10 text-primary flex size-11 flex-none items-center justify-center rounded-full">
           <FileText className="size-5" />
         </div>
@@ -279,7 +303,7 @@ export default function ReportUpload({ initialError }: Props) {
             <X /> Anuluj
           </Button>
         )}
-      </div>
+      </Card>
     );
   }
 
@@ -327,6 +351,43 @@ export default function ReportUpload({ initialError }: Props) {
     );
   }
 
+  if (error?.kind === "server") {
+    return (
+      <>
+        <ErrorCard
+          title={reportErrorMessage(error.code)}
+          fileName={error.fileName}
+          footer={pickAnotherFooter("Wybierz inny plik")}
+        >
+          {error.code === "invalid_file" && error.detail && <p className="text-sm text-pretty">{error.detail}</p>}
+        </ErrorCard>
+        {fileInput}
+      </>
+    );
+  }
+
+  if (error?.kind === "network") {
+    return (
+      <>
+        <ErrorCard
+          title="Nie udało się wgrać pliku"
+          fileName={error.fileName}
+          footer={
+            <div className="flex items-center justify-end gap-2">
+              {closeButton}
+              <Button type="button" onClick={retryUpload}>
+                <RotateCw /> Spróbuj ponownie
+              </Button>
+            </div>
+          }
+        >
+          <p className="text-muted-foreground text-sm">Sprawdź połączenie z internetem i spróbuj ponownie.</p>
+        </ErrorCard>
+        {fileInput}
+      </>
+    );
+  }
+
   if (error?.kind === "missing_columns") {
     const missingCount = error.columns.filter((column) => !column.found).length;
     return (
@@ -366,7 +427,7 @@ export default function ReportUpload({ initialError }: Props) {
                 </span>
                 <code
                   className={cn(
-                    "w-[150px] flex-none font-mono",
+                    "w-40 flex-none font-mono",
                     column.found ? "text-muted-foreground" : "text-destructive font-medium",
                   )}
                 >
@@ -385,46 +446,39 @@ export default function ReportUpload({ initialError }: Props) {
   }
 
   return (
-    <div className="space-y-2">
-      <div
-        className={cn(
-          "bg-card flex flex-wrap items-center justify-between gap-6 rounded-lg border-[1.5px] border-dashed p-6 transition-colors",
-          dragging && "border-primary bg-primary/10",
-        )}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={(event) => {
-          // dragleave also fires when moving onto a child element - ignore those.
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
-        }}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDragging(false);
-          const file = event.dataTransfer.files.item(0);
-          if (file) void startUpload(file);
-        }}
-      >
-        <div className="flex items-center gap-4">
-          <div className="bg-primary/10 text-primary flex size-11 flex-none items-center justify-center rounded-full">
-            <Upload className="size-5" />
-          </div>
-          <div className="space-y-1">
-            <div className="font-medium">Przeciągnij plik tutaj lub wybierz z dysku</div>
-            <div className="text-muted-foreground text-sm">CSV lub XLSX · maks. 5 MB</div>
-          </div>
-        </div>
-        <Button type="button" onClick={pickFile}>
-          <Upload /> Wgraj raport
-        </Button>
-        {fileInput}
-      </div>
-      {error?.kind === "network" && (
-        <p className="text-destructive text-sm" role="alert">
-          Nie udało się wgrać pliku. Sprawdź połączenie i spróbuj ponownie.
-        </p>
+    <div
+      className={cn(
+        "bg-card border-muted-foreground flex flex-wrap items-center justify-between gap-6 rounded-xl border-2 border-dashed p-4 transition-colors",
+        dragging && "border-primary bg-primary/10",
       )}
+      onDragOver={(event) => {
+        event.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={(event) => {
+        // dragleave also fires when moving onto a child element - ignore those.
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
+      }}
+      onDrop={(event) => {
+        event.preventDefault();
+        setDragging(false);
+        const file = event.dataTransfer.files.item(0);
+        if (file) void startUpload(file);
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <div className="bg-primary/10 text-primary flex size-11 flex-none items-center justify-center rounded-full">
+          <Upload className="size-5" />
+        </div>
+        <div className="space-y-1">
+          <div className="font-medium">Przeciągnij plik tutaj lub wybierz z dysku</div>
+          <div className="text-muted-foreground text-sm">CSV lub XLSX · maks. 5 MB</div>
+        </div>
+      </div>
+      <Button type="button" onClick={pickFile}>
+        <Upload /> Wgraj raport
+      </Button>
+      {fileInput}
     </div>
   );
 }
