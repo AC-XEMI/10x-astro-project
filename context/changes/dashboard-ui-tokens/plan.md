@@ -483,25 +483,25 @@ None — no schema change.
 
 #### Automated
 
-- [x] 1.1 `src/components/ui/card.tsx` exists and `git diff --stat package.json package-lock.json src/styles/global.css` shows no changes
-- [x] 1.2 Type check passes: `npx astro check`
-- [x] 1.3 Lint passes: `npm run lint`
+- [x] 1.1 `src/components/ui/card.tsx` exists and `git diff --stat package.json package-lock.json src/styles/global.css` shows no changes — e026fb1
+- [x] 1.2 Type check passes: `npx astro check` — e026fb1
+- [x] 1.3 Lint passes: `npm run lint` — e026fb1
 
 #### Manual
 
-- [x] 1.4 `/dev/kitchen-sink/dashboard` shows the stub card with header and content spaced as in shadcn's new-york card (no collapsed gap, no double padding)
+- [x] 1.4 `/dev/kitchen-sink/dashboard` shows the stub card with header and content spaced as in shadcn's new-york card (no collapsed gap, no double padding) — e026fb1
 
 ### Phase 2: Rule-series tokens
 
 #### Automated
 
-- [ ] 2.1 Type check passes: `npx astro check`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 `grep -c "rule-" src/styles/global.css` returns 9 (3 in `:root`, 3 in `.dark`, 3 in `@theme inline`)
+- [x] 2.1 Type check passes: `npx astro check`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 `grep -c "rule-" src/styles/global.css` returns 9 (3 in `:root`, 3 in `.dark`, 3 in `@theme inline`)
 
 #### Manual
 
-- [ ] 2.4 `token-source.md` lists all six values with their contrast numbers, and the numbers match a re-run of the contrast computation
+- [x] 2.4 `token-source.md` lists all six values with their contrast numbers, and the numbers match a re-run of the contrast computation
 
 ### Phase 3: Dashboard view on the contract
 
