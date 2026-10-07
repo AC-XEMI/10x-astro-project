@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
-import { translateAuthError } from "@/lib/auth-errors";
+import { authErrorCode, authErrorUrl } from "@/lib/auth-errors";
 import { clearPendingSignupEmail } from "@/lib/pending-signup";
 
 export const prerender = false;
@@ -12,12 +12,12 @@ export const POST: APIRoute = async (context) => {
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
+    return context.redirect(authErrorUrl("/auth/signin", "not_configured"));
   }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent(translateAuthError(error.message))}`);
+    return context.redirect(authErrorUrl("/auth/signin", authErrorCode(error.message)));
   }
 
   clearPendingSignupEmail(context.cookies);

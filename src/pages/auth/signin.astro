@@ -1,8 +1,9 @@
 ---
+import { authErrorMessage } from "@/lib/auth-errors";
 import AuthLayout from "@/layouts/AuthLayout.astro";
 import SignInForm from "@/components/auth/SignInForm";
 
-const error = Astro.url.searchParams.get("error");
+const error = authErrorMessage(Astro.url.searchParams.get("error"));
 ---
 
 <AuthLayout title="Zaloguj się">

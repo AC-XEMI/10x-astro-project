@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
-import { translateAuthError } from "@/lib/auth-errors";
+import { authErrorCode, authErrorUrl } from "@/lib/auth-errors";
 import { getPendingSignupEmail } from "@/lib/pending-signup";
 
 export const prerender = false;
@@ -13,19 +13,17 @@ export const prerender = false;
 export const POST: APIRoute = async (context) => {
   const email = getPendingSignupEmail(context.cookies);
   if (!email) {
-    return context.redirect(
-      `/auth/confirm-email?error=${encodeURIComponent("Sesja rejestracji wygasła. Zarejestruj się ponownie albo zaloguj się.")}`,
-    );
+    return context.redirect(authErrorUrl("/auth/confirm-email", "signup_session_expired"));
   }
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return context.redirect(`/auth/confirm-email?error=${encodeURIComponent("Supabase is not configured")}`);
+    return context.redirect(authErrorUrl("/auth/confirm-email", "not_configured"));
   }
 
   const { error } = await supabase.auth.resend({ type: "signup", email });
   if (error) {
-    return context.redirect(`/auth/confirm-email?error=${encodeURIComponent(translateAuthError(error.message))}`);
+    return context.redirect(authErrorUrl("/auth/confirm-email", authErrorCode(error.message)));
   }
 
   return context.redirect("/auth/confirm-email?resent=1");

@@ -4,13 +4,14 @@ import AuthLayout from "@/layouts/AuthLayout.astro";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { getPendingSignupEmail } from "@/lib/pending-signup";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 // With email confirmations disabled (local Supabase, see supabase/config.toml) signUp() already
 // returns a session, so the user arrives here signed in and confirmed - nothing to wait for.
 const user = Astro.locals.user;
 const isConfirmed = Boolean(user?.email_confirmed_at);
 const email = getPendingSignupEmail(Astro.cookies);
-const error = Astro.url.searchParams.get("error");
+const error = authErrorMessage(Astro.url.searchParams.get("error"));
 const resent = Astro.url.searchParams.has("resent");
 ---
 
