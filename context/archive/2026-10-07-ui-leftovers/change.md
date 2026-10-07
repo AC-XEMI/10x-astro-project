@@ -1,10 +1,10 @@
 ---
 change_id: ui-leftovers
 title: UI leftovers - Banner to Alert, report details polish
-status: implemented
+status: archived
 created: 2026-10-07
 updated: 2026-10-07
-archived_at: null
+archived_at: 2026-10-07T20:01:39Z
 ---
 
 ## Notes
