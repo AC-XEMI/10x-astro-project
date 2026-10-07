@@ -13,6 +13,8 @@ const MAX_BAR_PX = 130;
 
 // Rendered server-side only (no client directive) - React here just reuses the shadcn table.
 export default function RankingTable({ ranking, comparisonLabel }: Props) {
+  const breakdown = (row: RankingRow) =>
+    RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label}: ${row[rule]}`).join(", ");
   const maxDeviations = Math.max(1, ...ranking.map((r) => r.deviations));
   const num = "text-right tabular-nums";
   const optional = (n: number) => <TableCell className={cn(num, !n && "text-muted-foreground")}>{n || "—"}</TableCell>;
@@ -51,7 +53,9 @@ export default function RankingTable({ ranking, comparisonLabel }: Props) {
                 <div
                   className="flex h-2 gap-0.5 overflow-hidden rounded-full"
                   style={{ width: Math.max(12, (row.deviations / maxDeviations) * MAX_BAR_PX) }}
-                  aria-label={RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label}: ${row[rule]}`).join(", ")}
+                  role="img"
+                  aria-label={breakdown(row)}
+                  title={breakdown(row)}
                 >
                   {RULE_SERIES_ORDER.map((rule) => (
                     <div key={rule} className={RULE_SERIES[rule].className} style={{ flex: row[rule] }} />

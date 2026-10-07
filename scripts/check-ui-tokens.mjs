@@ -12,6 +12,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dashboardDir = "src/components/dashboard";
 const files = [
   "src/pages/dashboard.astro",
+  "src/lib/rule-series.ts", // source of the series colour classes
   ...readdirSync(path.join(root, dashboardDir))
     .filter((name) => /\.(astro|tsx)$/.test(name))
     .map((name) => `${dashboardDir}/${name}`),
@@ -29,7 +30,8 @@ const RULES = [
     name: "primary opacity step (use a --rule-* token for series)",
     re: /\b(bg|text|border|fill|stroke)-primary\/\d+/g,
   },
-  { name: "arbitrary value", re: /[\w-]+-\[[0-9.]+(px|rem)\]/g },
+  // Any Tailwind arbitrary value (px, %, fr, var(), calc() ...), not just px/rem.
+  { name: "arbitrary value", re: /[\w-]+-\[[^\]\s]+\]/g },
 ];
 
 // Known, reviewed arbitrary values (context/changes/dashboard-ui-tokens/research.md, Deferred).
@@ -38,6 +40,7 @@ const ALLOWED_ARBITRARY = new Set([
   "h-[180px]", // trend chart height, coupled to the 130px max bar
   "w-[150px]", // ranking "Struktura" column, coupled to MAX_BAR_PX
   "ring-[3px]", // focus ring width, same as src/components/ui/button.tsx
+  "grid-cols-[1.4fr_1fr]", // trend chart vs recent reports split, from the Claude Design mockup
 ]);
 
 const hits = [];
@@ -46,8 +49,7 @@ for (const file of files) {
   lines.forEach((line, index) => {
     for (const rule of RULES) {
       for (const match of line.matchAll(rule.re)) {
-        const token = match[0].replace(/^.*?:(?=[\w-]+-\[)/, ""); // drop variants like focus-visible:
-        if (rule.name === "arbitrary value" && ALLOWED_ARBITRARY.has(token)) continue;
+        if (rule.name === "arbitrary value" && ALLOWED_ARBITRARY.has(match[0])) continue;
         hits.push(`${file}:${index + 1}  ${rule.name}: ${match[0]}`);
       }
     }

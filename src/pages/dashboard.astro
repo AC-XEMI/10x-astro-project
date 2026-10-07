@@ -60,8 +60,9 @@ if (supabase) {
       if (!loadError) stats = computeDashboardStats(visits, refMonth, periodMonths);
     }
 
+    // "Ostatnie raporty" renders only alongside the stats, so skip the per-report counts otherwise.
     recent = await Promise.all(
-      recentResult.data.map(async (report) => {
+      (stats ? recentResult.data : []).map(async (report) => {
         const { count, error } = await supabase
           .from("deviations")
           .select("id, visits!inner(report_id)", { count: "exact", head: true })

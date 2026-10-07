@@ -74,6 +74,9 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const legend = RULE_SERIES_ORDER.map((rule) => RULE_SERIES[rule]);
 // Stacked bars grow upwards, so the first series in display order sits at the bottom.
 const stackTopDown = [...RULE_SERIES_ORDER].reverse();
+// Text equivalent of a stacked bar (screen readers via role="img" + aria-label, hover via title).
+const ruleBreakdown = (counts: Record<(typeof RULE_SERIES_ORDER)[number], number>) =>
+  RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label} ${counts[rule]}`).join(", ");
 // Every number on this page except "Ostatnie raporty" is bucketed by visit date, not upload date.
 const visitPeriodLabel = periodLabel && `wizyty: ${periodLabel}`;
 // Same focus ring as buttonVariants (src/components/ui/button.tsx) for links styled as plain text/rows.
@@ -188,7 +191,7 @@ function reportStatus(report: RecentReport) {
             aria-label="Przejrzane odstępstwa"
             aria-valuemin="0"
             aria-valuemax="100"
-            aria-valuenow={reviewedPct ?? 0}
+            aria-valuenow={reviewedPct ?? undefined}
           >
             <div class="h-full rounded-full bg-primary" style={{ width: `${reviewedPct ?? 0}%` }}></div>
           </div>
@@ -210,7 +213,7 @@ function reportStatus(report: RecentReport) {
               className: "w-full",
             })}
           >
-            Przejdź do listy
+            {stats.reviewTarget ? "Przejdź do raportu" : "Przejdź do listy"}
           </a>
         </CardFooter>
       </Card>
@@ -256,7 +259,9 @@ function reportStatus(report: RecentReport) {
                       m.total === 0 && "bg-muted",
                     ]}
                     style={{ height: `${Math.max(2, Math.round((m.total / maxTrend) * 130))}px` }}
-                    aria-label={`${monthName(m.month)}: ${RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label} ${m[rule]}`).join(", ")}`}
+                    role="img"
+                    aria-label={`${monthName(m.month)}: ${ruleBreakdown(m)}`}
+                    title={`${monthName(m.month)}: ${ruleBreakdown(m)}`}
                   >
                     {stackTopDown.map((rule) => (
                       <div class:list={RULE_SERIES[rule].className} style={{ flex: m[rule] }}></div>

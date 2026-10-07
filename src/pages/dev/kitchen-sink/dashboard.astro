@@ -124,8 +124,8 @@ const forcedRow = "flex items-center gap-3 rounded-md px-2 py-2 text-sm";
       <p class:list={["text-sm text-muted-foreground", sectionText]}>
         Statyczny zrzut nie utrwali <code>:hover</code>. Wiersze „Ostatnie raporty” przechodzą w
         <code>hover:bg-muted/50</code>, „Wszystkie” w <code>hover:underline</code>, przyciski okresu i eksportu w
-        <code>hover:bg-accent</code>, „Przejdź do listy” w <code>hover:bg-primary/90</code>. Poniżej wiersz z wymuszonym
-        tłem najechania.
+        <code>hover:bg-accent</code>, „Przejdź do raportu” w <code>hover:bg-primary/90</code>. Poniżej wiersz z
+        wymuszonym tłem najechania.
       </p>
       <div class="grid gap-4 md:grid-cols-2">
         {THEMES.map((theme) => (
@@ -160,7 +160,7 @@ const forcedRow = "flex items-center gap-3 rounded-md px-2 py-2 text-sm";
                 trasowki-wrzesien-2026.xlsx — wiersz z fokusem
               </div>
               <span class="rounded-sm text-xs text-primary ring-[3px] ring-ring/50">Wszystkie</span>
-              <span class:list={cn(buttonVariants({ size: "sm" }), "ring-[3px] ring-ring/50")}>Przejdź do listy</span>
+              <span class:list={cn(buttonVariants({ size: "sm" }), "ring-[3px] ring-ring/50")}>Przejdź do raportu</span>
             </div>
           </div>
         ))}
