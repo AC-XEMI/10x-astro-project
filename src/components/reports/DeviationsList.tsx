@@ -2,7 +2,9 @@ import { Fragment, useState, type ComponentType } from "react";
 import { Check, CheckCheck, ChevronDown, CircleAlert, Download, MapPin, Phone, Undo2, X } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/format-date";
 import { buildCsv, downloadBlob } from "@/lib/export-file";
 import { Constants, type Tables } from "@/types";
 import type { DeviationRule } from "@/lib/services/deviation-rules";
@@ -19,6 +21,12 @@ interface Props {
 
 type DeviationStatus = Tables<"deviations">["status"];
 type StatusFilter = "all" | "todo" | "done";
+type ActionError = "review" | "export" | null;
+
+const ACTION_ERROR_MESSAGES: Record<Exclude<ActionError, null>, string> = {
+  review: "Nie udało się zapisać zmiany statusu. Spróbuj ponownie za chwilę.",
+  export: "Nie udało się wyeksportować listy. Spróbuj ponownie.",
+};
 
 interface FilterState {
   representative: string;
@@ -87,13 +95,6 @@ function toDateOnly(isoDate: string) {
 function formatVisitDate(isoDate: string) {
   const [year, month, day] = toDateOnly(isoDate).split("-");
   return `${day}.${month}.${year}`;
-}
-
-/** Formats as dd.mm.yyyy, HH:MM, independent of browser locale. */
-function formatTimestamp(value: string) {
-  const date = new Date(value);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 /** Polish plural for "wizyta" (1 wizyta, 2-4 wizyty, 5+ wizyt, 12-14 wizyt). */
@@ -234,6 +235,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
     return new Set(largest);
   });
   const [openVisitIds, setOpenVisitIds] = useState<Set<string>>(new Set());
+  const [actionError, setActionError] = useState<ActionError>(null);
 
   const flaggedVisits = visits.filter((visit) => visit.deviations.length > 0);
   const reviewedVisitCount = flaggedVisits.filter(isVisitReviewed).length;
@@ -310,6 +312,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
       const isJson = response.headers.get("content-type")?.includes("application/json");
       if (!response.ok || !isJson) {
         console.error(`Nie udało się zaktualizować statusu odstępstw (HTTP ${response.status})`);
+        setActionError("review");
         return;
       }
 
@@ -324,8 +327,10 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
           }),
         })),
       );
+      setActionError(null);
     } catch (error) {
       console.error("Błąd podczas aktualizacji statusu odstępstw:", error);
+      setActionError("review");
     } finally {
       setPendingIds((prev) => {
         const next = new Set(prev);
@@ -347,8 +352,10 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
         });
         downloadBlob(blob, `odstepstwa-raport-${reportId}.xlsx`);
       }
+      setActionError(null);
     } catch (error) {
       console.error("Błąd podczas eksportu listy odstępstw:", error);
+      setActionError("export");
     }
   }
 
@@ -364,6 +371,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
       const isMulti = total > 1;
       const isPending = visit.deviations.some((d) => pendingIds.has(d.id));
       const allIds = visit.deviations.map((d) => d.id);
+      const detailsId = `visit-details-${visit.id}`;
 
       return (
         <Fragment key={visit.id}>
@@ -371,7 +379,6 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
             onClick={() => {
               toggleVisit(visit.id);
             }}
-            aria-expanded={isOpen}
             data-state={isOpen ? "selected" : undefined}
             className="cursor-pointer"
           >
@@ -381,7 +388,18 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
               />
             </TableCell>
             <TableCell className="py-3 align-top font-medium tabular-nums">
-              {formatVisitDate(visit.visit_date)}
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={detailsId}
+                className="focus-visible:ring-ring/50 cursor-pointer rounded-sm outline-none focus-visible:ring-[3px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleVisit(visit.id);
+                }}
+              >
+                {formatVisitDate(visit.visit_date)}
+              </button>
             </TableCell>
             <TableCell className="text-muted-foreground py-3 align-top whitespace-normal">
               {visit.visited_client ?? "—"}
@@ -441,7 +459,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
             </TableCell>
           </TableRow>
           {isOpen && (
-            <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableRow id={detailsId} className="bg-muted/50 hover:bg-muted/50">
               <TableCell colSpan={5} className="p-0 whitespace-normal">
                 <div className="grid gap-6 px-4 pt-4 pb-5 md:grid-cols-[300px_minmax(0,1fr)] md:pl-11">
                   <div className="space-y-3">
@@ -545,7 +563,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                               <div className="text-muted-foreground text-sm">{RULE_EXPLANATIONS[deviation.rule]}</div>
                               {done && deviation.reviewed_at && (
                                 <div className="text-muted-foreground pt-1 text-xs">
-                                  Sprawdzono: {formatTimestamp(deviation.reviewed_at)}
+                                  Sprawdzono: {formatDateTime(deviation.reviewed_at)}
                                 </div>
                               )}
                             </div>
@@ -707,6 +725,12 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
           </Button>
         </div>
       </div>
+
+      {actionError && (
+        <Alert variant="destructive">
+          <AlertDescription className="text-current">{ACTION_ERROR_MESSAGES[actionError]}</AlertDescription>
+        </Alert>
+      )}
 
       {flaggedVisits.length === 0 ? (
         <div className="bg-card text-muted-foreground rounded-lg border p-10 text-center text-sm">

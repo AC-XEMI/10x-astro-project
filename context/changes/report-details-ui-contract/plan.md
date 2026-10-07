@@ -416,30 +416,30 @@ error after a failed action, Klient column hidden below `md`.
 
 #### Automated
 
-- [x] 1.1 Type check passes: `npx astro check`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 `grep -c "Banner" "src/pages/reports/[id].astro"` returns 0
+- [x] 1.1 Type check passes: `npx astro check` — 55af009
+- [x] 1.2 Lint passes: `npm run lint` — 55af009
+- [x] 1.3 `grep -c "Banner" "src/pages/reports/[id].astro"` returns 0 — 55af009
 
 #### Manual
 
-- [x] 1.4 Signed in: `/reports/nie-uuid` and `/reports/<random valid UUID>` show "Nie znaleziono raportu." in an in-page alert with status 404 (devtools Network); an existing report renders as before
-- [x] 1.5 With `SUPABASE_URL` removed from `.dev.vars`, `/reports/<id>` shows the not-configured message with status 503
+- [x] 1.4 Signed in: `/reports/nie-uuid` and `/reports/<random valid UUID>` show "Nie znaleziono raportu." in an in-page alert with status 404 (devtools Network); an existing report renders as before — 55af009
+- [x] 1.5 With `SUPABASE_URL` removed from `.dev.vars`, `/reports/<id>` shows the not-configured message with status 503 — 55af009
 
 ### Phase 2: Island interactions
 
 #### Automated
 
-- [ ] 2.1 Type check passes: `npx astro check`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 `grep -cE "getHours|formatTimestamp" src/components/reports/DeviationsList.tsx` returns 0
-- [ ] 2.4 `grep -c "aria-controls" src/components/reports/DeviationsList.tsx` returns at least 1
+- [x] 2.1 Type check passes: `npx astro check`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 `grep -cE "getHours|formatTimestamp" src/components/reports/DeviationsList.tsx` returns 0
+- [x] 2.4 `grep -c "aria-controls" src/components/reports/DeviationsList.tsx` returns at least 1
 
 #### Manual
 
-- [ ] 2.5 Keyboard only: Tab reaches each visit date, Enter and Space open/close the details, the ring is visible, and "Cofnij" on a single deviation works
-- [ ] 2.6 Mouse click anywhere on the row still toggles it once
-- [ ] 2.7 With devtools "Offline", "Oznacz jako sprawdzone" shows the review alert; back online, a successful mark clears it
-- [ ] 2.8 A reviewed deviation shows "Sprawdzono: DD.MM.YYYY, HH:MM" equal to Warsaw time
+- [x] 2.5 Keyboard only: Tab reaches each visit date, Enter and Space open/close the details, the ring is visible, and "Cofnij" on a single deviation works
+- [x] 2.6 Mouse click anywhere on the row still toggles it once
+- [x] 2.7 With devtools "Offline", "Oznacz jako sprawdzone" shows the review alert; back online, a successful mark clears it
+- [x] 2.8 A reviewed deviation shows "Sprawdzono: DD.MM.YYYY, HH:MM" equal to Warsaw time
 
 ### Phase 3: Components and layout
 
