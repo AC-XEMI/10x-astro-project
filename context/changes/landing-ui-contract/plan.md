@@ -349,31 +349,31 @@ Visible change limited to dark mode: primary fills become lighter with dark text
 
 #### Automated
 
-- [x] 2.1 Type check passes: `npx astro check`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 `grep -nE "rounded-(lg|xl) border" src/components/Welcome.astro` returns nothing
-- [x] 2.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/components/Welcome.astro` lists only `max-w-[1100px]`, `leading-[1.1]`, `text-[44px]` and `ring-[3px]`
-- [x] 2.5 `grep -c "hidden md:flex" src/components/Welcome.astro` returns 0
-- [x] 2.6 The visible text of `/` (tags stripped) is identical before and after the phase for a logged-out visitor
+- [x] 2.1 Type check passes: `npx astro check` — 7eaf7f2
+- [x] 2.2 Lint passes: `npm run lint` — 7eaf7f2
+- [x] 2.3 `grep -nE "rounded-(lg|xl) border" src/components/Welcome.astro` returns nothing — 7eaf7f2
+- [x] 2.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/components/Welcome.astro` lists only `max-w-[1100px]`, `leading-[1.1]`, `text-[44px]` and `ring-[3px]` — 7eaf7f2
+- [x] 2.5 `grep -c "hidden md:flex" src/components/Welcome.astro` returns 0 — 7eaf7f2
+- [x] 2.6 The visible text of `/` (tags stripped) is identical before and after the phase for a logged-out visitor — 7eaf7f2
 
 #### Manual
 
-- [x] 2.7 `/` looks the same as before on desktop in both themes (cards, spacing, headline)
-- [x] 2.8 At 390px the section links are visible in the header and the page does not scroll horizontally
-- [x] 2.9 Tab through the header and footer: logo, section links and "Zaloguj się" show the ring
+- [x] 2.7 `/` looks the same as before on desktop in both themes (cards, spacing, headline) — 7eaf7f2
+- [x] 2.8 At 390px the section links are visible in the header and the page does not scroll horizontally — 7eaf7f2
+- [x] 2.9 Tab through the header and footer: logo, section links and "Zaloguj się" show the ring — 7eaf7f2
 
 ### Phase 3: Kitchen sink and visual gate
 
 #### Automated
 
-- [ ] 3.1 Type check passes: `npx astro check`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 `/dev/kitchen-sink/landing` returns HTTP 200
-- [ ] 3.4 The three screenshots exist and the 390 runs report `sw` = 390
+- [x] 3.1 Type check passes: `npx astro check`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 `/dev/kitchen-sink/landing` returns HTTP 200
+- [x] 3.4 The three screenshots exist and the 390 runs report `sw` = 390
 
 #### Manual
 
-- [ ] 3.5 The screenshots show logged-out and logged-in variants in light and dark, and the N/A cells with their reasons
+- [x] 3.5 The screenshots show logged-out and logged-in variants in light and dark, and the N/A cells with their reasons
 
 ### Phase 4: Guard
 

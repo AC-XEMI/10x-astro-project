@@ -18,7 +18,15 @@ import ThemeToggle from "@/components/ThemeToggle.astro";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-const { user } = Astro.locals;
+interface Props {
+  /** Dev-only (kitchen sink): render as this visitor instead of Astro.locals.user; pass null for logged out. */
+  user?: { email?: string } | null;
+  /** Dev-only (kitchen sink): render the mobile menu already open. */
+  menuOpen?: boolean;
+}
+
+const { menuOpen = false } = Astro.props;
+const user = "user" in Astro.props ? Astro.props.user : Astro.locals.user;
 
 // Header auth links, rendered inline from md up and inside the mobile menu below md.
 const AUTH_LINKS: { href: string; label: string; variant: "default" | "ghost"; icon?: typeof LogIn }[] = user
@@ -154,7 +162,7 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
           <button
             type="button"
             data-landing-menu-toggle
-            aria-expanded="false"
+            aria-expanded={menuOpen ? "true" : "false"}
             aria-controls="landing-menu"
             aria-label="Menu"
             class:list={["group md:hidden", buttonVariants({ variant: "ghost", size: "icon" }), "size-8"]}
@@ -164,7 +172,12 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
           </button>
         </div>
       </div>
-      <div id="landing-menu" data-landing-menu hidden class="mt-3 space-y-3 border-t border-border pt-3 md:hidden">
+      <div
+        id="landing-menu"
+        data-landing-menu
+        hidden={!menuOpen}
+        class="mt-3 space-y-3 border-t border-border pt-3 md:hidden"
+      >
         <nav class="flex flex-col text-sm" aria-label="Sekcje strony">
           {NAV.map((item) => (
             <a href={item.href} class:list={["py-2", navLink, linkFocus]}>

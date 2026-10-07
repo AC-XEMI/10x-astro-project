@@ -1,0 +1,162 @@
+---
+// Dev-only kitchen sink: the landing page (Welcome.astro) for both visitor variants, light and dark.
+// Not linked from product nav, not in PROTECTED_ROUTES (src/middleware.ts) — no auth needed.
+// Renders the real Welcome component; `user` / `menuOpen` are its dev-only override props.
+// Several Welcome instances on one page share ids (#jak, #landing-menu, …) and only the first
+// mobile menu button is wired by the script — fine for a static gate, not for clicking around.
+import Layout from "@/layouts/Layout.astro";
+import Welcome from "@/components/Welcome.astro";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const THEMES = [
+  { label: "Jasny", className: "" },
+  { label: "Ciemny", className: "dark" },
+];
+const VISITORS = [
+  { label: "Niezalogowany", user: null },
+  { label: "Zalogowany", user: { email: "kierownik@example.com" } },
+];
+
+// Below sm the frames drop the outer chrome so a frame is as wide as the real page body.
+const section = "space-y-4 py-6 sm:rounded-2xl sm:border sm:border-border sm:bg-card sm:p-6 sm:shadow-sm";
+const sectionText = "px-6 sm:px-0";
+// ?compact=1 clips each frame to the top of the page (header, mobile menu, hero) - six full landings
+// are taller than Chrome can capture at 390px. The full mobile layout is the real /, see landing-390.png.
+const compact = Astro.url.searchParams.has("compact");
+const frame = [
+  "overflow-hidden bg-background text-foreground sm:rounded-xl sm:border sm:border-border",
+  compact && "max-h-224",
+];
+const sampleFrame = "space-y-4 bg-background p-6 text-foreground sm:rounded-xl sm:border sm:border-border";
+const caption = "px-6 pt-4 text-xs font-medium text-muted-foreground sm:px-4";
+// Same class strings as Welcome.astro, with :hover / :focus-visible forced for the screenshot.
+const navLink = "text-sm text-muted-foreground transition-colors hover:text-foreground";
+const linkFocus = "rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+const forcedRing = "ring-[3px] ring-ring/50";
+---
+
+<Layout title="Kitchen sink – Strona startowa">
+  <div class="mx-auto max-w-[1200px] space-y-8 py-6 sm:p-6">
+    <div class:list={["space-y-1", sectionText]}>
+      <h1 class="text-2xl font-semibold tracking-tight">Kitchen sink: Strona startowa</h1>
+      <p class="text-sm text-muted-foreground">
+        Strona deweloperska — strona startowa dla niezalogowanego i zalogowanego użytkownika, w jasnym i ciemnym
+        motywie. Treść renderuje ten sam komponent co <code>/</code>:
+      </p>
+      <p class="text-sm text-muted-foreground">
+        <code>Welcome.astro</code> (propsy tylko do kitchen sinka: <code>user</code>, <code>menuOpen</code>).
+      </p>
+    </div>
+
+    {VISITORS.map((visitor, index) => (
+      <section class:list={section}>
+        <h2 class:list={["text-xl font-semibold", sectionText]}>
+          {index + 1}. Domyślny (default) — {visitor.label.toLowerCase()}
+        </h2>
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={frame}>
+              <p class:list={caption}>{theme.label}</p>
+              <Welcome user={visitor.user} />
+            </div>
+          </div>
+        ))}
+      </section>
+    ))}
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>3. Menu na telefonie (otwarte)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Poniżej 768px linki sekcji i logowania są pod przyciskiem menu w nagłówku. Ta ramka renderuje menu jako otwarte
+        (<code>menuOpen</code>); widać je tylko na zrzucie wąskim (<code>kitchen-sink-390.png</code>) — od 768px
+        nagłówek pokazuje linki w linii.
+      </p>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class:list={caption}>{theme.label}</p>
+            <Welcome user={null} menuOpen />
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>4. Najechanie (hover)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Statyczny zrzut nie utrwali <code>:hover</code>. Linki sekcji przechodzą w <code>hover:text-foreground</code>,
+        link „Zaloguj się” w stopce w <code>hover:underline</code>, przyciski w warianty <code>hover:</code> z
+        <code>buttonVariants</code>. Poniżej próbki z wymuszonym stanem najechania.
+      </p>
+      <div class="grid gap-4 md:grid-cols-2">
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={sampleFrame}>
+              <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+              <div class="flex flex-wrap items-center gap-4">
+                <span class:list={[navLink, "text-foreground"]}>Jak to działa</span>
+                <span class="text-sm text-primary underline">Zaloguj się</span>
+                <span class:list={cn(buttonVariants({ size: "sm" }), "bg-primary/90")}>Załóż konto</span>
+                <span
+                  class:list={cn(
+                    buttonVariants({ variant: "ghost", size: "sm" }),
+                    "bg-accent text-accent-foreground dark:bg-accent/50",
+                  )}
+                >
+                  Zaloguj się
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>5. Widoczny fokus (focus-visible)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Logo, linki sekcji, link w stopce, przycisk menu i przyciski mają ten sam pierścień tokenu
+        <code>--ring</code> (<code>focus-visible:ring-[3px] focus-visible:ring-ring/50</code>). Poniżej wymuszony
+        statycznie; na żywej stronie sprawdź klawiszem Tab.
+      </p>
+      <div class="grid gap-4 md:grid-cols-2">
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={sampleFrame}>
+              <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+              <div class="flex flex-wrap items-center gap-4">
+                <span class:list={["font-semibold tracking-tight", linkFocus, forcedRing]}>Kontrola Trasówek</span>
+                <span class:list={[navLink, linkFocus, forcedRing]}>Co sprawdzamy</span>
+                <span class:list={["text-sm text-primary", linkFocus, forcedRing]}>Zaloguj się</span>
+                <span class:list={cn(buttonVariants({ size: "sm" }), forcedRing)}>Załóż konto</span>
+                <span class:list={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-8", forcedRing)}>
+                  ☰
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>6. Wyłączony, błąd, pusty, ładowanie — N/A</h2>
+      <ul class:list={["list-disc space-y-1 pl-5 text-sm text-muted-foreground", sectionText]}>
+        <li>
+          <strong>Wyłączony (disabled):</strong> strona nie ma kontrolek, które mogłyby być nieaktywne — tylko linki.
+        </li>
+        <li>
+          <strong>Błąd (error):</strong> strona nie wysyła żadnych żądań ani formularzy, więc nie ma stanu błędu.
+        </li>
+        <li>
+          <strong>Pusty (empty):</strong> treść jest statyczna; podgląd aplikacji to przykładowe dane z projektu.
+        </li>
+        <li>
+          <strong>Ładowanie (loading):</strong> strona renderuje się na serwerze w całości; jedyny skrypt obsługuje menu
+          na telefonie.
+        </li>
+      </ul>
+    </section>
+  </div>
+</Layout>
