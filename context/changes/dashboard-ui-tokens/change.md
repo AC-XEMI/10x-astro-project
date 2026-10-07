@@ -1,7 +1,7 @@
 ---
 change_id: dashboard-ui-tokens
 title: Align dashboard (Pulpit) view with the design-system contract
-status: implementing
+status: implemented
 created: 2026-10-07
 updated: 2026-10-07
 archived_at: null

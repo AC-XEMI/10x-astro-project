@@ -538,10 +538,10 @@ None — no schema change.
 
 #### Automated
 
-- [x] 5.1 `npm run check:ui-tokens` exits 0 on the finished view
-- [x] 5.2 `npm run check:ui-tokens` exits non-zero when a `bg-primary/25` class is temporarily added to `RankingTable.tsx` (revert after)
-- [x] 5.3 Lint passes: `npm run lint`
+- [x] 5.1 `npm run check:ui-tokens` exits 0 on the finished view — a612cd0
+- [x] 5.2 `npm run check:ui-tokens` exits non-zero when a `bg-primary/25` class is temporarily added to `RankingTable.tsx` (revert after) — a612cd0
+- [x] 5.3 Lint passes: `npm run lint` — a612cd0
 
 #### Manual
 
-- [x] 5.4 The `CLAUDE.md` bullet reads correctly and points at files that exist
+- [x] 5.4 The `CLAUDE.md` bullet reads correctly and points at files that exist — a612cd0
