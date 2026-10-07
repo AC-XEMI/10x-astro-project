@@ -8,14 +8,25 @@ import {
   Lock,
   LogIn,
   MapPin,
+  Menu,
   Phone,
   Search,
   UserPlus,
+  X,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 const { user } = Astro.locals;
+
+// Header auth links, rendered inline from md up and inside the mobile menu below md.
+const AUTH_LINKS: { href: string; label: string; variant: "default" | "ghost"; icon?: typeof LogIn }[] = user
+  ? [{ href: "/dashboard", label: "Przejdź do pulpitu", variant: "default" }]
+  : [
+      { href: "/auth/signin", label: "Zaloguj się", variant: "ghost", icon: LogIn },
+      { href: "/auth/signup", label: "Załóż konto", variant: "default" },
+    ];
 
 const NAV = [
   { href: "#jak", label: "Jak to działa" },
@@ -109,53 +120,79 @@ const COLUMNS = [
 ];
 
 const section = "mx-auto max-w-[1100px] scroll-mt-16";
+// Same keyboard focus ring as buttonVariants (src/components/ui/button.tsx) for plain-text links.
+const linkFocus = "rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 const navLink = "text-muted-foreground transition-colors hover:text-foreground";
 ---
 
 <div class="min-h-screen bg-background text-foreground">
   <header class="sticky top-0 z-10 border-b border-border bg-card">
-    <div class="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-4 px-6 py-3">
-      <a href="/" class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
-        <MapPin className="size-4 text-primary" />
-        <span>Kontrola Trasówek</span>
-      </a>
-      <nav class="hidden items-center gap-6 text-sm md:flex" aria-label="Sekcje strony">
-        {NAV.map((item) => (
-          <a href={item.href} class:list={navLink}>
-            {item.label}
-          </a>
-        ))}
-      </nav>
-      <div class="flex items-center gap-2">
-        {user ? (
-          <a href="/dashboard" class:list={buttonVariants({ size: "sm" })}>
-            Przejdź do pulpitu
-          </a>
-        ) : (
-          <>
-            <a href="/auth/signin" class:list={buttonVariants({ variant: "ghost", size: "sm" })}>
-              <LogIn />
-              Zaloguj się
+    <div class="mx-auto max-w-[1100px] px-6 py-3">
+      <div class="flex items-center justify-between gap-4">
+        <a href="/" class:list={["flex items-center gap-2 font-semibold tracking-tight text-foreground", linkFocus]}>
+          <MapPin className="size-4 text-primary" />
+          <span>Kontrola Trasówek</span>
+        </a>
+        <nav class="hidden items-center gap-6 text-sm md:flex" aria-label="Sekcje strony">
+          {NAV.map((item) => (
+            <a href={item.href} class:list={[navLink, linkFocus]}>
+              {item.label}
             </a>
-            <a href="/auth/signup" class:list={buttonVariants({ size: "sm" })}>
-              Załóż konto
+          ))}
+        </nav>
+        <div class="flex items-center gap-2">
+          <div class="hidden items-center gap-2 md:flex">
+            {AUTH_LINKS.map((link) => (
+              <a href={link.href} class:list={buttonVariants({ variant: link.variant, size: "sm" })}>
+                {link.icon && <link.icon />}
+                {link.label}
+              </a>
+            ))}
+          </div>
+          <ThemeToggle />
+          {/* Below md the section links and the auth links live behind this button. */}
+          <button
+            type="button"
+            data-landing-menu-toggle
+            aria-expanded="false"
+            aria-controls="landing-menu"
+            aria-label="Menu"
+            class:list={["group md:hidden", buttonVariants({ variant: "ghost", size: "icon" }), "size-8"]}
+          >
+            <Menu className="size-4 group-aria-expanded:hidden" />
+            <X className="hidden size-4 group-aria-expanded:block" />
+          </button>
+        </div>
+      </div>
+      <div id="landing-menu" data-landing-menu hidden class="mt-3 space-y-3 border-t border-border pt-3 md:hidden">
+        <nav class="flex flex-col text-sm" aria-label="Sekcje strony">
+          {NAV.map((item) => (
+            <a href={item.href} class:list={["py-2", navLink, linkFocus]}>
+              {item.label}
             </a>
-          </>
-        )}
-        <ThemeToggle />
+          ))}
+        </nav>
+        <div class="flex flex-wrap items-center gap-2">
+          {AUTH_LINKS.map((link) => (
+            <a href={link.href} class:list={buttonVariants({ variant: link.variant, size: "sm" })}>
+              {link.icon && <link.icon />}
+              {link.label}
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="mx-auto max-w-[1100px] px-6 py-16 md:py-[72px]">
+    <section class="mx-auto max-w-[1100px] px-6 py-16 md:py-18">
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <div class="space-y-6">
           <div class="text-sm font-medium text-primary">Dla kierowników regionów sprzedaży</div>
           <h1 class="text-4xl leading-[1.1] font-semibold tracking-tight text-balance md:text-[44px]">
             Sprawdzaj trasówki przedstawicieli w kilka minut, a nie godzin
           </h1>
-          <p class="max-w-[520px] text-lg text-pretty text-muted-foreground">
+          <p class="max-w-130 text-lg text-pretty text-muted-foreground">
             Wgraj raport wizyt z pliku CSV lub XLSX. Kontrola Trasówek sama wskaże wizyty bez GPS, telefony zamiast
             spotkań i podejrzanie długie trasy, a Ty tylko je przejrzysz.
           </p>
@@ -188,47 +225,49 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
           )}
         </div>
 
-        <figure class="space-y-4 rounded-xl border border-border bg-card p-5 shadow-lg" aria-label="Podgląd aplikacji">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex min-w-0 items-center gap-2 text-sm font-semibold">
-              <FileText className="size-4 shrink-0 text-muted-foreground" />
-              <span class="truncate">trasowki-wrzesien-2026.xlsx</span>
-            </div>
-            <span class="text-xs text-muted-foreground">248 wizyt</span>
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            {[
-              ["Brak GPS", 9],
-              ["Telefon", 8],
-              ["Trasa > 1,5×", 24],
-            ].map(([label, count]) => (
-              <div class="rounded-md bg-muted/50 p-3">
-                <div class="text-xs text-muted-foreground">{label}</div>
-                <div class="text-xl font-semibold text-destructive tabular-nums">{count}</div>
+        <figure aria-label="Podgląd aplikacji">
+          <Card className="gap-4 p-5 shadow-lg">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-2 text-sm font-semibold">
+                <FileText className="size-4 shrink-0 text-muted-foreground" />
+                <span class="truncate">trasowki-wrzesien-2026.xlsx</span>
               </div>
-            ))}
-          </div>
-          <div class="rounded-md border border-border">
-            {PREVIEW.map((row) => (
-              <div class="flex items-start justify-between gap-3 border-b border-border px-3 py-2.5">
-                <div class="min-w-0">
-                  <div class="text-sm font-medium">{row.rep}</div>
-                  <div class="text-xs text-muted-foreground tabular-nums">
-                    {row.date} · {row.client}
+              <span class="text-xs text-muted-foreground">248 wizyt</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              {[
+                ["Brak GPS", 9],
+                ["Telefon", 8],
+                ["Trasa > 1,5×", 24],
+              ].map(([label, count]) => (
+                <div class="rounded-md bg-muted/50 p-3">
+                  <div class="text-xs text-muted-foreground">{label}</div>
+                  <div class="text-xl font-semibold text-destructive tabular-nums">{count}</div>
+                </div>
+              ))}
+            </div>
+            <div class="rounded-md border border-border">
+              {PREVIEW.map((row) => (
+                <div class="flex items-start justify-between gap-3 border-b border-border px-3 py-2.5">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium">{row.rep}</div>
+                    <div class="text-xs text-muted-foreground tabular-nums">
+                      {row.date} · {row.client}
+                    </div>
+                  </div>
+                  <div class="space-y-1 text-right">
+                    {row.rules.map((rule) => (
+                      <div class="text-xs font-medium text-destructive">{rule}</div>
+                    ))}
                   </div>
                 </div>
-                <div class="space-y-1 text-right">
-                  {row.rules.map((rule) => (
-                    <div class="text-xs font-medium text-destructive">{rule}</div>
-                  ))}
-                </div>
+              ))}
+              <div class="flex items-center gap-2 px-3 py-2.5 text-xs text-muted-foreground">
+                <CheckCheck className="size-4 text-primary" />
+                14 z 41 odstępstw sprawdzonych
               </div>
-            ))}
-            <div class="flex items-center gap-2 px-3 py-2.5 text-xs text-muted-foreground">
-              <CheckCheck className="size-4 text-primary" />
-              14 z 41 odstępstw sprawdzonych
             </div>
-          </div>
+          </Card>
         </figure>
       </div>
     </section>
@@ -241,12 +280,14 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
         </div>
         <ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, i) => (
-            <li class="space-y-3 rounded-lg border border-border bg-card p-5">
-              <div class="flex size-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                {i + 1}
-              </div>
-              <div class="font-semibold">{step.title}</div>
-              <p class="text-sm text-pretty text-muted-foreground">{step.text}</p>
+            <li>
+              <Card className="h-full gap-3 rounded-lg p-5 shadow-none">
+                <div class="flex size-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  {i + 1}
+                </div>
+                <div class="font-semibold">{step.title}</div>
+                <p class="text-sm text-pretty text-muted-foreground">{step.text}</p>
+              </Card>
             </li>
           ))}
         </ol>
@@ -257,14 +298,14 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
       <div class:list={[section, "space-y-8"]}>
         <div class="space-y-2">
           <h2 class="text-3xl font-semibold tracking-tight">Co sprawdzamy</h2>
-          <p class="max-w-[640px] text-pretty text-muted-foreground">
+          <p class="max-w-160 text-pretty text-muted-foreground">
             Każda wizyta z raportu przechodzi przez trzy reguły. Jedna wizyta może złamać kilka z nich naraz i wtedy
             widzisz wszystkie przy jednym wierszu.
           </p>
         </div>
         <div class="grid gap-4 md:grid-cols-3">
           {RULES.map((rule) => (
-            <div class="space-y-4 rounded-lg border border-border bg-card p-6">
+            <Card className="gap-4 rounded-lg p-6 shadow-none">
               <div class="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
                 <rule.icon className="size-5" />
               </div>
@@ -276,7 +317,7 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
                 <span class="text-muted-foreground">Przykład:</span> {rule.example[0]}
                 <span class="font-medium">{rule.example[1]}</span>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
@@ -320,20 +361,20 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
             Pobierz wzór pliku
           </a>
         </div>
-        <div class="rounded-lg border border-border bg-card">
+        <Card className="gap-0 rounded-lg p-0 shadow-none">
           <div class="border-b border-border px-4 py-3 text-sm font-semibold">Wymagane kolumny</div>
           {COLUMNS.map((column) => (
             <div class="flex items-start gap-4 border-b border-border px-4 py-3 text-sm last:border-b-0">
-              <code class="w-[150px] flex-none font-mono font-medium">{column.name}</code>
+              <code class="w-37.5 flex-none font-mono font-medium">{column.name}</code>
               <span class="text-muted-foreground">{column.desc}</span>
             </div>
           ))}
-        </div>
+        </Card>
       </div>
     </section>
 
     {!user && (
-      <section class="px-6 pb-[72px]">
+      <section class="px-6 pb-18">
         <div class="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-6 rounded-xl bg-primary p-10 text-primary-foreground">
           <div class="space-y-2">
             <h2 class="text-2xl font-semibold tracking-tight">Zacznij od pierwszego raportu</h2>
@@ -354,7 +395,7 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
       {!user && (
         <span>
           Masz już konto?{" "}
-          <a href="/auth/signin" class="text-primary hover:underline">
+          <a href="/auth/signin" class:list={["text-primary hover:underline", linkFocus]}>
             Zaloguj się
           </a>
         </span>
@@ -362,6 +403,33 @@ const navLink = "text-muted-foreground transition-colors hover:text-foreground";
     </div>
   </footer>
 </div>
+
+<script>
+  // Mobile section/auth menu (below md). Closes on a link click, Esc, or when the viewport grows to md.
+  const toggle = document.querySelector<HTMLButtonElement>("[data-landing-menu-toggle]");
+  const menu = document.querySelector<HTMLElement>("[data-landing-menu]");
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      menu.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+    };
+    toggle.addEventListener("click", () => {
+      setOpen(menu.hidden !== false);
+    });
+    menu.addEventListener("click", (event) => {
+      if ((event.target as HTMLElement).closest("a")) setOpen(false);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !menu.hidden) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    window.matchMedia("(min-width: 48rem)").addEventListener("change", (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>
 
 <style is:global>
   @media (prefers-reduced-motion: no-preference) {
