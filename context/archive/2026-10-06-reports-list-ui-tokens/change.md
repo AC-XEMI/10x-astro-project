@@ -1,10 +1,10 @@
 ---
 change_id: reports-list-ui-tokens
 title: Align reports list view with existing shadcn/Tailwind design tokens
-status: impl_reviewed
+status: archived
 created: 2026-10-06
-updated: 2026-10-06
-archived_at: null
+updated: 2026-10-07
+archived_at: 2026-10-07T06:25:21Z
 ---
 
 ## Notes
