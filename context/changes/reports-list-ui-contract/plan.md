@@ -541,10 +541,10 @@ Old bookmarked `?error=<text>` links show the generic message.
 
 #### Automated
 
-- [x] 6.1 `npm run check:ui-tokens` exits 0 and lists the 4 added files
-- [x] 6.2 `npm run check:ui-tokens` exits non-zero when `bg-slate-100` is temporarily added to `ReportsList.tsx` (revert after)
-- [x] 6.3 Lint passes: `npm run lint`
+- [x] 6.1 `npm run check:ui-tokens` exits 0 and lists the 4 added files — 0179b79
+- [x] 6.2 `npm run check:ui-tokens` exits non-zero when `bg-slate-100` is temporarily added to `ReportsList.tsx` (revert after) — 0179b79
+- [x] 6.3 Lint passes: `npm run lint` — 0179b79
 
 #### Manual
 
-- [x] 6.4 The `CLAUDE.md` bullet reads correctly and points at files that exist
+- [x] 6.4 The `CLAUDE.md` bullet reads correctly and points at files that exist — 0179b79
