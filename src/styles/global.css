@@ -51,9 +51,10 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  /* Brand color: same indigo as :root, lightened for dark backgrounds — see context/archive/2026-10-06-reports-list-ui-tokens/token-source.md */
-  --primary: oklch(58.5% 0.233 277.117);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Brand color: indigo-400 with dark text on it, so both purple text on the dark background (6.34:1) and
+     text on purple fills (5.74:1) reach 4.5:1 — see context/changes/landing-ui-contract/token-source.md */
+  --primary: oklch(67.3% 0.182 276.935);
+  --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
