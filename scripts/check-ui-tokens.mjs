@@ -21,7 +21,7 @@ const files = [
   "src/components/reports/ReportsList.tsx",
   "src/components/reports/ReportUpload.tsx",
   "src/components/ui/alert.tsx",
-  // Landing page (context/changes/landing-ui-contract/).
+  // Landing page (context/archive/2026-10-07-landing-ui-contract/).
   "src/components/Welcome.astro",
 ];
 

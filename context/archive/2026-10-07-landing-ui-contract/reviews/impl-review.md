@@ -31,7 +31,7 @@ Automated re-run on 54aaf8e: `npm run check:ui-tokens` OK (10 files incl. Welcom
 - **Location**: CLAUDE.md:178, src/styles/global.css:55, scripts/check-ui-tokens.mjs:24
 - **Detail**: All three point at `context/changes/landing-ui-contract/…`. After `/10x-archive` the folder becomes `context/archive/2026-10-07-landing-ui-contract/`, so the agent rule and the token comment would send the next agent to a missing file (same situation fixed afterwards for reports-list in a384e67).
 - **Fix**: When archiving, repoint the three paths to `context/archive/2026-10-07-landing-ui-contract/` in the same commit.
-- **Decision**: QUEUED — fix in the /10x-archive commit (follow-ups/review-fixes.md)
+- **Decision**: FIXED in the archive commit (follow-ups/review-fixes.md)
 
 ### F2 — check-ui-tokens header comment still describes only dashboard and reports list
 
