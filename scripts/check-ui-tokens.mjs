@@ -23,7 +23,7 @@ const files = [
   "src/components/ui/alert.tsx",
   // Landing page (context/archive/2026-10-07-landing-ui-contract/).
   "src/components/Welcome.astro",
-  // Report details (context/changes/report-details-ui-contract/).
+  // Report details (context/archive/2026-10-07-report-details-ui-contract/).
   "src/pages/reports/[id].astro",
   "src/components/reports/DeviationsList.tsx",
   "src/components/reports/ReportLoadError.astro",
