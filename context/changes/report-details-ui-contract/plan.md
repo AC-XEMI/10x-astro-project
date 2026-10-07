@@ -482,10 +482,10 @@ Each was approved by the user during implementation; Progress rows were not rena
 
 #### Automated
 
-- [x] 5.1 `npm run check:ui-tokens` exits 0 and lists the three files
-- [x] 5.2 `npm run check:ui-tokens` exits non-zero when `text-red-600` is temporarily added to `DeviationsList.tsx` (revert after)
-- [x] 5.3 Lint passes: `npm run lint`
+- [x] 5.1 `npm run check:ui-tokens` exits 0 and lists the three files — c1bbbe9
+- [x] 5.2 `npm run check:ui-tokens` exits non-zero when `text-red-600` is temporarily added to `DeviationsList.tsx` (revert after) — c1bbbe9
+- [x] 5.3 Lint passes: `npm run lint` — c1bbbe9
 
 #### Manual
 
-- [x] 5.4 The CLAUDE.md bullet reads correctly and points at files that exist
+- [x] 5.4 The CLAUDE.md bullet reads correctly and points at files that exist — c1bbbe9
