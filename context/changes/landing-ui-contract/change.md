@@ -1,7 +1,7 @@
 ---
 change_id: landing-ui-contract
 title: Landing ui contract
-status: implementing
+status: implemented
 created: 2026-10-07
 updated: 2026-10-07
 archived_at: null

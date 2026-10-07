@@ -387,10 +387,10 @@ Each was approved by the user during implementation; Progress rows were not rena
 
 #### Automated
 
-- [x] 4.1 `npm run check:ui-tokens` exits 0 and lists `src/components/Welcome.astro`
-- [x] 4.2 `npm run check:ui-tokens` exits non-zero when `text-indigo-600` is temporarily added to `Welcome.astro` (revert after)
-- [x] 4.3 Lint passes: `npm run lint`
+- [x] 4.1 `npm run check:ui-tokens` exits 0 and lists `src/components/Welcome.astro` — 59edebe
+- [x] 4.2 `npm run check:ui-tokens` exits non-zero when `text-indigo-600` is temporarily added to `Welcome.astro` (revert after) — 59edebe
+- [x] 4.3 Lint passes: `npm run lint` — 59edebe
 
 #### Manual
 
-- [x] 4.4 The CLAUDE.md bullet reads correctly and points at files that exist
+- [x] 4.4 The CLAUDE.md bullet reads correctly and points at files that exist — 59edebe
