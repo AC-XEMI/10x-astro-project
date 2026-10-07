@@ -1,4 +1,4 @@
-import { Fragment, useState, type ComponentType } from "react";
+import { Fragment, useId, useState, type ComponentType } from "react";
 import { Check, CheckCheck, ChevronDown, CircleAlert, Download, MapPin, Phone, Undo2, X } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -243,6 +243,8 @@ export default function DeviationsList({
   // Every representative group starts collapsed (user decision, report-details-ui-contract phase 3).
   const [expandedReps, setExpandedReps] = useState<Set<string>>(() => new Set(initialExpandedReps));
   const [openVisitIds, setOpenVisitIds] = useState<Set<string>>(() => new Set(initialOpenVisitIds));
+  // Group panel ids for aria-controls; representative names are not valid/unique ids across islands.
+  const idPrefix = useId();
   const [actionError, setActionError] = useState<ActionError>(initialActionError ?? null);
 
   const flaggedVisits = visits.filter((visit) => visit.deviations.length > 0);
@@ -308,6 +310,9 @@ export default function DeviationsList({
 
   async function updateDeviationStatus(ids: string[], status: DeviationStatus) {
     if (ids.length === 0) return;
+    // A new attempt clears only an earlier review error; a success never clears it, so an
+    // overlapping request that succeeds cannot hide one that failed.
+    setActionError((prev) => (prev === "review" ? null : prev));
     setPendingIds((prev) => new Set([...prev, ...ids]));
 
     try {
@@ -335,7 +340,11 @@ export default function DeviationsList({
           }),
         })),
       );
-      setActionError(null);
+      // Rows hidden by RLS or deleted meanwhile come back missing - the change did not happen for them.
+      if (updated.length < ids.length) {
+        console.error(`Zaktualizowano ${updated.length} z ${ids.length} odstępstw`);
+        setActionError("review");
+      }
     } catch (error) {
       console.error("Błąd podczas aktualizacji statusu odstępstw:", error);
       setActionError("review");
@@ -349,6 +358,7 @@ export default function DeviationsList({
   }
 
   function exportList(format: "csv" | "xlsx") {
+    setActionError((prev) => (prev === "export" ? null : prev));
     try {
       const rows = buildExportRows(visibleVisits);
       if (format === "csv") {
@@ -360,7 +370,6 @@ export default function DeviationsList({
         });
         downloadBlob(blob, `odstepstwa-raport-${reportId}.xlsx`);
       }
-      setActionError(null);
     } catch (error) {
       console.error("Błąd podczas eksportu listy odstępstw:", error);
       setActionError("export");
@@ -428,7 +437,7 @@ export default function DeviationsList({
               <button
                 type="button"
                 aria-expanded={isOpen}
-                aria-controls={detailsId}
+                aria-controls={isOpen ? detailsId : undefined}
                 className="focus-visible:ring-ring/50 cursor-pointer rounded-sm outline-none focus-visible:ring-[3px]"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -757,8 +766,9 @@ export default function DeviationsList({
         </Card>
       ) : (
         <div className="space-y-3">
-          {groups.map((group) => {
+          {groups.map((group, groupIndex) => {
             const isExpanded = expandedReps.has(group.name);
+            const groupPanelId = `${idPrefix}-group-${groupIndex}`;
             const multiRuleCount = group.all.filter((v) => v.deviations.length > 1).length;
             const countLabel = [
               `${group.all.length} ${visitsWord(group.all.length)} z odstępstwami`,
@@ -773,6 +783,7 @@ export default function DeviationsList({
                 <button
                   type="button"
                   aria-expanded={isExpanded}
+                  aria-controls={isExpanded ? groupPanelId : undefined}
                   className="hover:bg-muted/50 focus-visible:ring-ring/50 flex w-full cursor-pointer flex-wrap items-center gap-4 rounded-lg px-4 py-3 text-left outline-none focus-visible:ring-[3px]"
                   onClick={() => {
                     toggleRep(group.name);
@@ -797,6 +808,7 @@ export default function DeviationsList({
                           title={RULE_LABELS[rule]}
                         >
                           <Icon className="size-4" />
+                          <span className="sr-only">{RULE_LABELS[rule]}:</span>
                           {count}
                         </span>
                       );
@@ -810,7 +822,7 @@ export default function DeviationsList({
                   </div>
                 </button>
                 {isExpanded && (
-                  <div className="border-t pb-2 md:px-4">
+                  <div id={groupPanelId} className="border-t pb-2 md:px-4">
                     <Table>
                       <TableHeader>
                         <TableRow>

@@ -164,6 +164,10 @@ const forcedRing = "border-ring ring-[3px] ring-ring/50";
         <code>initialOpenVisitIds</code>, <code>initialFilters</code>, <code>initialPendingIds</code>,{" "}
         <code>initialActionError</code>) i <code>ReportLoadError</code>.
       </p>
+      <p class="text-sm text-muted-foreground">
+        Wyspy są interaktywne: przyciski „Oznacz…” / „Cofnij” wysyłają fikcyjne id do prawdziwego{" "}
+        <code>/api/deviations/review</code> — nic się nie zapisuje, a lista pokaże alert błędu zapisu.
+      </p>
     </div>
 
     <section class:list={section}>
