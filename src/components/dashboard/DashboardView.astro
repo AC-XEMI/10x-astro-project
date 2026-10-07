@@ -3,7 +3,7 @@
 // (src/pages/dashboard.astro, which fetches) and the kitchen sink
 // (src/pages/dev/kitchen-sink/dashboard.astro, which uses fixtures) share the same markup.
 import { FileText } from "lucide-react";
-import Banner from "@/components/Banner.astro";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -128,7 +128,11 @@ function reportStatus(report: RecentReport) {
   )}
 </div>
 
-{loadError && <Banner variant="error">Nie udało się wczytać danych pulpitu. Odśwież stronę.</Banner>}
+{loadError && (
+  <Alert variant="destructive">
+    <AlertDescription className="text-current">Nie udało się wczytać danych pulpitu. Odśwież stronę.</AlertDescription>
+  </Alert>
+)}
 
 {!loadError && !stats && (
   <Card className="text-center">

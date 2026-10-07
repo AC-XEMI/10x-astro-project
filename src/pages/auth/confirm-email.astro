@@ -1,7 +1,7 @@
 ---
 import { CircleCheck, Mail } from "lucide-react";
 import AuthLayout from "@/layouts/AuthLayout.astro";
-import Banner from "@/components/Banner.astro";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { getPendingSignupEmail } from "@/lib/pending-signup";
 
@@ -49,8 +49,16 @@ const resent = Astro.url.searchParams.has("resent");
             Kliknij go, aby potwierdzić email i dokończyć zakładanie konta.
           </p>
         </div>
-        {resent && <Banner variant="success">Wysłaliśmy link ponownie.</Banner>}
-        {error && <Banner variant="error">{error}</Banner>}
+        {resent && (
+          <Alert variant="success" role="status">
+            <AlertDescription className="text-current">Wysłaliśmy link ponownie.</AlertDescription>
+          </Alert>
+        )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription className="text-current">{error}</AlertDescription>
+          </Alert>
+        )}
         <div class="rounded-md bg-muted p-3 text-left text-sm text-pretty text-muted-foreground">
           Link jest ważny przez ograniczony czas. Nie widzisz wiadomości? Sprawdź folder Spam lub Oferty.
         </div>
