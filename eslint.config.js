@@ -85,6 +85,7 @@ const scriptsConfig = defineConfig({
       URLSearchParams: true,
       WebSocket: true,
       setTimeout: true,
+      clearTimeout: true,
       Buffer: true,
     },
   },

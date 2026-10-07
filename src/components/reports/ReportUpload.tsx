@@ -110,7 +110,7 @@ function ErrorCard({
   footer: ReactNode;
 }) {
   return (
-    <Card className="border-destructive gap-4 rounded-lg p-5 shadow-none" role="alert">
+    <Card className="border-destructive gap-4 rounded-lg p-5 shadow-none">
       <div className="flex items-start gap-3">
         <div className="bg-destructive/10 text-destructive flex size-9 flex-none items-center justify-center rounded-full">
           <CircleAlert className="size-5" />
@@ -231,17 +231,31 @@ export default function ReportUpload({ initialError, initialState }: Props) {
     // failure); XHR follows it, so responseURL is where a plain form POST would have landed.
     // A failure redirect is shown in this card instead of reloading the page.
     xhr.onload = () => {
-      const target = xhr.responseURL ? new URL(xhr.responseURL) : null;
-      const code = target?.pathname === "/reports" ? target.searchParams.get("error") : null;
-      if (target && code !== null) {
+      const responseUrl = xhr.responseURL ? new URL(xhr.responseURL) : null;
+      // Only a same-origin redirect target is trusted; anything else is treated as /reports.
+      const target = responseUrl?.origin === window.location.origin ? responseUrl : null;
+      // No redirect happened (unhandled server error, platform 413/502): navigating to the API URL
+      // would GET a POST-only route, so show the generic save failure in the card instead.
+      const failedWithoutRedirect = xhr.status >= 400 || target?.pathname.startsWith("/api/");
+      const code = failedWithoutRedirect
+        ? "upload_failed"
+        : target?.pathname === "/reports"
+          ? target.searchParams.get("error")
+          : null;
+      if (code !== null) {
         xhrRef.current = null;
         setState({
           kind: "idle",
-          error: { kind: "server", code, detail: target.searchParams.get("detail") ?? undefined, fileName: file.name },
+          error: {
+            kind: "server",
+            code,
+            detail: failedWithoutRedirect ? undefined : (target?.searchParams.get("detail") ?? undefined),
+            fileName: file.name,
+          },
         });
         return;
       }
-      window.location.assign(xhr.responseURL || "/reports");
+      window.location.assign(target ? target.href : "/reports");
     };
     xhr.onerror = () => {
       xhrRef.current = null;
@@ -335,7 +349,6 @@ export default function ReportUpload({ initialError, initialState }: Props) {
             ref={statusRef}
             tabIndex={-1}
             role="status"
-            aria-live="polite"
             className={cn("text-muted-foreground text-xs", FOCUS_TARGET_CLASS)}
           >
             {isUploading

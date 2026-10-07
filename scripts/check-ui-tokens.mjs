@@ -56,8 +56,10 @@ const ALLOWED_ARBITRARY = new Set([
 ]);
 
 // Opacity steps of --primary that are tints, not data-series colours (series use --rule-*).
-const ALLOWED_PRIMARY_TINTS = new Set([
-  "bg-primary/10", // upload icon chip and drag-over fill from the Claude Design upload card
+// Keyed by file, so the dashboard keeps the strict "no primary/NN" rule for its series colours.
+const ALLOWED_PRIMARY_TINTS = new Map([
+  // upload icon chip and drag-over fill from the Claude Design upload card
+  ["bg-primary/10", "src/components/reports/ReportUpload.tsx"],
 ]);
 
 const hits = [];
@@ -67,7 +69,7 @@ for (const file of files) {
     for (const rule of RULES) {
       for (const match of line.matchAll(rule.re)) {
         if (rule.name === "arbitrary value" && ALLOWED_ARBITRARY.has(match[0])) continue;
-        if (rule.name.startsWith("primary opacity step") && ALLOWED_PRIMARY_TINTS.has(match[0])) continue;
+        if (rule.name.startsWith("primary opacity step") && ALLOWED_PRIMARY_TINTS.get(match[0]) === file) continue;
         hits.push(`${file}:${index + 1}  ${rule.name}: ${match[0]}`);
       }
     }

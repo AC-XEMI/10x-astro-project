@@ -460,6 +460,17 @@ Old bookmarked `?error=<text>` links show the generic message.
 - Dashboard pattern (Card density, kitchen sink frames, CDP screenshots): `context/archive/2026-10-07-dashboard-ui-tokens/`
 - Lessons: `context/foundation/lessons.md`
 
+## Deviations during implementation
+
+Recorded after the full implementation review (`reviews/impl-review.md`, F8). Each was approved by the user during implementation; Progress rows were not renamed.
+
+- **Phase 2:** `index.astro` already mapped `?error` through `reportErrorMessage` (planned for Phase 3) so the page never showed a raw code in between.
+- **Phase 3:** on PostgREST `PGRST103` (offset past the last row, count dropped by supabase-js) the page re-queries the count with `head: true` so the out-of-range redirect can run. `eslint.config.js` narrows `no-misused-promises` for `*.astro` to `checksVoidReturn.returns: false` — top-level `return Astro.redirect()` crashed ESLint (user approved).
+- **Phase 4 (user request):** the upload cards keep the Claude Design dimensions — ErrorCard `rounded-lg p-5 gap-4` without shadow, progress card `rounded-lg p-6`, drop zone `rounded-lg border-[1.5px] p-6` (only the border colour changed to `--muted-foreground` for contrast), `pl-[18px]`, `w-[150px]`. Criteria 3.3 / 3.4 therefore now list these values on purpose. The drag-over text stays "Przeciągnij plik tutaj lub wybierz z dysku" (planned change dropped); the network error card uses the design's sentences verbatim. Standing rule: styles and display logic may change, user-facing wording from Claude Design must not.
+- **Phase 5:** the open delete dialog renders only on `?dialog=1` (a fixed modal covered other states in the full-page screenshot) and is shown in the light theme only (its portal mounts outside the `.dark` frame); separate screenshot `kitchen-sink-dialog.png`.
+- **Phase 6:** `check:ui-tokens` skips variant selectors (`-[…]` followed by `:`), allow-lists the Claude Design upload dimensions and the shadcn alert layout values, and allows `bg-primary/10` only in `ReportUpload.tsx`.
+- **Review fixes (impl-review F1–F10):** non-redirect upload failures and cross-origin `responseURL` handled in the card; `?page` parsed as a safe integer; CLAUDE.md wording narrowed; lesson 3 clarified for spreadsheet header names; screenshot script fails on navigation errors / HTTP ≥ 400 and cleans up on signals; one announcement mechanism per upload state.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.

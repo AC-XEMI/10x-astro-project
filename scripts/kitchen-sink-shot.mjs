@@ -55,6 +55,11 @@ function fail(message) {
   process.exit(1);
 }
 
+// Ctrl+C / kill must not leave a headless Chrome and its temp profile behind.
+for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => fail(`Interrupted (${signal}).`));
+
+const COMMAND_TIMEOUT_MS = 60_000;
+
 async function findPageTarget() {
   for (let attempt = 0; attempt < 50; attempt++) {
     try {
@@ -84,6 +89,7 @@ try {
   let nextId = 0;
   const pending = new Map();
   const events = new Set();
+  let documentStatus = null;
   ws.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
     if (message.id && pending.has(message.id)) {
@@ -91,12 +97,24 @@ try {
       pending.delete(message.id);
     } else if (message.method) {
       events.add(message.method);
+      if (message.method === "Network.responseReceived" && message.params.type === "Document") {
+        documentStatus = message.params.response.status;
+      }
     }
+  });
+  ws.addEventListener("close", () => {
+    for (const settle of pending.values()) settle({ error: { message: "DevTools connection closed" } });
+    pending.clear();
   });
   const send = (method, params = {}) =>
     new Promise((resolve, reject) => {
       const id = ++nextId;
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error(`${method}: no answer within ${COMMAND_TIMEOUT_MS / 1000} s`));
+      }, COMMAND_TIMEOUT_MS);
       pending.set(id, (message) => {
+        clearTimeout(timer);
         if (message.error) reject(new Error(`${method}: ${message.error.message}`));
         else resolve(message.result);
       });
@@ -107,9 +125,13 @@ try {
 
   await setViewport(VIEWPORT_HEIGHT);
   await send("Page.enable");
-  await send("Page.navigate", { url });
+  await send("Network.enable");
+  // An unreachable URL still "loads" Chrome's error page - never let that pass as a gate screenshot.
+  const navigation = await send("Page.navigate", { url });
+  if (navigation.errorText) fail(`Navigation failed (${navigation.errorText}): ${url}`);
   for (let i = 0; i < 100 && !events.has("Page.loadEventFired"); i++) await sleep(100);
   if (!events.has("Page.loadEventFired")) fail(`Page did not finish loading within 10 s: ${url}`);
+  if (documentStatus !== null && documentStatus >= 400) fail(`Page answered HTTP ${documentStatus}: ${url}`);
   await sleep(1500); // let client:load islands hydrate
 
   const evaluated = await send("Runtime.evaluate", {

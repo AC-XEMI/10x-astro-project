@@ -31,3 +31,5 @@
 **Rule:** Żaden string budowany do wyświetlenia użytkownikowi nie może zawierać dosłownej nazwy kolumny/pola źródłowego (snake_case, nazwa z arkusza importu itp.) — zawsze używać opisowego zdania w języku użytkownika. Jeśli taki tekst jest zapisywany do bazy (nie liczony w locie), poprawka kodu wymaga też rozważenia backfillu istniejących rekordów.
 
 **Applies to:** Wszystkie miejsca budujące `detail`/komunikaty w `src/lib/services/*.ts` zapisywane do bazy przy przetwarzaniu raportu; review nowych reguł detekcji odstępstw.
+
+**Wyjątek (doprecyzowanie 2026-10-07, reports-list-ui-contract):** nazwy **nagłówków arkusza wejściowego**, które użytkownik sam musi wpisać w pliku (np. `gps_wlaczony`, `data_wizyty` w komunikatach parsera `report-parser.ts` i w karcie brakujących kolumn), są dozwolone — to słownictwo pliku użytkownika, nie wewnętrzna nazwa z bazy; najlepiej pokazywać je jako kod. Zakaz dotyczy nazw kolumn/tabel bazy (`deviation_rule`, `visit_id`, …) i surowych komunikatów Supabase.

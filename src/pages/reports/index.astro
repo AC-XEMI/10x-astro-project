@@ -14,7 +14,10 @@ const PAGE_SIZE = 20;
 
 const error = Astro.url.searchParams.get("error");
 const deleted = Astro.url.searchParams.get("deleted");
-const page = Math.max(1, Number(Astro.url.searchParams.get("page")) || 1);
+// Whole page numbers only (parseInt: "2.9" -> 2, "1e21" -> 1); anything that is not a safe integer >= 1
+// ("abc", "-2", "99999999999999999999") falls back to the first page.
+const requestedPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "", 10);
+const page = Number.isSafeInteger(requestedPage) && requestedPage >= 1 ? requestedPage : 1;
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
