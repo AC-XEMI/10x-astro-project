@@ -523,25 +523,25 @@ None — no schema change.
 
 #### Automated
 
-- [x] 4.1 Type check passes: `npx astro check`
-- [x] 4.2 Lint passes: `npm run lint`
-- [x] 4.3 `/dev/kitchen-sink/dashboard` returns HTTP 200 from the dev server
-- [x] 4.4 Both screenshot files exist in `context/changes/dashboard-ui-tokens/screenshots/`
-- [x] 4.5 Hardcoded-value scan on `dashboard.astro`, `DashboardView.astro`, `RankingTable.tsx`, `DashboardExport.tsx` reports 0 colour literals and no `primary/NN` series classes
+- [x] 4.1 Type check passes: `npx astro check` — 2ecd59c
+- [x] 4.2 Lint passes: `npm run lint` — 2ecd59c
+- [x] 4.3 `/dev/kitchen-sink/dashboard` returns HTTP 200 from the dev server — 2ecd59c
+- [x] 4.4 Both screenshot files exist in `context/changes/dashboard-ui-tokens/screenshots/` — 2ecd59c
+- [x] 4.5 Hardcoded-value scan on `dashboard.astro`, `DashboardView.astro`, `RankingTable.tsx`, `DashboardExport.tsx` reports 0 colour literals and no `primary/NN` series classes — 2ecd59c
 
 #### Manual
 
-- [x] 4.6 The screenshots show all 7 states in both themes, with N/A frames explaining why
-- [x] 4.7 `/dashboard` on real data renders identically to before the extraction (same numbers, same sections)
+- [x] 4.6 The screenshots show all 7 states in both themes, with N/A frames explaining why — 2ecd59c
+- [x] 4.7 `/dashboard` on real data renders identically to before the extraction (same numbers, same sections) — 2ecd59c
 
 ### Phase 5: Guard
 
 #### Automated
 
-- [ ] 5.1 `npm run check:ui-tokens` exits 0 on the finished view
-- [ ] 5.2 `npm run check:ui-tokens` exits non-zero when a `bg-primary/25` class is temporarily added to `RankingTable.tsx` (revert after)
-- [ ] 5.3 Lint passes: `npm run lint`
+- [x] 5.1 `npm run check:ui-tokens` exits 0 on the finished view
+- [x] 5.2 `npm run check:ui-tokens` exits non-zero when a `bg-primary/25` class is temporarily added to `RankingTable.tsx` (revert after)
+- [x] 5.3 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 5.4 The `CLAUDE.md` bullet reads correctly and points at files that exist
+- [x] 5.4 The `CLAUDE.md` bullet reads correctly and points at files that exist
