@@ -172,12 +172,12 @@ container moves to its own row below `md`. No text or ARIA changes.
 
 #### Automated
 
-- [x] 2.1 Type check passes: `npx astro check`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 `npm run check:ui-tokens` exits 0
-- [x] 2.4 The 390 screenshot run reports `sw` = 390
+- [x] 2.1 Type check passes: `npx astro check` — 582b9f2
+- [x] 2.2 Lint passes: `npm run lint` — 582b9f2
+- [x] 2.3 `npm run check:ui-tokens` exits 0 — 582b9f2
+- [x] 2.4 The 390 screenshot run reports `sw` = 390 — 582b9f2
 
 #### Manual
 
-- [x] 2.5 At 390px every group header shows the full name on its own row with counts and progress below it; desktop looks as before
-- [x] 2.6 The "Wizyty" tile in the empty states ("Brak wizyt…", "Brak wykrytych odstępstw…") shows a grey 0
+- [x] 2.5 At 390px every group header shows the full name on its own row with counts and progress below it; desktop looks as before — 582b9f2
+- [x] 2.6 The "Wizyty" tile in the empty states ("Brak wizyt…", "Brak wykrytych odstępstw…") shows a grey 0 — 582b9f2
