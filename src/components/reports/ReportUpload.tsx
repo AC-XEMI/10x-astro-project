@@ -213,7 +213,7 @@ export default function ReportUpload({ initialError }: Props) {
   );
 
   const closeButton = (
-    <Button type="button" variant="outline" className="cursor-pointer" onClick={dismissError}>
+    <Button type="button" variant="outline" onClick={dismissError}>
       Zamknij
     </Button>
   );
@@ -221,7 +221,7 @@ export default function ReportUpload({ initialError }: Props) {
   const pickAnotherFooter = (label: string) => (
     <div className="flex items-center justify-end gap-2">
       {closeButton}
-      <Button type="button" className="cursor-pointer" onClick={pickFile}>
+      <Button type="button" onClick={pickFile}>
         <Upload /> {label}
       </Button>
     </div>
@@ -272,7 +272,6 @@ export default function ReportUpload({ initialError }: Props) {
           <Button
             type="button"
             variant="outline"
-            className="cursor-pointer"
             onClick={() => {
               xhrRef.current?.abort();
             }}
@@ -344,7 +343,7 @@ export default function ReportUpload({ initialError }: Props) {
               </Button>
               <div className="flex items-center gap-2">
                 {closeButton}
-                <Button type="button" className="cursor-pointer" onClick={pickFile}>
+                <Button type="button" onClick={pickFile}>
                   <Upload /> Wgraj poprawiony plik
                 </Button>
               </div>
@@ -416,7 +415,7 @@ export default function ReportUpload({ initialError }: Props) {
             <div className="text-muted-foreground text-sm">CSV lub XLSX · maks. 5 MB</div>
           </div>
         </div>
-        <Button type="button" className="cursor-pointer" onClick={pickFile}>
+        <Button type="button" onClick={pickFile}>
           <Upload /> Wgraj raport
         </Button>
         {fileInput}

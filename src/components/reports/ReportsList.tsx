@@ -122,7 +122,7 @@ export default function ReportsList({ reports, page }: Props) {
                     type="button"
                     variant="destructive"
                     size="icon"
-                    className="size-8 cursor-pointer"
+                    className="size-8"
                     title="Usuń raport"
                     aria-label="Usuń raport"
                     onClick={() => {
@@ -167,14 +167,13 @@ export default function ReportsList({ reports, page }: Props) {
                   <Button
                     type="button"
                     variant="outline"
-                    className="cursor-pointer"
                     onClick={() => {
                       setDeletingReport(null);
                     }}
                   >
                     Anuluj
                   </Button>
-                  <Button type="submit" variant="destructive" className="cursor-pointer">
+                  <Button type="submit" variant="destructive">
                     <Trash2 /> Tak, usuń raport
                   </Button>
                 </DialogFooter>
