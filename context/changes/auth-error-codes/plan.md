@@ -110,14 +110,14 @@ travel as codes from `src/lib/auth-errors.ts`, and that raw Supabase messages go
 
 #### Automated
 
-- [x] 1.1 Type check passes: `npx astro check`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 `grep -rn "encodeURIComponent" src/pages/api/auth` returns nothing
-- [x] 1.4 `grep -rn "translateAuthError" src` returns nothing
-- [x] 1.5 `/auth/signin?error=Kliknij%20tutaj` renders "Coś poszło nie tak. Spróbuj ponownie." and not "Kliknij tutaj"
-- [x] 1.6 `/auth/signin?error=invalid_credentials` renders "Nieprawidłowy email lub hasło. Sprawdź dane i spróbuj ponownie."
-- [ ] 1.7 `npm run smoke` passes against the running dev server, including "signin rejects wrong password"
+- [x] 1.1 Type check passes: `npx astro check` — 7b5e12c
+- [x] 1.2 Lint passes: `npm run lint` — 7b5e12c
+- [x] 1.3 `grep -rn "encodeURIComponent" src/pages/api/auth` returns nothing — 7b5e12c
+- [x] 1.4 `grep -rn "translateAuthError" src` returns nothing — 7b5e12c
+- [x] 1.5 `/auth/signin?error=Kliknij%20tutaj` renders "Coś poszło nie tak. Spróbuj ponownie." and not "Kliknij tutaj" — 7b5e12c
+- [x] 1.6 `/auth/signin?error=invalid_credentials` renders "Nieprawidłowy email lub hasło. Sprawdź dane i spróbuj ponownie." — 7b5e12c
+- [x] 1.7 `npm run smoke` passes against the running dev server, including "signin rejects wrong password" — 7b5e12c
 
 #### Manual
 
-- [x] 1.8 A wrong password on `/auth/signin` shows the same Polish message as before, and the URL contains `?error=invalid_credentials`
+- [x] 1.8 A wrong password on `/auth/signin` shows the same Polish message as before, and the URL contains `?error=invalid_credentials` — 7b5e12c
