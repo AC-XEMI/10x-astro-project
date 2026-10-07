@@ -158,26 +158,26 @@ container moves to its own row below `md`. No text or ARIA changes.
 
 #### Automated
 
-- [x] 1.1 Type check passes: `npx astro check`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 `grep -rln "Banner" src --include=*.astro --include=*.tsx` lists only `src/components/Banner.astro`, `src/layouts/Layout.astro` and `src/components/ui/alert.tsx` (comment)
-- [x] 1.4 `npm run check:ui-tokens` exits 0
+- [x] 1.1 Type check passes: `npx astro check` — 2b59c0b
+- [x] 1.2 Lint passes: `npm run lint` — 2b59c0b
+- [x] 1.3 `grep -rln "Banner" src --include=*.astro --include=*.tsx` lists only `src/components/Banner.astro`, `src/layouts/Layout.astro` and `src/components/ui/alert.tsx` (comment) — 2b59c0b
+- [x] 1.4 `npm run check:ui-tokens` exits 0 — 2b59c0b
 
 #### Manual
 
-- [x] 1.5 `/dev/kitchen-sink/dashboard` error state shows an in-page alert in light and dark
-- [x] 1.6 `/auth/confirm-email?resent` and `/auth/confirm-email?error=Test` show a success / error alert in the column
+- [x] 1.5 `/dev/kitchen-sink/dashboard` error state shows an in-page alert in light and dark — 2b59c0b
+- [x] 1.6 `/auth/confirm-email?resent` and `/auth/confirm-email?error=Test` show a success / error alert in the column — 2b59c0b
 
 ### Phase 2: Report details polish
 
 #### Automated
 
-- [ ] 2.1 Type check passes: `npx astro check`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 `npm run check:ui-tokens` exits 0
-- [ ] 2.4 The 390 screenshot run reports `sw` = 390
+- [x] 2.1 Type check passes: `npx astro check`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 `npm run check:ui-tokens` exits 0
+- [x] 2.4 The 390 screenshot run reports `sw` = 390
 
 #### Manual
 
-- [ ] 2.5 At 390px every group header shows the full name on its own row with counts and progress below it; desktop looks as before
-- [ ] 2.6 The "Wizyty" tile in the empty states ("Brak wizyt…", "Brak wykrytych odstępstw…") shows a grey 0
+- [x] 2.5 At 390px every group header shows the full name on its own row with counts and progress below it; desktop looks as before
+- [x] 2.6 The "Wizyty" tile in the empty states ("Brak wizyt…", "Brak wykrytych odstępstw…") shows a grey 0

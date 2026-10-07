@@ -620,8 +620,15 @@ export default function DeviationsList({
           <div className="text-muted-foreground text-sm">Wizyty</div>
           <div className="text-2xl font-semibold tabular-nums">{visits.length}</div>
           <div className="text-muted-foreground text-xs">
-            <span className="text-destructive font-medium tabular-nums">{flaggedVisits.length}</span> z odstępstwami (
-            {percent(flaggedVisits.length, visits.length)}%)
+            <span
+              className={cn(
+                "font-medium tabular-nums",
+                flaggedVisits.length > 0 ? "text-destructive" : "text-muted-foreground",
+              )}
+            >
+              {flaggedVisits.length}
+            </span>{" "}
+            z odstępstwami ({percent(flaggedVisits.length, visits.length)}%)
           </div>
         </Card>
         {ALL_RULES.map((rule) => {
@@ -796,29 +803,32 @@ export default function DeviationsList({
                     <div className="font-semibold">{group.name}</div>
                     <div className="text-muted-foreground text-xs">{countLabel}</div>
                   </div>
-                  <div className="text-destructive flex items-center gap-4 text-sm">
-                    {ALL_RULES.map((rule) => {
-                      const count = ruleCount(rule, group.all);
-                      if (count === 0) return null;
-                      const Icon = RULE_ICONS[rule];
-                      return (
-                        <span
-                          key={rule}
-                          className="flex items-center gap-1 font-medium tabular-nums"
-                          title={RULE_LABELS[rule]}
-                        >
-                          <Icon className="size-4" />
-                          <span className="sr-only">{RULE_LABELS[rule]}:</span>
-                          {count}
-                        </span>
-                      );
-                    })}
-                  </div>
-                  <div className="flex w-37.5 items-center gap-2">
-                    <ProgressBar value={percent(group.reviewed, group.all.length)} className="flex-1" />
-                    <span className="text-muted-foreground text-xs tabular-nums">
-                      {group.reviewed}/{group.all.length}
-                    </span>
+                  {/* Own row below md (aligned under the name: chevron size-4 + gap-4 = pl-8), inline from md. */}
+                  <div className="flex w-full items-center justify-between gap-4 pl-8 md:w-auto md:pl-0">
+                    <div className="text-destructive flex items-center gap-4 text-sm">
+                      {ALL_RULES.map((rule) => {
+                        const count = ruleCount(rule, group.all);
+                        if (count === 0) return null;
+                        const Icon = RULE_ICONS[rule];
+                        return (
+                          <span
+                            key={rule}
+                            className="flex items-center gap-1 font-medium tabular-nums"
+                            title={RULE_LABELS[rule]}
+                          >
+                            <Icon className="size-4" />
+                            <span className="sr-only">{RULE_LABELS[rule]}:</span>
+                            {count}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <div className="flex w-37.5 items-center gap-2">
+                      <ProgressBar value={percent(group.reviewed, group.all.length)} className="flex-1" />
+                      <span className="text-muted-foreground text-xs tabular-nums">
+                        {group.reviewed}/{group.all.length}
+                      </span>
+                    </div>
                   </div>
                 </button>
                 {isExpanded && (
