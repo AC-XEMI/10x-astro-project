@@ -1,4 +1,4 @@
-// UI token check for the dashboard (Pulpit) and the reports list (Raporty): fails when a dashboard file gains a colour literal,
+// UI token check for the dashboard (Pulpit), the reports list (Raporty) and the landing page (Strona startowa): fails when a scanned file gains a colour literal,
 // a Tailwind palette class, an unlisted arbitrary value, or an opacity step of --primary used as a
 // colour (series colours must come from the --rule-* tokens via src/lib/rule-series.ts).
 // Patterns follow the /10x-ui hardcoded-value scan; see context/archive/2026-10-07-dashboard-ui-tokens/.
