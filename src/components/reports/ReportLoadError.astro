@@ -1,0 +1,14 @@
+---
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { REPORT_LOAD_ERROR_MESSAGES, type ReportLoadErrorKind } from "@/lib/report-load-errors";
+
+interface Props {
+  kind: ReportLoadErrorKind;
+}
+
+const { kind } = Astro.props;
+---
+
+<Alert variant="destructive">
+  <AlertDescription className="text-current">{REPORT_LOAD_ERROR_MESSAGES[kind]}</AlertDescription>
+</Alert>

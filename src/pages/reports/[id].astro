@@ -1,38 +1,53 @@
 ---
 import { FileText, Undo2 } from "lucide-react";
 import Layout from "@/layouts/Layout.astro";
-import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
 import { buttonVariants } from "@/components/ui/button";
 import DeviationsList from "@/components/reports/DeviationsList";
 import type { VisitWithDeviations } from "@/components/reports/DeviationsList";
+import ReportLoadError from "@/components/reports/ReportLoadError.astro";
 import { createClient } from "@/lib/supabase";
+import { REPORT_LOAD_ERROR_STATUS, type ReportLoadErrorKind } from "@/lib/report-load-errors";
 import { formatDateTime } from "@/lib/format-date";
 import type { Tables } from "@/types";
 
 const { id } = Astro.params;
 
+// A malformed id can never match a report, and querying with it would only make Postgres reject
+// the uuid cast — a "not found", not a database failure — so it is decided without a query.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let report: Tables<"reports"> | null = null;
 let visits: VisitWithDeviations[] = [];
+let loadError: ReportLoadErrorKind | null = null;
 
-if (supabase) {
+if (!supabase) {
+  loadError = "not_configured";
+} else if (!id || !UUID_RE.test(id)) {
+  loadError = "not_found";
+} else {
   const [reportResult, visitsResult] = await Promise.all([
-    supabase
-      .from("reports")
-      .select("*")
-      .eq("id", id ?? "")
-      .maybeSingle(),
-    supabase
-      .from("visits")
-      .select("*, deviations(*)")
-      .eq("report_id", id ?? ""),
+    supabase.from("reports").select("*").eq("id", id).maybeSingle(),
+    supabase.from("visits").select("*, deviations(*)").eq("report_id", id),
   ]);
-  if (!reportResult.error && reportResult.data && !visitsResult.error) {
+  if (reportResult.error || visitsResult.error) {
+    // Raw Supabase messages go to the server log only, never to the page.
+    if (reportResult.error) console.error("Report details: loading the report failed:", reportResult.error.message);
+    if (visitsResult.error) console.error("Report details: loading visits failed:", visitsResult.error.message);
+    loadError = "load_failed";
+  } else if (!reportResult.data) {
+    loadError = "not_found";
+  } else {
     report = reportResult.data;
     visits = visitsResult.data;
   }
+}
+
+// Must be set here, before any output is streamed.
+if (loadError) {
+  Astro.response.status = REPORT_LOAD_ERROR_STATUS[loadError];
 }
 ---
 
@@ -64,7 +79,7 @@ if (supabase) {
     {report ? (
       <DeviationsList visits={visits} reportId={report.id} client:load />
     ) : (
-      <Banner variant="error">Nie znaleziono raportu.</Banner>
+      <ReportLoadError kind={loadError ?? "not_found"} />
     )}
   </main>
 </Layout>
