@@ -23,7 +23,7 @@ export type UploadError =
   | { kind: "server"; code: string; detail?: string; fileName?: string }
   | { kind: "network"; fileName?: string };
 
-type UploadState =
+export type UploadState =
   | { kind: "idle"; error?: UploadError }
   | { kind: "checking"; fileName: string }
   | { kind: "uploading"; fileName: string; loaded: number; total: number }
@@ -145,14 +145,16 @@ function FixList({ heading, children }: { heading: string; children: ReactNode }
 interface Props {
   /** Dev kitchen sink only: render an error state without picking a file. */
   initialError?: UploadError;
+  /** Dev kitchen sink only: render a progress stage (checking/uploading/processing) without a file. */
+  initialState?: UploadState;
 }
 
-export default function ReportUpload({ initialError }: Props) {
+export default function ReportUpload({ initialError, initialState }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
   // The file of the last attempt, so a network failure can be retried without picking it again.
   const lastFileRef = useRef<File | null>(null);
-  const [state, setState] = useState<UploadState>({ kind: "idle", error: initialError });
+  const [state, setState] = useState<UploadState>(initialState ?? { kind: "idle", error: initialError });
   const [dragging, setDragging] = useState(false);
 
   // Focus targets, so focus never falls to <body> when the card swaps its content.
@@ -165,7 +167,7 @@ export default function ReportUpload({ initialError }: Props) {
   useEffect(() => {
     const previous = previousStateRef.current;
     previousStateRef.current = state;
-    // Initial render (idle on page load, or initialError in the kitchen sink): don't steal focus.
+    // Initial render (idle on page load, or initialError/initialState in the kitchen sink): don't steal focus.
     if (previous === null) return;
     if (state.kind !== "idle") {
       // Entering progress from idle, or a stage change removed the focused control (Anuluj).

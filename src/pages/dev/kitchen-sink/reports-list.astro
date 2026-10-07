@@ -1,201 +1,345 @@
 ---
-// Dev-only kitchen sink: every state of the upload card + reports table, side by side.
+// Dev-only kitchen sink: every state of the reports list page (Raporty), light and dark, from fixtures.
 // Not linked from product nav, not in PROTECTED_ROUTES (src/middleware.ts) — no auth needed.
+// Renders the same components the real page uses (src/pages/reports/index.astro): ReportUpload,
+// ReportsList inside Card > CardContent, page Alerts and the CardFooter pagination. Upload stages and
+// the open delete dialog come from the dev-only initialState / initialDeletingId props.
 import Layout from "@/layouts/Layout.astro";
-import Banner from "@/components/Banner.astro";
 import ReportsList from "@/components/reports/ReportsList";
-import ReportUpload from "@/components/reports/ReportUpload";
-import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Search, Trash2 } from "lucide-react";
+import ReportUpload, { type UploadError, type UploadState } from "@/components/reports/ReportUpload";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { reportErrorMessage } from "@/lib/report-errors";
 import { checkRequiredColumns } from "@/lib/services/report-columns";
+import { cn } from "@/lib/utils";
 import type { Tables } from "@/types";
+import { Search, Trash2, Upload } from "lucide-react";
 
+const USER_ID = "00000000-0000-0000-0000-000000000001";
+
+// 37 / 0 / null deviations; the last one also has no stored row_count (shown as "—").
 const sampleReports: Tables<"reports">[] = [
   {
     id: "11111111-1111-1111-1111-111111111111",
-    created_at: "2026-10-01T10:00:00Z",
+    created_at: "2026-10-06T07:14:00Z",
     deviation_count: 37,
-    original_filename: "raport_wrzesien.csv",
+    original_filename: "trasowki-wrzesien-2026.xlsx",
     row_count: 128,
-    uploaded_at: "2026-10-01T10:00:00Z",
-    user_id: "00000000-0000-0000-0000-000000000001",
+    uploaded_at: "2026-10-06T07:14:00Z",
+    user_id: USER_ID,
   },
   {
     id: "22222222-2222-2222-2222-222222222222",
-    created_at: "2026-09-28T09:15:00Z",
+    created_at: "2026-09-02T12:32:00Z",
     deviation_count: 0,
-    original_filename: "raport_sierpien.xlsx",
+    original_filename: "trasowki-sierpien.csv",
     row_count: 342,
-    uploaded_at: "2026-09-28T09:15:00Z",
-    user_id: "00000000-0000-0000-0000-000000000001",
+    uploaded_at: "2026-09-02T12:32:00Z",
+    user_id: USER_ID,
   },
   {
     id: "33333333-3333-3333-3333-333333333333",
-    created_at: "2026-09-20T14:45:00Z",
+    created_at: "2026-08-04T06:05:00Z",
     deviation_count: null,
-    original_filename: "raport_lipiec.csv",
+    original_filename: "trasowki-lipiec.xlsx",
     row_count: null,
-    uploaded_at: "2026-09-20T14:45:00Z",
-    user_id: "00000000-0000-0000-0000-000000000001",
+    uploaded_at: "2026-08-04T06:05:00Z",
+    user_id: USER_ID,
   },
 ];
+
+const FILE_NAME = "trasowki-wrzesien-2026.xlsx";
+
+const uploadErrors: { label: string; error: UploadError }[] = [
+  { label: "Za duży plik (too_large)", error: { kind: "too_large", fileName: "trasowki-q3-2026.xlsx", size: 8178892 } },
+  { label: "Zły format (bad_format)", error: { kind: "bad_format", fileName: "trasowki-wrzesien-2026.pdf" } },
+  {
+    label: "Brak wymaganych kolumn (missing_columns), z podpowiedzią podobnego nagłówka",
+    error: {
+      kind: "missing_columns",
+      fileName: FILE_NAME,
+      columns: checkRequiredColumns(["Przedstawiciel", "Data wizyty", "gps_wlaczony"]),
+    },
+  },
+  { label: "Błąd sieci (network)", error: { kind: "network", fileName: FILE_NAME } },
+  {
+    label: "Błąd zapisu na serwerze (server / upload_failed)",
+    error: { kind: "server", code: "upload_failed", fileName: FILE_NAME },
+  },
+  {
+    label: "Nieprawidłowy plik z opisem wiersza (server / invalid_file)",
+    error: {
+      kind: "server",
+      code: "invalid_file",
+      detail: "Wiersz 12: nierozpoznana wartość gps_wlaczony (oczekiwano TAK/NIE).",
+      fileName: FILE_NAME,
+    },
+  },
+];
+
+// 4 MB file, 40% sent: 1677722 / 4194304 rounds to 40%.
+const uploadStages: { label: string; state: UploadState }[] = [
+  { label: "Sprawdzanie kolumn (checking)", state: { kind: "checking", fileName: FILE_NAME } },
+  {
+    label: "Wysyłanie 40% (uploading)",
+    state: { kind: "uploading", fileName: FILE_NAME, loaded: 1677722, total: 4194304 },
+  },
+  { label: "Przetwarzanie (processing)", state: { kind: "processing", fileName: FILE_NAME } },
+];
+
+const THEMES = [
+  { label: "Jasny", className: "" },
+  { label: "Ciemny", className: "dark" },
+];
+
+// Below sm the frames drop the outer chrome so a frame is exactly as wide as the real page body
+// (<main class="p-6"> in src/pages/reports/index.astro) - a 390px screenshot then shows the real layout.
+const section = "space-y-4 py-6 sm:rounded-2xl sm:border sm:border-border sm:bg-card sm:p-6 sm:shadow-sm";
+const sectionText = "px-6 sm:px-0";
+const frame = "space-y-6 bg-background p-6 text-foreground sm:rounded-xl sm:border sm:border-border";
+const caption = "text-xs font-medium text-muted-foreground";
+
+// Same classes as the real controls; the forced classes below are static stand-ins for
+// :hover / :focus-visible (a screenshot cannot hold either state).
+const paginationLink = buttonVariants({ variant: "outline", size: "sm" });
+const viewAction = cn(buttonVariants({ variant: "ghost", size: "icon" }), "text-primary size-8");
+const deleteAction = cn(buttonVariants({ variant: "destructive", size: "icon" }), "size-8");
+const uploadButton = buttonVariants();
+const forcedRow = "rounded-md px-2 py-2 text-sm";
+const forcedRing = "border-ring ring-[3px] ring-ring/50";
+
+// The open delete dialog (a fixed, full-viewport modal) is rendered only on ?dialog=1 so it does not
+// cover the other states in the full-page screenshot.
+const showDialog = Astro.url.searchParams.has("dialog");
 ---
 
-<Layout title="Kitchen sink – Lista raportów">
-  <div class="min-h-screen p-4">
-    <div class="mx-auto max-w-3xl py-8">
-      <h1 class="mb-2 text-center text-2xl font-bold">Kitchen sink: karta wgrywania i lista raportów</h1>
-      <p class="text-muted-foreground mb-8 text-center text-sm">
-        Strona deweloperska — prezentuje wszystkie 7 stanów komponentów bez potrzeby realnych danych z Supabase.
+<Layout title="Kitchen sink – Raporty">
+  <div class="mx-auto max-w-[1100px] space-y-8 py-6 sm:p-6">
+    <div class:list={["space-y-1", sectionText]}>
+      <h1 class="text-2xl font-semibold tracking-tight">Kitchen sink: Raporty</h1>
+      <p class="text-sm text-muted-foreground">
+        Strona deweloperska — wszystkie 7 stanów listy raportów i karty wgrywania w jasnym i ciemnym motywie, z danych
+        testowych (bez Supabase). Treść renderują te same komponenty co <code>/reports</code> (<code>ReportUpload</code>
+        ,<code>ReportsList</code>, <code>Alert</code>, <code>Card</code>).
       </p>
-
-      <div class="flex flex-col gap-8">
-        <!-- 1. Default -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">1. Domyślny (default)</h2>
-          <ReportsList reports={sampleReports} page={1} client:load />
-        </section>
-
-        <!-- 2. Hover -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">2. Najechanie (hover)</h2>
-          <p class="text-muted-foreground mb-4 text-sm">
-            Statyczny zrzut ekranu nie utrwali stanu <code>:hover</code>. Wiersze tabeli przechodzą w
-            <code>hover:bg-muted/50</code>, link „Zobacz raport” w{" "}
-            <code>hover:bg-accent hover:text-accent-foreground</code>, a przycisk „Usuń raport” w{" "}
-            <code>hover:bg-destructive/90</code> — najedź kursorem ręcznie, aby zweryfikować.
-          </p>
-          <ReportsList reports={sampleReports} page={1} client:load />
-        </section>
-
-        <!-- 3. Focus-visible -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">3. Widoczny fokus (focus-visible)</h2>
-          <p class="text-muted-foreground mb-4 text-sm">
-            Statyczny zrzut ekranu nie utrwali stanu <code>:focus-visible</code>. Przejdź klawiszem Tab do linku „Zobacz
-            raport” poniżej — pokaże domyślny fokus przeglądarki, pokolorowany tokenem <code>--ring</code>
-            przez globalną regułę <code>outline-ring/50</code> (src/styles/global.css), tak jak każdy inny element w
-            apce. Przycisk „Usuń raport” (prawdziwy <code>&lt;Button&gt;</code>) dodatkowo ma własny
-            <code>focus-visible:ring-ring/50</code>.
-          </p>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nazwa pliku</TableHead>
-                <TableHead>Data wgrania</TableHead>
-                <TableHead>Liczba wierszy</TableHead>
-                <TableHead>Akcje</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>{sampleReports[0].original_filename}</TableCell>
-                <TableCell>2026-10-01 10:00</TableCell>
-                <TableCell>{sampleReports[0].row_count}</TableCell>
-                <TableCell>
-                  <div class="flex items-center gap-2">
-                    <a
-                      href={`/reports/${sampleReports[0].id}`}
-                      class="text-primary hover:bg-accent hover:text-accent-foreground inline-flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors"
-                      title="Zobacz raport"
-                      aria-label="Zobacz raport"
-                    >
-                      <Search className="size-4" />
-                    </a>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="size-8 cursor-pointer"
-                      title="Usuń raport"
-                      aria-label="Usuń raport"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </section>
-
-        <!-- 4. Upload card -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">4. Karta wgrywania</h2>
-          <p class="text-muted-foreground mb-4 text-sm">
-            Stany przeciągania i wgrywania (pasek postępu, Anuluj) pojawiają się dopiero po wybraniu pliku.
-          </p>
-          <ReportUpload client:load />
-        </section>
-
-        <!-- 5. Error -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">5. Błąd (error)</h2>
-          <p class="text-muted-foreground mb-4 text-sm">
-            Karty błędów wgrywania wykrywanych w przeglądarce (za duży plik, zły format, brak wymaganych kolumn), a pod
-            nimi baner dla błędów zwracanych przez serwer (<code>?error=</code>).
-          </p>
-          <div class="space-y-4">
-            <ReportUpload
-              initialError={{ kind: "too_large", fileName: "trasowki-q3-2026.xlsx", size: 8178892 }}
-              client:load
-            />
-            <ReportUpload initialError={{ kind: "bad_format", fileName: "trasowki-wrzesien-2026.pdf" }} client:load />
-            <ReportUpload
-              initialError={{
-                kind: "missing_columns",
-                fileName: "trasowki-wrzesien-2026.xlsx",
-                columns: checkRequiredColumns(["przedstawiciel", "Klient", "Data wizyty", "gps_wlaczony"]),
-              }}
-              client:load
-            />
-            <Banner variant="error">Wiersz 12: nierozpoznana wartość gps_wlaczony (oczekiwano TAK/NIE).</Banner>
-          </div>
-        </section>
-
-        <!-- 6. Empty -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">6. Pusty (empty)</h2>
-          <ReportsList reports={[]} page={1} client:load />
-        </section>
-
-        <!-- 7. Loading -->
-        <section class="w-full rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 class="mb-4 text-xl font-bold">7. Ładowanie (loading)</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nazwa pliku</TableHead>
-                <TableHead>Data wgrania</TableHead>
-                <TableHead>Liczba wierszy</TableHead>
-                <TableHead>Akcje</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[0, 1, 2].map((i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <div class="bg-muted h-4 w-32 animate-pulse rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <div class="bg-muted h-4 w-28 animate-pulse rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <div class="bg-muted h-4 w-10 animate-pulse rounded" />
-                  </TableCell>
-                  <TableCell>
-                    <div class="flex items-center gap-2">
-                      <div class="bg-muted size-8 animate-pulse rounded-md" />
-                      <div class="bg-muted size-8 animate-pulse rounded-md" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </section>
-      </div>
     </div>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>1. Domyślny (default)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Trzy raporty: 37 odstępstw, brak odstępstw (0) i liczba nieznana (null, także bez liczby wierszy), nad nimi
+        bezczynna karta wgrywania.
+      </p>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class:list={caption}>{theme.label}</p>
+            <ReportUpload client:load />
+            <Card>
+              <CardContent>
+                <ReportsList reports={sampleReports} page={1} client:load />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>2. Najechanie (hover)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Statyczny zrzut nie utrwali <code>:hover</code>. Wiersze tabeli przechodzą w <code>hover:bg-muted/50</code>,
+        „Zobacz raport” i „Poprzednia”/„Następna” w <code>hover:bg-accent</code>, „Usuń raport” w
+        <code>hover:bg-destructive/90</code>, „Wgraj raport” w <code>hover:bg-primary/90</code>. Poniżej te same klasy z
+        wymuszonym tłem najechania.
+      </p>
+      <div class="grid gap-4 md:grid-cols-2">
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={frame}>
+              <p class:list={caption}>{theme.label}</p>
+              <div class:list={[forcedRow, "bg-muted/50"]}>trasowki-wrzesien-2026.xlsx — wiersz pod kursorem</div>
+              <div class="flex flex-wrap items-center gap-3">
+                <span class:list={cn(viewAction, "bg-accent text-accent-foreground dark:bg-accent/50")}>
+                  <Search />
+                </span>
+                <span class:list={cn(deleteAction, "bg-destructive/90")}>
+                  <Trash2 />
+                </span>
+                <span class:list={cn(paginationLink, "bg-accent text-accent-foreground dark:bg-input/50")}>
+                  Następna
+                </span>
+                <span class:list={cn(uploadButton, "bg-primary/90")}>
+                  <Upload /> Wgraj raport
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>3. Widoczny fokus (focus-visible)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Linki paginacji, akcje w wierszu i „Wgraj raport” mają pierścień
+        <code>focus-visible:ring-[3px] focus-visible:ring-ring/50</code> (token <code>--ring</code>). Poniżej pierścień
+        wymuszony statycznie na tych samych klasach; na żywej stronie sprawdź klawiszem Tab.
+      </p>
+      <div class="grid gap-4 md:grid-cols-2">
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={frame}>
+              <p class:list={caption}>{theme.label}</p>
+              <div class="flex flex-wrap items-center gap-3">
+                <span class:list={cn(paginationLink, forcedRing)}>Następna</span>
+                <span class:list={cn(viewAction, forcedRing)}>
+                  <Search />
+                </span>
+                <span class:list={cn(deleteAction, forcedRing)}>
+                  <Trash2 />
+                </span>
+                <span class:list={cn(uploadButton, forcedRing)}>
+                  <Upload /> Wgraj raport
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>4. Wyłączony (disabled) — N/A</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Na tej stronie nie ma wyłączanej kontrolki. Podwójne wysłanie pliku jest zablokowane wymianą stanu: po wybraniu
+        pliku karta wgrywania zastępuje przycisk „Wgraj raport” paskiem postępu (<code>ReportUpload.tsx</code>), a
+        usunięcie raportu wymaga potwierdzenia w oknie dialogowym. Stan nieosiągalny.
+      </p>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>5. Błąd (error)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Błędy wgrywania pokazywane w karcie (wykryte w przeglądarce oraz zwrócone przez serwer), a pod nimi komunikaty
+        strony: nieudane usunięcie raportu (<code>?error=delete_failed</code>) i nieudane wczytanie listy.
+      </p>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class:list={caption}>{theme.label}</p>
+            {uploadErrors.map((item) => (
+              <div class="space-y-2">
+                <p class:list={caption}>{item.label}</p>
+                <ReportUpload initialError={item.error} client:load />
+              </div>
+            ))}
+            <div class="space-y-2">
+              <p class:list={caption}>Komunikat strony: nieudane usunięcie</p>
+              <Alert variant="destructive">
+                <AlertDescription className="text-current">{reportErrorMessage("delete_failed")}</AlertDescription>
+              </Alert>
+            </div>
+            <div class="space-y-2">
+              <p class:list={caption}>Komunikat strony: nieudane wczytanie listy</p>
+              <Alert variant="destructive">
+                <AlertDescription className="text-current">
+                  Nie udało się wczytać listy raportów. Odśwież stronę.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>6. Pusty (empty)</h2>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class:list={caption}>{theme.label}</p>
+            <Card>
+              <CardContent>
+                <ReportsList reports={[]} page={1} client:load />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>7. Ładowanie (loading)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Lista jest renderowana na serwerze (bez stanu ładowania); czeka tylko karta wgrywania: sprawdzanie kolumn,
+        wysyłanie i przetwarzanie.
+      </p>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class:list={caption}>{theme.label}</p>
+            {uploadStages.map((item) => (
+              <div class="space-y-2">
+                <p class:list={caption}>{item.label}</p>
+                <ReportUpload initialState={item.state} client:load />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>8. Dodatkowe: komunikat sukcesu i paginacja</h2>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class:list={caption}>{theme.label}</p>
+            <Alert variant="success" role="status">
+              <AlertDescription className="text-current">Raport został usunięty.</AlertDescription>
+            </Alert>
+            <Card>
+              <CardFooter className="justify-between gap-4 text-sm">
+                <a href="/reports?page=1" class:list={paginationLink}>
+                  Poprzednia
+                </a>
+                <span class="text-muted-foreground tabular-nums">Strona 2 z 3</span>
+                <a href="/reports?page=3" class:list={paginationLink}>
+                  Następna
+                </a>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>9. Dodatkowe: otwarte okno usuwania</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Okno dialogowe jest modalne i renderuje się w portalu nad całą stroną (pozycja <code>fixed</code>), więc na
+        pełnostronicowym zrzucie przykryłoby inne stany. Otwiera się tylko pod
+        <a href="?dialog=1" class="text-primary underline">
+          ?dialog=1
+        </a>{" "}
+        i ma osobny zrzut (<code>kitchen-sink-dialog.png</code>); pokazuje motyw jasny, bo portal trafia do{" "}
+        <code>&lt;body&gt;</code>, poza ramkę <code>.dark</code>.
+      </p>
+      <div class:list={frame}>
+        <p class:list={caption}>Jasny</p>
+        <Card>
+          <CardContent>
+            <ReportsList
+              reports={sampleReports}
+              page={1}
+              initialDeletingId={showDialog ? sampleReports[0].id : undefined}
+              client:load
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </section>
   </div>
 </Layout>

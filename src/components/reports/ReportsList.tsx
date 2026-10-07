@@ -59,10 +59,14 @@ function DeviationCount({ count }: { count: number | null }) {
 interface Props {
   reports: Tables<"reports">[];
   page: number;
+  /** Dev kitchen sink only: start with the delete dialog open for the report with this id. */
+  initialDeletingId?: string;
 }
 
-export default function ReportsList({ reports, page }: Props) {
-  const [deletingReport, setDeletingReport] = useState<Tables<"reports"> | null>(null);
+export default function ReportsList({ reports, page, initialDeletingId }: Props) {
+  const [deletingReport, setDeletingReport] = useState<Tables<"reports"> | null>(
+    () => reports.find((report) => report.id === initialDeletingId) ?? null,
+  );
 
   if (reports.length === 0) {
     return (

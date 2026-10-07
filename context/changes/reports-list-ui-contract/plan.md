@@ -514,28 +514,28 @@ Old bookmarked `?error=<text>` links show the generic message.
 
 #### Automated
 
-- [x] 4.1 Type check passes: `npx astro check`
-- [x] 4.2 Lint passes: `npm run lint`
-- [x] 4.3 `grep -c "opacity-40" src/components/reports/ReportUpload.tsx` returns 0 and `grep -c 'role="status"' src/components/reports/ReportUpload.tsx` returns at least 1
+- [x] 4.1 Type check passes: `npx astro check` — 67a330a
+- [x] 4.2 Lint passes: `npm run lint` — 67a330a
+- [x] 4.3 `grep -c "opacity-40" src/components/reports/ReportUpload.tsx` returns 0 and `grep -c 'role="status"' src/components/reports/ReportUpload.tsx` returns at least 1 — 67a330a
 
 #### Manual
 
-- [x] 4.4 Keyboard only: after "Wgraj raport" focus is on the status; after an error on its title; after "Zamknij" on "Wgraj raport"
-- [x] 4.5 During "Sprawdzanie kolumn" and "Przetwarzanie" the bar visibly animates
+- [x] 4.4 Keyboard only: after "Wgraj raport" focus is on the status; after an error on its title; after "Zamknij" on "Wgraj raport" — 67a330a
+- [x] 4.5 During "Sprawdzanie kolumn" and "Przetwarzanie" the bar visibly animates — 67a330a
 
 ### Phase 5: Kitchen sink and visual gate
 
 #### Automated
 
-- [ ] 5.1 Type check passes: `npx astro check`
-- [ ] 5.2 Lint passes: `npm run lint`
-- [ ] 5.3 `/dev/kitchen-sink/reports-list` returns HTTP 200 from the dev server
-- [ ] 5.4 `grep -c "<Table" src/pages/dev/kitchen-sink/reports-list.astro` returns 0
-- [ ] 5.5 Both screenshots exist and the 390 run reports `sw` = 390
+- [x] 5.1 Type check passes: `npx astro check`
+- [x] 5.2 Lint passes: `npm run lint`
+- [x] 5.3 `/dev/kitchen-sink/reports-list` returns HTTP 200 from the dev server
+- [x] 5.4 `grep -c "<Table" src/pages/dev/kitchen-sink/reports-list.astro` returns 0
+- [x] 5.5 Both screenshots exist and the 390 run reports `sw` = 390
 
 #### Manual
 
-- [ ] 5.6 The screenshots show every listed state in light and dark, N/A frames with their reason
+- [x] 5.6 The screenshots show every listed state in light and dark, N/A frames with their reason
 
 ### Phase 6: Guard
 
