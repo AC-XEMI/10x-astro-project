@@ -408,6 +408,14 @@ error after a failed action, Klient column hidden below `md`.
 - Kitchen-sink and Card precedents: `src/pages/dev/kitchen-sink/reports-list.astro`, `context/archive/2026-10-07-landing-ui-contract/plan.md`
 - Wording rule: CLAUDE.md "Claude Design views keep their user-facing information"
 
+## Deviations during implementation
+
+Each was approved by the user during implementation; Progress rows were not renamed.
+
+- **Phase 1:** `ReportLoadErrorKind`, the messages and the status map live in `src/lib/report-load-errors.ts` instead of the `.astro` frontmatter — type-aware ESLint cannot resolve types exported from an `.astro` file.
+- **Phase 3 — 390px table (user decision after measurement):** with the planned contract the table measured 449px in a 308px container. Below `md` the Status column is hidden and the same block (`statusContent`, one JSX value rendered twice, one copy `display:none` at each width) sits under the deviations in the Odstępstwa cell; the date column is content-sized below `md` (`md:w-27.5`), the group table wrapper has no side padding below `md` (`md:px-4`) and the chevron cell drops its right padding below `md`. Measured after: 340px table in a 340px container at 390; desktop 1018 = 1018. Criterion 3.5 checked as "same words; the only additions are the hidden duplicate of the status block".
+- **Phase 3 — manual gate feedback (user request):** (a) the deviation card's single-action button ("Cofnij" / "Oznacz jako sprawdzone") landed top-right or bottom-left depending on text length (pre-existing `flex-wrap` + `justify-between`); now it is always top-right from `md` (text wraps, button `shrink-0`) and always below the text under `md`. (b) Representative groups no longer start with the largest one expanded (Claude Design rule, which could put the open group last in the date order); every group starts collapsed. Criterion 3.5 was measured before (b) — with all groups collapsed the visit table is simply not rendered on load. Phase 4 therefore needs a dev-only initial-expanded-groups prop next to `initialOpenVisitIds`.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.
@@ -429,33 +437,33 @@ error after a failed action, Klient column hidden below `md`.
 
 #### Automated
 
-- [x] 2.1 Type check passes: `npx astro check`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 `grep -cE "getHours|formatTimestamp" src/components/reports/DeviationsList.tsx` returns 0
-- [x] 2.4 `grep -c "aria-controls" src/components/reports/DeviationsList.tsx` returns at least 1
+- [x] 2.1 Type check passes: `npx astro check` — cd777f7
+- [x] 2.2 Lint passes: `npm run lint` — cd777f7
+- [x] 2.3 `grep -cE "getHours|formatTimestamp" src/components/reports/DeviationsList.tsx` returns 0 — cd777f7
+- [x] 2.4 `grep -c "aria-controls" src/components/reports/DeviationsList.tsx` returns at least 1 — cd777f7
 
 #### Manual
 
-- [x] 2.5 Keyboard only: Tab reaches each visit date, Enter and Space open/close the details, the ring is visible, and "Cofnij" on a single deviation works
-- [x] 2.6 Mouse click anywhere on the row still toggles it once
-- [x] 2.7 With devtools "Offline", "Oznacz jako sprawdzone" shows the review alert; back online, a successful mark clears it
-- [x] 2.8 A reviewed deviation shows "Sprawdzono: DD.MM.YYYY, HH:MM" equal to Warsaw time
+- [x] 2.5 Keyboard only: Tab reaches each visit date, Enter and Space open/close the details, the ring is visible, and "Cofnij" on a single deviation works — cd777f7
+- [x] 2.6 Mouse click anywhere on the row still toggles it once — cd777f7
+- [x] 2.7 With devtools "Offline", "Oznacz jako sprawdzone" shows the review alert; back online, a successful mark clears it — cd777f7
+- [x] 2.8 A reviewed deviation shows "Sprawdzono: DD.MM.YYYY, HH:MM" equal to Warsaw time — cd777f7
 
 ### Phase 3: Components and layout
 
 #### Automated
 
-- [ ] 3.1 Type check passes: `npx astro check`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 `grep -nE "bg-card[^\"]*rounded-lg border|rounded-lg border p-" src/components/reports/DeviationsList.tsx` returns nothing
-- [ ] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/components/reports/DeviationsList.tsx` lists only `ring-[3px]`, `transition-[width]`, `grid-cols-[300px_minmax(0,1fr)]` and `grid-cols-[1.2fr_repeat(3,1fr)_1.3fr]`
-- [ ] 3.5 Visible text of the island (tags stripped) for a fixed fixture is identical before and after the phase
+- [x] 3.1 Type check passes: `npx astro check`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 `grep -nE "bg-card[^\"]*rounded-lg border|rounded-lg border p-" src/components/reports/DeviationsList.tsx` returns nothing
+- [x] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/components/reports/DeviationsList.tsx` lists only `ring-[3px]`, `transition-[width]`, `grid-cols-[300px_minmax(0,1fr)]` and `grid-cols-[1.2fr_repeat(3,1fr)_1.3fr]`
+- [x] 3.5 Visible text of the island (tags stripped) for a fixed fixture is identical before and after the phase
 
 #### Manual
 
-- [ ] 3.6 Desktop, both themes: tiles, groups, deviation cards and empty states look as before
-- [ ] 3.7 Tab through selects and a group header: ring identical to the neighbouring buttons
-- [ ] 3.8 At 390px a group with visits shows date, deviations and the "Oznacz…" button without horizontal scroll
+- [x] 3.6 Desktop, both themes: tiles, groups, deviation cards and empty states look as before
+- [x] 3.7 Tab through selects and a group header: ring identical to the neighbouring buttons
+- [x] 3.8 At 390px a group with visits shows date, deviations and the "Oznacz…" button without horizontal scroll
 
 ### Phase 4: Kitchen sink and visual gate
 

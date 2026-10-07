@@ -3,6 +3,7 @@ import { Check, CheckCheck, ChevronDown, CircleAlert, Download, MapPin, Phone, U
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format-date";
 import { buildCsv, downloadBlob } from "@/lib/export-file";
@@ -84,7 +85,8 @@ const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "done", label: "Sprawdzone" },
 ];
 
-const SELECT_CLASS = "border-input bg-card h-9 rounded-md border px-3 text-sm shadow-xs";
+const SELECT_CLASS =
+  "border-input bg-card h-9 rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 /** `visit_date` comes back as a full ISO timestamp (e.g. "2026-09-02T00:00:00+00:00"); UI and export only care about the date part. */
 function toDateOnly(isoDate: string) {
@@ -220,20 +222,8 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
   const [visits, setVisits] = useState<VisitWithDeviations[]>(initialVisits);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
-  // Only the representative with the most flagged visits starts expanded; computed once so the
-  // expansion doesn't jump around when the date sort reorders groups.
-  const [expandedReps, setExpandedReps] = useState<Set<string>>(() => {
-    const counts = new Map<string, number>();
-    for (const visit of initialVisits) {
-      if (visit.deviations.length === 0) continue;
-      counts.set(visit.representative_name, (counts.get(visit.representative_name) ?? 0) + 1);
-    }
-    const largest = [...counts]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pl"))
-      .slice(0, 1)
-      .map(([name]) => name);
-    return new Set(largest);
-  });
+  // Every representative group starts collapsed (user decision, report-details-ui-contract phase 3).
+  const [expandedReps, setExpandedReps] = useState<Set<string>>(new Set());
   const [openVisitIds, setOpenVisitIds] = useState<Set<string>>(new Set());
   const [actionError, setActionError] = useState<ActionError>(null);
 
@@ -372,6 +362,35 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
       const isPending = visit.deviations.some((d) => pendingIds.has(d.id));
       const allIds = visit.deviations.map((d) => d.id);
       const detailsId = `visit-details-${visit.id}`;
+      // Shown in the Status column from md up; below md that column is hidden and the same block
+      // sits under the deviations, so the full-label button fits a 390px screen.
+      const statusContent = allReviewed ? (
+        <span className="text-primary inline-flex h-8 items-center gap-1 text-sm font-medium">
+          <CheckCheck className="size-4" />
+          Sprawdzone
+        </span>
+      ) : (
+        <div className="flex items-center gap-3 md:justify-end">
+          {isMulti && (
+            <span className="text-muted-foreground text-xs tabular-nums">
+              {doneCount} z {total}
+            </span>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="cursor-pointer"
+            disabled={isPending}
+            onClick={(e) => {
+              e.stopPropagation();
+              void updateDeviationStatus(allIds, "reviewed");
+            }}
+          >
+            {isMulti ? <CheckCheck /> : <Check />}
+            {isMulti ? "Oznacz wszystkie" : "Oznacz jako sprawdzone"}
+          </Button>
+        </div>
+      );
 
       return (
         <Fragment key={visit.id}>
@@ -382,7 +401,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
             data-state={isOpen ? "selected" : undefined}
             className="cursor-pointer"
           >
-            <TableCell className="w-7 py-3 align-top">
+            <TableCell className="w-7 py-3 pr-0 align-top md:pr-2">
               <ChevronDown
                 className={cn("text-muted-foreground size-4 transition-transform", !isOpen && "-rotate-90")}
               />
@@ -401,7 +420,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                 {formatVisitDate(visit.visit_date)}
               </button>
             </TableCell>
-            <TableCell className="text-muted-foreground py-3 align-top whitespace-normal">
+            <TableCell className="text-muted-foreground hidden py-3 align-top whitespace-normal md:table-cell">
               {visit.visited_client ?? "—"}
             </TableCell>
             <TableCell className="py-3 whitespace-normal">
@@ -413,7 +432,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                     <div key={deviation.id} className="flex flex-wrap items-start gap-x-2">
                       <span
                         className={cn(
-                          "flex w-[200px] shrink-0 items-center gap-2 font-medium",
+                          "flex items-center gap-2 font-medium md:w-50 md:shrink-0",
                           done ? "text-muted-foreground" : "text-destructive",
                         )}
                       >
@@ -427,36 +446,9 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                   );
                 })}
               </div>
+              <div className="mt-2 md:hidden">{statusContent}</div>
             </TableCell>
-            <TableCell className="py-2 text-right align-top">
-              {allReviewed ? (
-                <span className="text-primary inline-flex h-8 items-center gap-1 text-sm font-medium">
-                  <CheckCheck className="size-4" />
-                  Sprawdzone
-                </span>
-              ) : (
-                <div className="flex items-center justify-end gap-3">
-                  {isMulti && (
-                    <span className="text-muted-foreground text-xs tabular-nums">
-                      {doneCount} z {total}
-                    </span>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="cursor-pointer"
-                    disabled={isPending}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void updateDeviationStatus(allIds, "reviewed");
-                    }}
-                  >
-                    {isMulti ? <CheckCheck /> : <Check />}
-                    {isMulti ? "Oznacz wszystkie" : "Oznacz jako sprawdzone"}
-                  </Button>
-                </div>
-              )}
-            </TableCell>
+            <TableCell className="hidden py-2 text-right align-top md:table-cell">{statusContent}</TableCell>
           </TableRow>
           {isOpen && (
             <TableRow id={detailsId} className="bg-muted/50 hover:bg-muted/50">
@@ -532,14 +524,15 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                         const done = isReviewed(deviation);
                         const Icon = RULE_ICONS[deviation.rule];
                         return (
-                          <div
+                          <Card
                             key={deviation.id}
                             className={cn(
-                              "flex flex-wrap items-start justify-between gap-4 rounded-lg border p-3",
-                              done ? "bg-muted/50" : "bg-card border-destructive shadow-xs",
+                              // Button always top-right from md (text wraps instead), always below the text under md.
+                              "items-start gap-3 rounded-lg p-3 md:flex-row md:justify-between md:gap-4",
+                              done ? "bg-muted/50 shadow-none" : "border-destructive shadow-xs",
                             )}
                           >
-                            <div className="min-w-0 space-y-1">
+                            <div className="min-w-0 space-y-1 md:flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
                                   className={cn(
@@ -570,7 +563,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                             <Button
                               size="sm"
                               variant={done ? "ghost" : "outline"}
-                              className="cursor-pointer"
+                              className="shrink-0 cursor-pointer"
                               disabled={pendingIds.has(deviation.id)}
                               onClick={() => {
                                 void updateDeviationStatus([deviation.id], done ? "unreviewed" : "reviewed");
@@ -579,7 +572,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                               {done ? <Undo2 /> : <Check />}
                               {done ? "Cofnij" : "Oznacz jako sprawdzone"}
                             </Button>
-                          </div>
+                          </Card>
                         );
                       })}
                     </div>
@@ -596,19 +589,19 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-[1.2fr_repeat(3,1fr)_1.3fr]">
-        <div className="bg-card space-y-1 rounded-lg border p-4">
+        <Card className="gap-1 rounded-lg p-4 shadow-none">
           <div className="text-muted-foreground text-sm">Wizyty</div>
           <div className="text-2xl font-semibold tabular-nums">{visits.length}</div>
           <div className="text-muted-foreground text-xs">
             <span className="text-destructive font-medium tabular-nums">{flaggedVisits.length}</span> z odstępstwami (
             {percent(flaggedVisits.length, visits.length)}%)
           </div>
-        </div>
+        </Card>
         {ALL_RULES.map((rule) => {
           const Icon = RULE_ICONS[rule];
           const count = ruleCount(rule, flaggedVisits);
           return (
-            <div key={rule} className="bg-card space-y-1 rounded-lg border p-4">
+            <Card key={rule} className="gap-1 rounded-lg p-4 shadow-none">
               <div className="text-muted-foreground flex items-center gap-2 text-sm">
                 <Icon className="size-4 shrink-0" />
                 <span>{RULE_LABELS[rule]}</span>
@@ -622,17 +615,17 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                 {count}
               </div>
               <div className="text-muted-foreground text-xs">{RULE_HINTS[rule]}</div>
-            </div>
+            </Card>
           );
         })}
-        <div className="bg-card space-y-2 rounded-lg border p-4">
+        <Card className="gap-2 rounded-lg p-4 shadow-none">
           <div className="text-muted-foreground text-sm">Przejrzane</div>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-semibold tabular-nums">{reviewedVisitCount}</span>
             <span className="text-muted-foreground text-sm tabular-nums">/ {flaggedVisits.length}</span>
           </div>
           <ProgressBar value={percent(reviewedVisitCount, flaggedVisits.length)} />
-        </div>
+        </Card>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -733,17 +726,17 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
       )}
 
       {flaggedVisits.length === 0 ? (
-        <div className="bg-card text-muted-foreground rounded-lg border p-10 text-center text-sm">
+        <Card className="text-muted-foreground items-center rounded-lg p-10 text-center text-sm shadow-none">
           {visits.length === 0 ? "Brak wizyt w tym raporcie." : "Brak wykrytych odstępstw w tym raporcie."}
-        </div>
+        </Card>
       ) : groups.length === 0 ? (
-        <div className="bg-card text-muted-foreground flex flex-col items-center gap-3 rounded-lg border p-10 text-center text-sm">
+        <Card className="text-muted-foreground items-center gap-3 rounded-lg p-10 text-center text-sm shadow-none">
           Brak wizyt spełniających wybrane filtry.
           <Button variant="outline" size="sm" className="cursor-pointer" onClick={clearFilters}>
             <X />
             Wyczyść filtry
           </Button>
-        </div>
+        </Card>
       ) : (
         <div className="space-y-3">
           {groups.map((group) => {
@@ -758,11 +751,11 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
               .join(" · ");
 
             return (
-              <div key={group.name} className="bg-card rounded-lg border">
+              <Card key={group.name} className="gap-0 rounded-lg p-0 shadow-none">
                 <button
                   type="button"
                   aria-expanded={isExpanded}
-                  className="flex w-full cursor-pointer flex-wrap items-center gap-4 px-4 py-3 text-left"
+                  className="hover:bg-muted/50 focus-visible:ring-ring/50 flex w-full cursor-pointer flex-wrap items-center gap-4 rounded-lg px-4 py-3 text-left outline-none focus-visible:ring-[3px]"
                   onClick={() => {
                     toggleRep(group.name);
                   }}
@@ -791,7 +784,7 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                       );
                     })}
                   </div>
-                  <div className="flex w-[150px] items-center gap-2">
+                  <div className="flex w-37.5 items-center gap-2">
                     <ProgressBar value={percent(group.reviewed, group.all.length)} className="flex-1" />
                     <span className="text-muted-foreground text-xs tabular-nums">
                       {group.reviewed}/{group.all.length}
@@ -799,22 +792,22 @@ export default function DeviationsList({ visits: initialVisits, reportId }: Prop
                   </div>
                 </button>
                 {isExpanded && (
-                  <div className="border-t px-4 pb-2">
+                  <div className="border-t pb-2 md:px-4">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-7" />
-                          <TableHead className="w-[110px]">Data wizyty</TableHead>
-                          <TableHead className="w-[200px]">Klient</TableHead>
+                          <TableHead className="w-7 pr-0 md:pr-2" />
+                          <TableHead className="md:w-27.5">Data wizyty</TableHead>
+                          <TableHead className="hidden md:table-cell md:w-50">Klient</TableHead>
                           <TableHead>Odstępstwa</TableHead>
-                          <TableHead className="w-[230px] text-right">Status</TableHead>
+                          <TableHead className="hidden text-right md:table-cell md:w-57.5">Status</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>{renderVisitRows(group.visible)}</TableBody>
                     </Table>
                   </div>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
