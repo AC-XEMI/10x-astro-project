@@ -507,32 +507,32 @@ None — no schema change.
 
 #### Automated
 
-- [x] 3.1 Type check passes: `npx astro check`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 `grep -nE "bg-primary/[0-9]+|rounded-lg border[^\"]*bg-card" src/pages/dashboard.astro src/components/dashboard/RankingTable.tsx` returns nothing
-- [x] 3.4 A Node one-off run of `computeDashboardStats` on the Phase 3 §5 example returns `reviewTarget` = report B
+- [x] 3.1 Type check passes: `npx astro check` — cfc332d
+- [x] 3.2 Lint passes: `npm run lint` — cfc332d
+- [x] 3.3 `grep -nE "bg-primary/[0-9]+|rounded-lg border[^\"]*bg-card" src/pages/dashboard.astro src/components/dashboard/RankingTable.tsx` returns nothing — cfc332d
+- [x] 3.4 A Node one-off run of `computeDashboardStats` on the Phase 3 §5 example returns `reviewTarget` = report B — cfc332d
 
 #### Manual
 
-- [x] 3.5 On real data in both themes, the three rule colours are distinguishable in the legend, the trend bars and the ranking bars
-- [x] 3.6 Tabbing through the page shows the ring on "Wszystkie" and on each recent-report row
-- [x] 3.7 At a 390px-wide window the header controls wrap and the page does not scroll horizontally
-- [x] 3.8 "Przejdź do listy" opens a report whose visits fall in the selected period
+- [x] 3.5 On real data in both themes, the three rule colours are distinguishable in the legend, the trend bars and the ranking bars — cfc332d
+- [x] 3.6 Tabbing through the page shows the ring on "Wszystkie" and on each recent-report row — cfc332d
+- [x] 3.7 At a 390px-wide window the header controls wrap and the page does not scroll horizontally — cfc332d
+- [x] 3.8 "Przejdź do listy" opens a report whose visits fall in the selected period — cfc332d
 
 ### Phase 4: States and visual gate
 
 #### Automated
 
-- [ ] 4.1 Type check passes: `npx astro check`
-- [ ] 4.2 Lint passes: `npm run lint`
-- [ ] 4.3 `/dev/kitchen-sink/dashboard` returns HTTP 200 from the dev server
-- [ ] 4.4 Both screenshot files exist in `context/changes/dashboard-ui-tokens/screenshots/`
-- [ ] 4.5 Hardcoded-value scan on `dashboard.astro`, `DashboardView.astro`, `RankingTable.tsx`, `DashboardExport.tsx` reports 0 colour literals and no `primary/NN` series classes
+- [x] 4.1 Type check passes: `npx astro check`
+- [x] 4.2 Lint passes: `npm run lint`
+- [x] 4.3 `/dev/kitchen-sink/dashboard` returns HTTP 200 from the dev server
+- [x] 4.4 Both screenshot files exist in `context/changes/dashboard-ui-tokens/screenshots/`
+- [x] 4.5 Hardcoded-value scan on `dashboard.astro`, `DashboardView.astro`, `RankingTable.tsx`, `DashboardExport.tsx` reports 0 colour literals and no `primary/NN` series classes
 
 #### Manual
 
-- [ ] 4.6 The screenshots show all 7 states in both themes, with N/A frames explaining why
-- [ ] 4.7 `/dashboard` on real data renders identically to before the extraction (same numbers, same sections)
+- [x] 4.6 The screenshots show all 7 states in both themes, with N/A frames explaining why
+- [x] 4.7 `/dashboard` on real data renders identically to before the extraction (same numbers, same sections)
 
 ### Phase 5: Guard
 

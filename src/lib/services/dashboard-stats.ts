@@ -11,6 +11,9 @@ export type DashboardVisit = Pick<Tables<"visits">, "report_id" | "representativ
   deviations: Pick<Tables<"deviations">, "rule" | "status">[];
 };
 
+/** A recently uploaded report with its unreviewed-deviation count (null when the count query failed). */
+export type RecentReport = Tables<"reports"> & { unreviewed: number | null };
+
 export const PERIODS = { "1m": 1, "3m": 3, "6m": 6 } as const;
 export type PeriodKey = keyof typeof PERIODS;
 

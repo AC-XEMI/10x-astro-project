@@ -1,37 +1,19 @@
 ---
-import { FileText } from "lucide-react";
 import Layout from "@/layouts/Layout.astro";
-import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import DashboardExport from "@/components/dashboard/DashboardExport";
-import RankingTable from "@/components/dashboard/RankingTable";
+import DashboardView from "@/components/dashboard/DashboardView.astro";
 import { createClient } from "@/lib/supabase";
-import { RULE_SERIES, RULE_SERIES_ORDER } from "@/lib/rule-series";
-import { cn, plural } from "@/lib/utils";
 import {
   PERIODS,
   TREND_MONTHS,
   computeDashboardStats,
-  formatDelta,
   monthLowerBound,
-  monthName,
-  monthNameInstrumental,
   toMonthIndex,
   type DashboardStats,
   type DashboardVisit,
   type PeriodKey,
+  type RecentReport,
 } from "@/lib/services/dashboard-stats";
-import type { Tables } from "@/types";
 
 const PAGE_SIZE = 1000; // PostgREST default max rows per request
 
@@ -42,7 +24,7 @@ const periodMonths = PERIODS[period];
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let stats: DashboardStats | null = null;
-let recent: (Tables<"reports"> & { unreviewed: number | null })[] = [];
+let recent: RecentReport[] = [];
 let loadError = false;
 
 if (supabase) {
@@ -91,302 +73,11 @@ if (supabase) {
     );
   }
 }
-
-const PERIOD_LABELS: Record<PeriodKey, string> = { "1m": "Ostatni miesiąc", "3m": "3 miesiące", "6m": "6 miesięcy" };
-
-const periodLinks = (Object.keys(PERIODS) as PeriodKey[]).map((key) => ({
-  key,
-  href: key === "1m" ? "/dashboard" : `/dashboard?okres=${key}`,
-  label: PERIOD_LABELS[key],
-}));
-
-let periodLabel = "";
-let comparisonShort = "";
-let comparisonSentence = "";
-if (stats) {
-  const { refMonth } = stats;
-  periodLabel =
-    periodMonths === 1 ? monthName(refMonth) : `${monthName(refMonth - periodMonths + 1)} – ${monthName(refMonth)}`;
-  comparisonShort =
-    periodMonths === 1 ? `vs ${monthName(refMonth - 1).split(" ")[0]}` : `vs poprz. ${periodMonths} mies.`;
-  comparisonSentence =
-    periodMonths === 1
-      ? `porównanie z ${monthNameInstrumental(refMonth - 1)}`
-      : `porównanie z poprzednimi ${periodMonths} ${plural(periodMonths, "miesiącem", "miesiącami", "miesiącami")}`;
-}
-
-const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) * 100) : 0);
-const reviewedPct = stats?.current.deviations
-  ? pct(stats.current.deviations - stats.current.unreviewed, stats.current.deviations)
-  : null;
-
-const maxTrend = stats ? Math.max(1, ...stats.trend.map((m) => m.total)) : 1;
-const cleanMonths = stats ? stats.trend.filter((m) => m.hasVisits && m.total === 0) : [];
-const emptyMonths = stats ? stats.trend.filter((m) => !m.hasVisits) : [];
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-const legend = RULE_SERIES_ORDER.map((rule) => RULE_SERIES[rule]);
-// Stacked bars grow upwards, so the first series in display order sits at the bottom.
-const stackTopDown = [...RULE_SERIES_ORDER].reverse();
-// Every number on this page except "Ostatnie raporty" is bucketed by visit date, not upload date.
-const visitPeriodLabel = periodLabel && `wizyty: ${periodLabel}`;
-// Same focus ring as buttonVariants (src/components/ui/button.tsx) for links styled as plain text/rows.
-const linkFocus = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
-const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
-  timeZone: "Europe/Warsaw",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-function reportStatus(report: (typeof recent)[number]) {
-  if (report.deviation_count === 0) return "Brak odstępstw";
-  if (report.unreviewed === null) return "—";
-  return report.unreviewed ? `${report.unreviewed} do przeglądu` : "Przejrzany";
-}
 ---
 
 <Layout title="Pulpit">
   <Topbar />
   <main class="mx-auto max-w-[1100px] space-y-6 p-6">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div class="space-y-1">
-        <h1 class="text-2xl font-semibold tracking-tight">Pulpit</h1>
-        {stats && (
-          <p class="text-sm text-muted-foreground">
-            {stats.ranking.length}{" "}
-            {plural(stats.ranking.length, "przedstawiciel", "przedstawicieli", "przedstawicieli")}
-            {" · "}
-            {visitPeriodLabel} · {comparisonSentence}
-          </p>
-        )}
-      </div>
-      {stats && (
-        <div class="flex flex-wrap items-center gap-2">
-          <nav
-            class="flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-0.5"
-            aria-label="Okres wizyt"
-          >
-            {periodLinks.map((link) => (
-              <a
-                href={link.href}
-                aria-current={link.key === period ? "page" : undefined}
-                class:list={buttonVariants({ variant: link.key === period ? "secondary" : "ghost", size: "sm" })}
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-          <DashboardExport
-            ranking={stats.ranking}
-            periodLabel={periodLabel}
-            comparisonLabel={comparisonShort}
-            filename={`pulpit-${period}-${monthName(stats.refMonth).replace(" ", "-")}.csv`}
-            client:load
-          />
-        </div>
-      )}
-    </div>
-
-    {loadError && <Banner variant="error">Nie udało się wczytać danych pulpitu. Odśwież stronę.</Banner>}
-
-    {!loadError && !stats && (
-      <Card className="text-center">
-        <CardHeader>
-          <CardTitle>Brak danych do podsumowania</CardTitle>
-          <CardDescription>Wgraj pierwszy raport, aby zobaczyć ranking przedstawicieli i trendy.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <a href="/reports" class:list={buttonVariants({ size: "sm" })}>
-            Przejdź do raportów
-          </a>
-        </CardContent>
-      </Card>
-    )}
-
-    {stats && (
-      <>
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Card>
-            <CardHeader>
-              <CardDescription>Wizyty</CardDescription>
-              <CardTitle className="text-2xl tabular-nums">{stats.current.visits}</CardTitle>
-            </CardHeader>
-            <CardFooter className="text-xs text-muted-foreground">
-              {formatDelta(stats.current.visits - stats.previous.visits)} {comparisonShort} ({stats.previous.visits})
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>Odstępstwa</CardDescription>
-              <CardTitle className={cn("text-2xl tabular-nums", stats.current.deviations > 0 && "text-destructive")}>
-                {stats.current.deviations}
-              </CardTitle>
-            </CardHeader>
-            <CardFooter className="block text-xs text-muted-foreground">
-              <span
-                class:list={{ "font-medium text-destructive": stats.current.deviations > stats.previous.deviations }}
-              >
-                {formatDelta(stats.current.deviations - stats.previous.deviations)}
-              </span>{" "}
-              {comparisonShort} · {pct(stats.current.flaggedVisits, stats.current.visits)}% wizyt
-              {stats.previous.visits > 0 && ` (było ${pct(stats.previous.flaggedVisits, stats.previous.visits)}%)`}
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>Przejrzane</CardDescription>
-              <CardTitle className="text-2xl tabular-nums">{reviewedPct === null ? "—" : `${reviewedPct}%`}</CardTitle>
-            </CardHeader>
-            <CardFooter>
-              <div
-                class="h-1.5 w-full overflow-hidden rounded-full bg-muted"
-                role="progressbar"
-                aria-label="Przejrzane odstępstwa"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow={reviewedPct ?? 0}
-              >
-                <div class="h-full rounded-full bg-primary" style={{ width: `${reviewedPct ?? 0}%` }}></div>
-              </div>
-            </CardFooter>
-          </Card>
-          <Card className={cn("justify-between", stats.current.unreviewed > 0 && "border-destructive")}>
-            <CardHeader>
-              <CardDescription>Czeka na przegląd</CardDescription>
-              <CardTitle className={cn("text-2xl tabular-nums", stats.current.unreviewed > 0 && "text-destructive")}>
-                {stats.current.unreviewed}
-              </CardTitle>
-            </CardHeader>
-            <CardFooter>
-              <a
-                href={stats.reviewTarget ? `/reports/${stats.reviewTarget}` : "/reports"}
-                class:list={buttonVariants({
-                  size: "sm",
-                  variant: stats.current.unreviewed > 0 ? "default" : "outline",
-                  className: "w-full",
-                })}
-              >
-                Przejdź do listy
-              </a>
-            </CardFooter>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Ranking przedstawicieli</CardTitle>
-            <CardDescription>{visitPeriodLabel} · sortowane wg liczby odstępstw</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RankingTable ranking={stats.ranking} comparisonLabel={comparisonShort} />
-          </CardContent>
-        </Card>
-
-        <div class="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Odstępstwa w kolejnych miesiącach</CardTitle>
-              <CardDescription>miesiące wizyt</CardDescription>
-              <CardAction>
-                <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  {legend.map((item) => (
-                    <span class="flex items-center gap-1">
-                      <span class:list={["size-2 rounded-full", item.className]}></span>
-                      {item.label}
-                    </span>
-                  ))}
-                </div>
-              </CardAction>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div class="flex h-[180px] items-end gap-6 px-2">
-                {stats.trend.map((m) => (
-                  <div class="flex h-full flex-1 flex-col items-center justify-end gap-2">
-                    <span class:list={["text-xs font-semibold tabular-nums", !m.hasVisits && "text-muted-foreground"]}>
-                      {m.hasVisits ? m.total : "—"}
-                    </span>
-                    {m.hasVisits && (
-                      <div
-                        class:list={[
-                          "flex w-full max-w-14 flex-col gap-0.5 overflow-hidden rounded-md",
-                          m.total === 0 && "bg-muted",
-                        ]}
-                        style={{ height: `${Math.max(2, Math.round((m.total / maxTrend) * 130))}px` }}
-                        aria-label={`${monthName(m.month)}: ${RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label} ${m[rule]}`).join(", ")}`}
-                      >
-                        {stackTopDown.map((rule) => (
-                          <div class:list={RULE_SERIES[rule].className} style={{ flex: m[rule] }}></div>
-                        ))}
-                      </div>
-                    )}
-                    <span class="text-xs text-muted-foreground">{m.label}</span>
-                  </div>
-                ))}
-              </div>
-              {(cleanMonths.length > 0 || emptyMonths.length > 0) && (
-                <p class="text-xs text-muted-foreground">
-                  {cleanMonths.length > 0 &&
-                    `${capitalize(cleanMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: wizyty bez wykrytych odstępstw. `}
-                  {emptyMonths.length > 0 &&
-                    `${capitalize(emptyMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: brak wgranych wizyt.`}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Ostatnie raporty</CardTitle>
-              <CardDescription>wg daty wgrania</CardDescription>
-              <CardAction>
-                <a href="/reports" class:list={["rounded-sm text-xs text-primary hover:underline", linkFocus]}>
-                  Wszystkie
-                </a>
-              </CardAction>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {recent.map((report) => (
-                <a
-                  href={`/reports/${report.id}`}
-                  class:list={[
-                    "flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50",
-                    linkFocus,
-                  ]}
-                >
-                  <FileText className="size-4 shrink-0 text-muted-foreground" />
-                  <div class="min-w-0 flex-1">
-                    <div class="truncate text-sm font-medium">{report.original_filename}</div>
-                    <div class="text-xs text-muted-foreground tabular-nums">
-                      wgrano {dateFormatter.format(new Date(report.uploaded_at))}
-                      {report.row_count !== null &&
-                        ` · ${report.row_count} ${plural(report.row_count, "wiersz", "wiersze", "wierszy")}`}
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <div
-                      class:list={[
-                        "text-sm tabular-nums",
-                        report.deviation_count ? "font-semibold text-destructive" : "text-muted-foreground",
-                      ]}
-                    >
-                      {report.deviation_count === null
-                        ? "—"
-                        : report.deviation_count === 0
-                          ? "Brak"
-                          : `${report.deviation_count} ${plural(report.deviation_count, "odstępstwo", "odstępstwa", "odstępstw")}`}
-                    </div>
-                    <div class="text-xs text-muted-foreground">{reportStatus(report)}</div>
-                  </div>
-                </a>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </>
-    )}
+    <DashboardView stats={stats} recent={recent} period={period} loadError={loadError} />
   </main>
 </Layout>

@@ -1,37 +1,211 @@
 ---
-// Dev-only kitchen sink for the dashboard (Pulpit). Not linked from product nav, not in
-// PROTECTED_ROUTES (src/middleware.ts) — no auth needed.
-// Phase 1 stub (context/changes/dashboard-ui-tokens/plan.md): proves the React Card renders
-// correctly from Astro (children arrive wrapped in a display:contents astro-static-slot).
-// Phase 4 replaces this with every dashboard state, light and dark.
+// Dev-only kitchen sink: every state of the dashboard (Pulpit), light and dark, from fixtures.
+// Not linked from product nav, not in PROTECTED_ROUTES (src/middleware.ts) — no auth needed.
+// Renders the same DashboardView the real page uses; data comes from computeDashboardStats
+// over the fixture visits below instead of Supabase.
 import Layout from "@/layouts/Layout.astro";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardView from "@/components/dashboard/DashboardView.astro";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  computeDashboardStats,
+  toMonthIndex,
+  type DashboardVisit,
+  type RecentReport,
+} from "@/lib/services/dashboard-stats";
+import type { DeviationRule } from "@/lib/services/deviation-rules";
+
+const REPS = ["Anna Kowalska", "Piotr Nowak", "Katarzyna Wiśniewska", "Tomasz Wójcik"];
+const RULES: DeviationRule[] = ["missing_gps", "phone_instead_of_visit", "route_deviation"];
+// month (2026, 1-based) -> report id holding that month's visits; July has visits but no deviations,
+// May has no report at all (shows the "brak wgranych wizyt" note).
+const MONTHS: [number, string | null][] = [
+  [4, "rep-04"],
+  [5, null],
+  [6, "rep-06"],
+  [7, "rep-07"],
+  [8, "rep-08"],
+  [9, "rep-09"],
+];
+
+// Deterministic fixture: rep i gets 10 - 2i visits a month; every (i + day) % 4 === 0 visit breaks a
+// rule picked by (day + month) % 3, September visits also break a second rule on every 7th day.
+const visits: DashboardVisit[] = [];
+for (const [month, reportId] of MONTHS) {
+  if (!reportId) continue;
+  REPS.forEach((name, i) => {
+    for (let day = 1; day <= 10 - 2 * i; day++) {
+      const flagged = month !== 7 && (i + day) % 4 === 0;
+      const rules = flagged ? [RULES[(day + month) % 3]] : [];
+      if (flagged && month === 9 && day % 7 === 0) rules.push(RULES[(day + month + 1) % 3]);
+      visits.push({
+        report_id: reportId,
+        representative_name: name,
+        visit_date: `2026-${String(month).padStart(2, "0")}-${String(day * 2).padStart(2, "0")}T08:00:00Z`,
+        deviations: rules.map((rule) => ({ rule, status: month === 9 && day % 3 !== 0 ? "unreviewed" : "reviewed" })),
+      });
+    }
+  });
+}
+
+const stats = computeDashboardStats(visits, toMonthIndex("2026-09-15T12:00:00Z"), 1);
+
+const recent: RecentReport[] = [
+  {
+    id: "rep-09",
+    user_id: "00000000-0000-0000-0000-000000000001",
+    original_filename: "trasowki-wrzesien-2026.xlsx",
+    uploaded_at: "2026-10-06T07:14:00Z",
+    created_at: "2026-10-06T07:14:00Z",
+    row_count: 28,
+    deviation_count: 8,
+    unreviewed: 6,
+  },
+  {
+    id: "rep-08",
+    user_id: "00000000-0000-0000-0000-000000000001",
+    original_filename: "trasowki-sierpien.csv",
+    uploaded_at: "2026-09-02T12:32:00Z",
+    created_at: "2026-09-02T12:32:00Z",
+    row_count: 28,
+    deviation_count: 7,
+    unreviewed: 0,
+  },
+  {
+    id: "rep-07",
+    user_id: "00000000-0000-0000-0000-000000000001",
+    original_filename: "trasowki-lipiec.xlsx",
+    uploaded_at: "2026-08-04T06:05:00Z",
+    created_at: "2026-08-04T06:05:00Z",
+    row_count: 28,
+    deviation_count: 0,
+    unreviewed: 0,
+  },
+];
+
+const THEMES = [
+  { label: "Jasny", className: "" },
+  { label: "Ciemny", className: "dark" },
+];
+
+// Below sm the frames drop the outer chrome so a frame is exactly as wide as the real page body
+// (<main class="p-6"> in src/pages/dashboard.astro) - a 390px screenshot then shows the real layout.
+const section = "space-y-4 py-6 sm:rounded-2xl sm:border sm:border-border sm:bg-card sm:p-6 sm:shadow-sm";
+const sectionText = "px-6 sm:px-0";
+const frame = "space-y-6 bg-background p-6 text-foreground sm:rounded-xl sm:border sm:border-border";
+// Static stand-ins for :hover / :focus-visible (a screenshot cannot hold either state).
+const forcedRow = "flex items-center gap-3 rounded-md px-2 py-2 text-sm";
 ---
 
 <Layout title="Kitchen sink – Pulpit">
-  <div class="mx-auto max-w-3xl space-y-6 p-6">
-    <h1 class="text-2xl font-semibold tracking-tight">Kitchen sink: Pulpit</h1>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Ranking przedstawicieli</CardTitle>
-          <CardDescription>wrzesień 2026 · sortowane wg liczby odstępstw</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p class="text-sm text-muted-foreground">Treść karty renderowana z pliku Astro.</p>
-        </CardContent>
-      </Card>
-      <div class="dark">
-        <Card>
-          <CardHeader>
-            <CardTitle>Ta sama karta w ciemnym motywie</CardTitle>
-            <CardDescription>tokeny z .dark w poddrzewie</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p class="text-sm text-muted-foreground">Treść karty renderowana z pliku Astro.</p>
-          </CardContent>
-        </Card>
-      </div>
+  <div class="mx-auto max-w-[1200px] space-y-8 py-6 sm:p-6">
+    <div class:list={["space-y-1", sectionText]}>
+      <h1 class="text-2xl font-semibold tracking-tight">Kitchen sink: Pulpit</h1>
+      <p class="text-sm text-muted-foreground">
+        Strona deweloperska — wszystkie 7 stanów Pulpitu w jasnym i ciemnym motywie, z danych testowych (bez Supabase).
+        Treść renderuje ten sam komponent co <code>/dashboard</code> (<code>DashboardView.astro</code>).
+      </p>
     </div>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>1. Domyślny (default)</h2>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+            <DashboardView stats={stats} recent={recent} period="1m" loadError={false} />
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>2. Najechanie (hover)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Statyczny zrzut nie utrwali <code>:hover</code>. Wiersze „Ostatnie raporty” przechodzą w
+        <code>hover:bg-muted/50</code>, „Wszystkie” w <code>hover:underline</code>, przyciski okresu i eksportu w
+        <code>hover:bg-accent</code>, „Przejdź do listy” w <code>hover:bg-primary/90</code>. Poniżej wiersz z wymuszonym
+        tłem najechania.
+      </p>
+      <div class="grid gap-4 md:grid-cols-2">
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={frame}>
+              <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+              <div class:list={[forcedRow, "bg-muted/50"]}>trasowki-wrzesien-2026.xlsx — wiersz pod kursorem</div>
+              <span
+                class:list={cn(buttonVariants({ variant: "outline", size: "sm" }), "bg-accent text-accent-foreground")}
+              >
+                Eksportuj (hover)
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>3. Widoczny fokus (focus-visible)</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Linki tekstowe i wiersze raportów używają tego samego pierścienia co przyciski:
+        <code>focus-visible:ring-[3px] focus-visible:ring-ring/50</code> (token <code>--ring</code>). Poniżej pierścień
+        wymuszony statycznie; na żywej stronie sprawdź klawiszem Tab.
+      </p>
+      <div class="grid gap-4 md:grid-cols-2">
+        {THEMES.map((theme) => (
+          <div class:list={theme.className}>
+            <div class:list={frame}>
+              <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+              <div class:list={[forcedRow, "ring-[3px] ring-ring/50"]}>
+                trasowki-wrzesien-2026.xlsx — wiersz z fokusem
+              </div>
+              <span class="rounded-sm text-xs text-primary ring-[3px] ring-ring/50">Wszystkie</span>
+              <span class:list={cn(buttonVariants({ size: "sm" }), "ring-[3px] ring-ring/50")}>Przejdź do listy</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>4. Wyłączony (disabled) — N/A</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Jedyny przełączalny element, „Eksportuj”, jest wyłączany przy pustym rankingu, ale Pulpit renderuje go tylko gdy
+        są statystyki, a ranking zawsze obejmuje miesiąc odniesienia, który z definicji ma co najmniej jedną wizytę (
+        <code>DashboardView.astro</code>, <code>dashboard-stats.ts</code>). Stan nieosiągalny na tej stronie.
+      </p>
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>5. Błąd (error)</h2>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+            <DashboardView stats={null} recent={[]} period="1m" loadError={true} />
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>6. Pusty (empty)</h2>
+      {THEMES.map((theme) => (
+        <div class:list={theme.className}>
+          <div class:list={frame}>
+            <p class="text-xs font-medium text-muted-foreground">{theme.label}</p>
+            <DashboardView stats={null} recent={[]} period="1m" loadError={false} />
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section class:list={section}>
+      <h2 class:list={["text-xl font-semibold", sectionText]}>7. Ładowanie (loading) — N/A</h2>
+      <p class:list={["text-sm text-muted-foreground", sectionText]}>
+        Pulpit jest renderowany na serwerze: dane są gotowe, zanim HTML trafi do przeglądarki, a zmiana okresu to zwykła
+        nawigacja (pełne przeładowanie). Nie ma stanu, w którym część strony czeka na dane.
+      </p>
+    </section>
   </div>
 </Layout>
