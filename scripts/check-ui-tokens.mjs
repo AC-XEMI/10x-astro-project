@@ -16,7 +16,7 @@ const files = [
   ...readdirSync(path.join(root, dashboardDir))
     .filter((name) => /\.(astro|tsx)$/.test(name))
     .map((name) => `${dashboardDir}/${name}`),
-  // Reports list (context/changes/reports-list-ui-contract/).
+  // Reports list (context/archive/2026-10-07-reports-list-ui-contract/).
   "src/pages/reports/index.astro",
   "src/components/reports/ReportsList.tsx",
   "src/components/reports/ReportUpload.tsx",
