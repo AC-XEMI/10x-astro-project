@@ -4,10 +4,20 @@ import Layout from "@/layouts/Layout.astro";
 import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import DashboardExport from "@/components/dashboard/DashboardExport";
 import RankingTable from "@/components/dashboard/RankingTable";
 import { createClient } from "@/lib/supabase";
-import { plural } from "@/lib/utils";
+import { RULE_SERIES, RULE_SERIES_ORDER } from "@/lib/rule-series";
+import { cn, plural } from "@/lib/utils";
 import {
   PERIODS,
   TREND_MONTHS,
@@ -53,7 +63,7 @@ if (supabase) {
       for (let from = 0; ; from += PAGE_SIZE) {
         const { data, error } = await supabase
           .from("visits")
-          .select("representative_name, visit_date, deviations(rule, status)")
+          .select("report_id, representative_name, visit_date, deviations(rule, status)")
           .gte("visit_date", monthLowerBound(firstMonth))
           .order("id")
           .range(from, from + PAGE_SIZE - 1);
@@ -109,18 +119,19 @@ const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) 
 const reviewedPct = stats?.current.deviations
   ? pct(stats.current.deviations - stats.current.unreviewed, stats.current.deviations)
   : null;
-const todoTarget = recent.find((r) => r.unreviewed)?.id;
 
 const maxTrend = stats ? Math.max(1, ...stats.trend.map((m) => m.total)) : 1;
 const cleanMonths = stats ? stats.trend.filter((m) => m.hasVisits && m.total === 0) : [];
 const emptyMonths = stats ? stats.trend.filter((m) => !m.hasVisits) : [];
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-const legend = [
-  { label: "Brak GPS", className: "bg-primary" },
-  { label: "Telefon", className: "bg-primary/55" },
-  { label: "Trasa", className: "bg-primary/25" },
-];
+const legend = RULE_SERIES_ORDER.map((rule) => RULE_SERIES[rule]);
+// Stacked bars grow upwards, so the first series in display order sits at the bottom.
+const stackTopDown = [...RULE_SERIES_ORDER].reverse();
+// Every number on this page except "Ostatnie raporty" is bucketed by visit date, not upload date.
+const visitPeriodLabel = periodLabel && `wizyty: ${periodLabel}`;
+// Same focus ring as buttonVariants (src/components/ui/button.tsx) for links styled as plain text/rows.
+const linkFocus = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   timeZone: "Europe/Warsaw",
@@ -149,13 +160,16 @@ function reportStatus(report: (typeof recent)[number]) {
             {stats.ranking.length}{" "}
             {plural(stats.ranking.length, "przedstawiciel", "przedstawicieli", "przedstawicieli")}
             {" · "}
-            {periodLabel} · {comparisonSentence}
+            {visitPeriodLabel} · {comparisonSentence}
           </p>
         )}
       </div>
       {stats && (
-        <div class="flex items-center gap-2">
-          <nav class="flex items-center gap-1 rounded-md border border-border bg-card p-0.5" aria-label="Okres">
+        <div class="flex flex-wrap items-center gap-2">
+          <nav
+            class="flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-0.5"
+            aria-label="Okres wizyt"
+          >
             {periodLinks.map((link) => (
               <a
                 href={link.href}
@@ -180,35 +194,39 @@ function reportStatus(report: (typeof recent)[number]) {
     {loadError && <Banner variant="error">Nie udało się wczytać danych pulpitu. Odśwież stronę.</Banner>}
 
     {!loadError && !stats && (
-      <div class="space-y-3 rounded-lg border border-border bg-card p-8 text-center">
-        <p class="font-semibold">Brak danych do podsumowania</p>
-        <p class="text-sm text-muted-foreground">
-          Wgraj pierwszy raport, aby zobaczyć ranking przedstawicieli i trendy.
-        </p>
-        <a href="/reports" class:list={buttonVariants({ size: "sm" })}>
-          Przejdź do raportów
-        </a>
-      </div>
+      <Card className="text-center">
+        <CardHeader>
+          <CardTitle>Brak danych do podsumowania</CardTitle>
+          <CardDescription>Wgraj pierwszy raport, aby zobaczyć ranking przedstawicieli i trendy.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <a href="/reports" class:list={buttonVariants({ size: "sm" })}>
+            Przejdź do raportów
+          </a>
+        </CardContent>
+      </Card>
     )}
 
     {stats && (
       <>
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div class="space-y-1 rounded-lg border border-border bg-card p-4">
-            <div class="text-sm text-muted-foreground">Wizyty</div>
-            <div class="text-2xl font-semibold tabular-nums">{stats.current.visits}</div>
-            <div class="text-xs text-muted-foreground">
+          <Card>
+            <CardHeader>
+              <CardDescription>Wizyty</CardDescription>
+              <CardTitle className="text-2xl tabular-nums">{stats.current.visits}</CardTitle>
+            </CardHeader>
+            <CardFooter className="text-xs text-muted-foreground">
               {formatDelta(stats.current.visits - stats.previous.visits)} {comparisonShort} ({stats.previous.visits})
-            </div>
-          </div>
-          <div class="space-y-1 rounded-lg border border-border bg-card p-4">
-            <div class="text-sm text-muted-foreground">Odstępstwa</div>
-            <div
-              class:list={["text-2xl font-semibold tabular-nums", stats.current.deviations > 0 && "text-destructive"]}
-            >
-              {stats.current.deviations}
-            </div>
-            <div class="text-xs text-muted-foreground">
+            </CardFooter>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>Odstępstwa</CardDescription>
+              <CardTitle className={cn("text-2xl tabular-nums", stats.current.deviations > 0 && "text-destructive")}>
+                {stats.current.deviations}
+              </CardTitle>
+            </CardHeader>
+            <CardFooter className="block text-xs text-muted-foreground">
               <span
                 class:list={{ "font-medium text-destructive": stats.current.deviations > stats.previous.deviations }}
               >
@@ -216,118 +234,134 @@ function reportStatus(report: (typeof recent)[number]) {
               </span>{" "}
               {comparisonShort} · {pct(stats.current.flaggedVisits, stats.current.visits)}% wizyt
               {stats.previous.visits > 0 && ` (było ${pct(stats.previous.flaggedVisits, stats.previous.visits)}%)`}
-            </div>
-          </div>
-          <div class="space-y-1 rounded-lg border border-border bg-card p-4">
-            <div class="text-sm text-muted-foreground">Przejrzane</div>
-            <div class="text-2xl font-semibold tabular-nums">{reviewedPct === null ? "—" : `${reviewedPct}%`}</div>
-            <div
-              class="h-1.5 overflow-hidden rounded-full bg-muted"
-              role="progressbar"
-              aria-label="Przejrzane odstępstwa"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow={reviewedPct ?? 0}
-            >
-              <div class="h-full rounded-full bg-primary" style={{ width: `${reviewedPct ?? 0}%` }}></div>
-            </div>
-          </div>
-          <div
-            class:list={[
-              "flex flex-col justify-between gap-2 rounded-lg border bg-card p-4",
-              stats.current.unreviewed > 0 ? "border-destructive" : "border-border",
-            ]}
-          >
-            <div class="space-y-1">
-              <div class="text-sm text-muted-foreground">Czeka na przegląd</div>
+            </CardFooter>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardDescription>Przejrzane</CardDescription>
+              <CardTitle className="text-2xl tabular-nums">{reviewedPct === null ? "—" : `${reviewedPct}%`}</CardTitle>
+            </CardHeader>
+            <CardFooter>
               <div
-                class:list={["text-2xl font-semibold tabular-nums", stats.current.unreviewed > 0 && "text-destructive"]}
+                class="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+                role="progressbar"
+                aria-label="Przejrzane odstępstwa"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow={reviewedPct ?? 0}
               >
-                {stats.current.unreviewed}
+                <div class="h-full rounded-full bg-primary" style={{ width: `${reviewedPct ?? 0}%` }}></div>
               </div>
-            </div>
-            <a
-              href={todoTarget ? `/reports/${todoTarget}` : "/reports"}
-              class:list={buttonVariants({ size: "sm", variant: stats.current.unreviewed > 0 ? "default" : "outline" })}
-            >
-              Przejdź do listy
-            </a>
-          </div>
+            </CardFooter>
+          </Card>
+          <Card className={cn("justify-between", stats.current.unreviewed > 0 && "border-destructive")}>
+            <CardHeader>
+              <CardDescription>Czeka na przegląd</CardDescription>
+              <CardTitle className={cn("text-2xl tabular-nums", stats.current.unreviewed > 0 && "text-destructive")}>
+                {stats.current.unreviewed}
+              </CardTitle>
+            </CardHeader>
+            <CardFooter>
+              <a
+                href={stats.reviewTarget ? `/reports/${stats.reviewTarget}` : "/reports"}
+                class:list={buttonVariants({
+                  size: "sm",
+                  variant: stats.current.unreviewed > 0 ? "default" : "outline",
+                  className: "w-full",
+                })}
+              >
+                Przejdź do listy
+              </a>
+            </CardFooter>
+          </Card>
         </div>
 
-        <div class="space-y-3 rounded-lg border border-border bg-card p-5">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <div class="font-semibold">Ranking przedstawicieli</div>
-            <div class="text-xs text-muted-foreground">{periodLabel} · sortowane wg liczby odstępstw</div>
-          </div>
-          <RankingTable ranking={stats.ranking} comparisonLabel={comparisonShort} />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ranking przedstawicieli</CardTitle>
+            <CardDescription>{visitPeriodLabel} · sortowane wg liczby odstępstw</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RankingTable ranking={stats.ranking} comparisonLabel={comparisonShort} />
+          </CardContent>
+        </Card>
 
         <div class="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <div class="space-y-4 rounded-lg border border-border bg-card p-5">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <div class="font-semibold">Odstępstwa w kolejnych miesiącach</div>
-              <div class="flex items-center gap-3 text-xs text-muted-foreground">
-                {legend.map((item) => (
-                  <span class="flex items-center gap-1">
-                    <span class:list={["size-2 rounded-full", item.className]}></span>
-                    {item.label}
-                  </span>
+          <Card>
+            <CardHeader>
+              <CardTitle>Odstępstwa w kolejnych miesiącach</CardTitle>
+              <CardDescription>miesiące wizyt</CardDescription>
+              <CardAction>
+                <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  {legend.map((item) => (
+                    <span class="flex items-center gap-1">
+                      <span class:list={["size-2 rounded-full", item.className]}></span>
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </CardAction>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div class="flex h-[180px] items-end gap-6 px-2">
+                {stats.trend.map((m) => (
+                  <div class="flex h-full flex-1 flex-col items-center justify-end gap-2">
+                    <span class:list={["text-xs font-semibold tabular-nums", !m.hasVisits && "text-muted-foreground"]}>
+                      {m.hasVisits ? m.total : "—"}
+                    </span>
+                    {m.hasVisits && (
+                      <div
+                        class:list={[
+                          "flex w-full max-w-14 flex-col gap-0.5 overflow-hidden rounded-md",
+                          m.total === 0 && "bg-muted",
+                        ]}
+                        style={{ height: `${Math.max(2, Math.round((m.total / maxTrend) * 130))}px` }}
+                        aria-label={`${monthName(m.month)}: ${RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label} ${m[rule]}`).join(", ")}`}
+                      >
+                        {stackTopDown.map((rule) => (
+                          <div class:list={RULE_SERIES[rule].className} style={{ flex: m[rule] }}></div>
+                        ))}
+                      </div>
+                    )}
+                    <span class="text-xs text-muted-foreground">{m.label}</span>
+                  </div>
                 ))}
               </div>
-            </div>
-            <div class="flex h-[180px] items-end gap-6 px-2">
-              {stats.trend.map((m) => (
-                <div class="flex h-full flex-1 flex-col items-center justify-end gap-2">
-                  <span class:list={["text-xs font-semibold tabular-nums", !m.hasVisits && "text-muted-foreground"]}>
-                    {m.hasVisits ? m.total : "—"}
-                  </span>
-                  {m.hasVisits && (
-                    <div
-                      class:list={[
-                        "flex w-full max-w-14 flex-col gap-0.5 overflow-hidden rounded-md",
-                        m.total === 0 && "bg-muted",
-                      ]}
-                      style={{ height: `${Math.max(2, Math.round((m.total / maxTrend) * 130))}px` }}
-                      aria-label={`${monthName(m.month)}: brak GPS ${m.missing_gps}, telefon ${m.phone_instead_of_visit}, trasa ${m.route_deviation}`}
-                    >
-                      <div class="bg-primary/25" style={{ flex: m.route_deviation }}></div>
-                      <div class="bg-primary/55" style={{ flex: m.phone_instead_of_visit }}></div>
-                      <div class="bg-primary" style={{ flex: m.missing_gps }}></div>
-                    </div>
-                  )}
-                  <span class="text-xs text-muted-foreground">{m.label}</span>
-                </div>
-              ))}
-            </div>
-            {(cleanMonths.length > 0 || emptyMonths.length > 0) && (
-              <p class="text-xs text-muted-foreground">
-                {cleanMonths.length > 0 &&
-                  `${capitalize(cleanMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: wizyty bez wykrytych odstępstw. `}
-                {emptyMonths.length > 0 &&
-                  `${capitalize(emptyMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: brak wgranych wizyt.`}
-              </p>
-            )}
-          </div>
+              {(cleanMonths.length > 0 || emptyMonths.length > 0) && (
+                <p class="text-xs text-muted-foreground">
+                  {cleanMonths.length > 0 &&
+                    `${capitalize(cleanMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: wizyty bez wykrytych odstępstw. `}
+                  {emptyMonths.length > 0 &&
+                    `${capitalize(emptyMonths.map((m) => monthName(m.month).split(" ")[0]).join(", "))}: brak wgranych wizyt.`}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-          <div class="space-y-4 rounded-lg border border-border bg-card p-5">
-            <div class="flex items-baseline justify-between">
-              <div class="font-semibold">Ostatnie raporty</div>
-              <a href="/reports" class="text-xs text-primary hover:underline">
-                Wszystkie
-              </a>
-            </div>
-            <div class="space-y-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ostatnie raporty</CardTitle>
+              <CardDescription>wg daty wgrania</CardDescription>
+              <CardAction>
+                <a href="/reports" class:list={["rounded-sm text-xs text-primary hover:underline", linkFocus]}>
+                  Wszystkie
+                </a>
+              </CardAction>
+            </CardHeader>
+            <CardContent className="space-y-1">
               {recent.map((report) => (
                 <a
                   href={`/reports/${report.id}`}
-                  class="flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50"
+                  class:list={[
+                    "flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/50",
+                    linkFocus,
+                  ]}
                 >
                   <FileText className="size-4 shrink-0 text-muted-foreground" />
                   <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-medium">{report.original_filename}</div>
                     <div class="text-xs text-muted-foreground tabular-nums">
-                      {dateFormatter.format(new Date(report.uploaded_at))}
+                      wgrano {dateFormatter.format(new Date(report.uploaded_at))}
                       {report.row_count !== null &&
                         ` · ${report.row_count} ${plural(report.row_count, "wiersz", "wiersze", "wierszy")}`}
                     </div>
@@ -349,8 +383,8 @@ function reportStatus(report: (typeof recent)[number]) {
                   </div>
                 </a>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </>
     )}

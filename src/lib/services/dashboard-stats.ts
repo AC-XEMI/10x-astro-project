@@ -7,7 +7,7 @@ import type { Tables } from "@/types";
  * dashboard keeps showing the last reported month instead of an empty current month.
  */
 
-export type DashboardVisit = Pick<Tables<"visits">, "representative_name" | "visit_date"> & {
+export type DashboardVisit = Pick<Tables<"visits">, "report_id" | "representative_name" | "visit_date"> & {
   deviations: Pick<Tables<"deviations">, "rule" | "status">[];
 };
 
@@ -106,6 +106,13 @@ export interface DashboardStats {
   previous: WindowTotals;
   ranking: RankingRow[];
   trend: TrendMonth[];
+  /**
+   * Report holding the most unreviewed deviations among visits in the current window - the
+   * "Przejdź do listy" target, so it shares the window with the unreviewed count shown next to
+   * it. Tie: the report whose newest in-window visit is latest, then the lowest id. Null when
+   * the window has no unreviewed deviation.
+   */
+  reviewTarget: string | null;
 }
 
 function emptyTotals(): WindowTotals {
@@ -147,6 +154,7 @@ export function computeDashboardStats(
   const previous = emptyTotals();
   const byRep = new Map<string, { current: WindowTotals; previous: WindowTotals }>();
   const trend = new Map<MonthIndex, WindowTotals>();
+  const reviewByReport = new Map<string, { unreviewed: number; latestVisit: number }>();
 
   for (const visit of visits) {
     const m = toMonthIndex(visit.visit_date);
@@ -162,6 +170,12 @@ export function computeDashboardStats(
     if (!window) continue;
 
     addVisit(window === "current" ? current : previous, visit);
+    if (window === "current") {
+      const entry = reviewByReport.get(visit.report_id) ?? { unreviewed: 0, latestVisit: 0 };
+      entry.unreviewed += visit.deviations.filter((d) => d.status === "unreviewed").length;
+      entry.latestVisit = Math.max(entry.latestVisit, new Date(visit.visit_date).getTime());
+      reviewByReport.set(visit.report_id, entry);
+    }
     const rep = byRep.get(visit.representative_name) ?? { current: emptyTotals(), previous: emptyTotals() };
     addVisit(rep[window], visit);
     byRep.set(visit.representative_name, rep);
@@ -187,5 +201,13 @@ export function computeDashboardStats(
     });
   }
 
-  return { refMonth, current, previous, ranking, trend: trendMonths };
+  const reviewTarget =
+    [...reviewByReport.entries()]
+      .filter(([, entry]) => entry.unreviewed > 0)
+      .sort(
+        ([idA, a], [idB, b]) =>
+          b.unreviewed - a.unreviewed || b.latestVisit - a.latestVisit || (idA < idB ? -1 : idA > idB ? 1 : 0),
+      )[0]?.[0] ?? null;
+
+  return { refMonth, current, previous, ranking, trend: trendMonths, reviewTarget };
 }

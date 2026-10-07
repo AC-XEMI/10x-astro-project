@@ -495,29 +495,29 @@ None — no schema change.
 
 #### Automated
 
-- [x] 2.1 Type check passes: `npx astro check`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 `grep -c "rule-" src/styles/global.css` returns 9 (3 in `:root`, 3 in `.dark`, 3 in `@theme inline`)
+- [x] 2.1 Type check passes: `npx astro check` — c0c3ab8
+- [x] 2.2 Lint passes: `npm run lint` — c0c3ab8
+- [x] 2.3 `grep -c "rule-" src/styles/global.css` returns 9 (3 in `:root`, 3 in `.dark`, 3 in `@theme inline`) — c0c3ab8
 
 #### Manual
 
-- [x] 2.4 `token-source.md` lists all six values with their contrast numbers, and the numbers match a re-run of the contrast computation
+- [x] 2.4 `token-source.md` lists all six values with their contrast numbers, and the numbers match a re-run of the contrast computation — c0c3ab8
 
 ### Phase 3: Dashboard view on the contract
 
 #### Automated
 
-- [ ] 3.1 Type check passes: `npx astro check`
-- [ ] 3.2 Lint passes: `npm run lint`
-- [ ] 3.3 `grep -nE "bg-primary/[0-9]+|rounded-lg border[^\"]*bg-card" src/pages/dashboard.astro src/components/dashboard/RankingTable.tsx` returns nothing
-- [ ] 3.4 A Node one-off run of `computeDashboardStats` on the Phase 3 §5 example returns `reviewTarget` = report B
+- [x] 3.1 Type check passes: `npx astro check`
+- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.3 `grep -nE "bg-primary/[0-9]+|rounded-lg border[^\"]*bg-card" src/pages/dashboard.astro src/components/dashboard/RankingTable.tsx` returns nothing
+- [x] 3.4 A Node one-off run of `computeDashboardStats` on the Phase 3 §5 example returns `reviewTarget` = report B
 
 #### Manual
 
-- [ ] 3.5 On real data in both themes, the three rule colours are distinguishable in the legend, the trend bars and the ranking bars
-- [ ] 3.6 Tabbing through the page shows the ring on "Wszystkie" and on each recent-report row
-- [ ] 3.7 At a 390px-wide window the header controls wrap and the page does not scroll horizontally
-- [ ] 3.8 "Przejdź do listy" opens a report whose visits fall in the selected period
+- [x] 3.5 On real data in both themes, the three rule colours are distinguishable in the legend, the trend bars and the ranking bars
+- [x] 3.6 Tabbing through the page shows the ring on "Wszystkie" and on each recent-report row
+- [x] 3.7 At a 390px-wide window the header controls wrap and the page does not scroll horizontally
+- [x] 3.8 "Przejdź do listy" opens a report whose visits fall in the selected period
 
 ### Phase 4: States and visual gate
 

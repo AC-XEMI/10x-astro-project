@@ -1,4 +1,5 @@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { RULE_SERIES, RULE_SERIES_ORDER } from "@/lib/rule-series";
 import { cn } from "@/lib/utils";
 import { formatDelta, type RankingRow } from "@/lib/services/dashboard-stats";
 
@@ -50,11 +51,11 @@ export default function RankingTable({ ranking, comparisonLabel }: Props) {
                 <div
                   className="flex h-2 gap-0.5 overflow-hidden rounded-full"
                   style={{ width: Math.max(12, (row.deviations / maxDeviations) * MAX_BAR_PX) }}
-                  aria-label={`Brak GPS: ${row.missing_gps}, telefon: ${row.phone_instead_of_visit}, trasa: ${row.route_deviation}`}
+                  aria-label={RULE_SERIES_ORDER.map((rule) => `${RULE_SERIES[rule].label}: ${row[rule]}`).join(", ")}
                 >
-                  <div className="bg-primary" style={{ flex: row.missing_gps }} />
-                  <div className="bg-primary/55" style={{ flex: row.phone_instead_of_visit }} />
-                  <div className="bg-primary/25" style={{ flex: row.route_deviation }} />
+                  {RULE_SERIES_ORDER.map((rule) => (
+                    <div key={rule} className={RULE_SERIES[rule].className} style={{ flex: row[rule] }} />
+                  ))}
                 </div>
               )}
             </TableCell>
