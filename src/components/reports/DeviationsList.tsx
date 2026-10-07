@@ -18,18 +18,28 @@ export type VisitWithDeviations = Tables<"visits"> & { deviations: Tables<"devia
 interface Props {
   visits: VisitWithDeviations[];
   reportId: string;
+  /** Dev kitchen sink only: representative groups (by name) expanded on load; absent → all collapsed. */
+  initialExpandedReps?: string[];
+  /** Dev kitchen sink only: visits whose details row is open on load (their group must be expanded too). */
+  initialOpenVisitIds?: string[];
+  /** Dev kitchen sink only: filters applied on load, merged over the defaults. */
+  initialFilters?: Partial<FilterState>;
+  /** Dev kitchen sink only: deviation ids rendered as a status change in flight (their buttons disabled). */
+  initialPendingIds?: string[];
+  /** Dev kitchen sink only: show the review / export failure alert without a failed action. */
+  initialActionError?: ActionError;
 }
 
 type DeviationStatus = Tables<"deviations">["status"];
 type StatusFilter = "all" | "todo" | "done";
-type ActionError = "review" | "export" | null;
+export type ActionError = "review" | "export" | null;
 
 const ACTION_ERROR_MESSAGES: Record<Exclude<ActionError, null>, string> = {
   review: "Nie udało się zapisać zmiany statusu. Spróbuj ponownie za chwilę.",
   export: "Nie udało się wyeksportować listy. Spróbuj ponownie.",
 };
 
-interface FilterState {
+export interface FilterState {
   representative: string;
   rule: DeviationRule | "";
   status: StatusFilter;
@@ -218,14 +228,22 @@ function StatusPill({ reviewed }: { reviewed: boolean }) {
   );
 }
 
-export default function DeviationsList({ visits: initialVisits, reportId }: Props) {
+export default function DeviationsList({
+  visits: initialVisits,
+  reportId,
+  initialExpandedReps,
+  initialOpenVisitIds,
+  initialFilters,
+  initialPendingIds,
+  initialActionError,
+}: Props) {
   const [visits, setVisits] = useState<VisitWithDeviations[]>(initialVisits);
-  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(() => new Set(initialPendingIds));
+  const [filters, setFilters] = useState<FilterState>(() => ({ ...INITIAL_FILTERS, ...initialFilters }));
   // Every representative group starts collapsed (user decision, report-details-ui-contract phase 3).
-  const [expandedReps, setExpandedReps] = useState<Set<string>>(new Set());
-  const [openVisitIds, setOpenVisitIds] = useState<Set<string>>(new Set());
-  const [actionError, setActionError] = useState<ActionError>(null);
+  const [expandedReps, setExpandedReps] = useState<Set<string>>(() => new Set(initialExpandedReps));
+  const [openVisitIds, setOpenVisitIds] = useState<Set<string>>(() => new Set(initialOpenVisitIds));
+  const [actionError, setActionError] = useState<ActionError>(initialActionError ?? null);
 
   const flaggedVisits = visits.filter((visit) => visit.deviations.length > 0);
   const reviewedVisitCount = flaggedVisits.filter(isVisitReviewed).length;

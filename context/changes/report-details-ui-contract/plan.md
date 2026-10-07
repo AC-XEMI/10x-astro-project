@@ -453,30 +453,30 @@ Each was approved by the user during implementation; Progress rows were not rena
 
 #### Automated
 
-- [x] 3.1 Type check passes: `npx astro check`
-- [x] 3.2 Lint passes: `npm run lint`
-- [x] 3.3 `grep -nE "bg-card[^\"]*rounded-lg border|rounded-lg border p-" src/components/reports/DeviationsList.tsx` returns nothing
-- [x] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/components/reports/DeviationsList.tsx` lists only `ring-[3px]`, `transition-[width]`, `grid-cols-[300px_minmax(0,1fr)]` and `grid-cols-[1.2fr_repeat(3,1fr)_1.3fr]`
-- [x] 3.5 Visible text of the island (tags stripped) for a fixed fixture is identical before and after the phase
+- [x] 3.1 Type check passes: `npx astro check` — a7c192b
+- [x] 3.2 Lint passes: `npm run lint` — a7c192b
+- [x] 3.3 `grep -nE "bg-card[^\"]*rounded-lg border|rounded-lg border p-" src/components/reports/DeviationsList.tsx` returns nothing — a7c192b
+- [x] 3.4 `grep -noE '[a-z-]+-\[[^] ]+\]' src/components/reports/DeviationsList.tsx` lists only `ring-[3px]`, `transition-[width]`, `grid-cols-[300px_minmax(0,1fr)]` and `grid-cols-[1.2fr_repeat(3,1fr)_1.3fr]` — a7c192b
+- [x] 3.5 Visible text of the island (tags stripped) for a fixed fixture is identical before and after the phase — a7c192b
 
 #### Manual
 
-- [x] 3.6 Desktop, both themes: tiles, groups, deviation cards and empty states look as before
-- [x] 3.7 Tab through selects and a group header: ring identical to the neighbouring buttons
-- [x] 3.8 At 390px a group with visits shows date, deviations and the "Oznacz…" button without horizontal scroll
+- [x] 3.6 Desktop, both themes: tiles, groups, deviation cards and empty states look as before — a7c192b
+- [x] 3.7 Tab through selects and a group header: ring identical to the neighbouring buttons — a7c192b
+- [x] 3.8 At 390px a group with visits shows date, deviations and the "Oznacz…" button without horizontal scroll — a7c192b
 
 ### Phase 4: Kitchen sink and visual gate
 
 #### Automated
 
-- [ ] 4.1 Type check passes: `npx astro check`
-- [ ] 4.2 Lint passes: `npm run lint`
-- [ ] 4.3 `/dev/kitchen-sink/report-details` returns HTTP 200
-- [ ] 4.4 Both screenshots exist and the 390 run reports `sw` = 390
+- [x] 4.1 Type check passes: `npx astro check`
+- [x] 4.2 Lint passes: `npm run lint`
+- [x] 4.3 `/dev/kitchen-sink/report-details` returns HTTP 200
+- [x] 4.4 Both screenshots exist and the 390 run reports `sw` = 390
 
 #### Manual
 
-- [ ] 4.5 The screenshots show all 7 matrix cells in light and dark, the three page errors, both action errors, and at 390 the review button inside the card
+- [x] 4.5 The screenshots show all 7 matrix cells in light and dark, the three page errors, both action errors, and at 390 the review button inside the card
 
 ### Phase 5: Guard
 
