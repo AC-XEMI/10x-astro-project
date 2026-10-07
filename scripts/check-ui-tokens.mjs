@@ -1,4 +1,4 @@
-// UI token check for the dashboard (Pulpit), the reports list (Raporty) and the landing page (Strona startowa): fails when a scanned file gains a colour literal,
+// UI token check for the dashboard (Pulpit), the reports list (Raporty), the landing page (Strona startowa) and the report details (Szczegóły raportu): fails when a scanned file gains a colour literal,
 // a Tailwind palette class, an unlisted arbitrary value, or an opacity step of --primary used as a
 // colour (series colours must come from the --rule-* tokens via src/lib/rule-series.ts).
 // Patterns follow the /10x-ui hardcoded-value scan; see context/archive/2026-10-07-dashboard-ui-tokens/.
@@ -23,6 +23,10 @@ const files = [
   "src/components/ui/alert.tsx",
   // Landing page (context/archive/2026-10-07-landing-ui-contract/).
   "src/components/Welcome.astro",
+  // Report details (context/changes/report-details-ui-contract/).
+  "src/pages/reports/[id].astro",
+  "src/components/reports/DeviationsList.tsx",
+  "src/components/reports/ReportLoadError.astro",
 ];
 
 const PALETTE =
@@ -58,13 +62,25 @@ const ALLOWED_ARBITRARY = new Set([
   // Landing headline from the Claude Design file (no Tailwind scale equivalent).
   "text-[44px]",
   "leading-[1.1]",
+  // Claude Design report details layout (no Tailwind scale equivalent).
+  "transition-[width]", // progress bar fill animates width only
+  "grid-cols-[300px_minmax(0,1fr)]", // expanded visit: context column vs broken rules
+  "grid-cols-[1.2fr_repeat(3,1fr)_1.3fr]", // summary tiles row
 ]);
 
 // Opacity steps of --primary that are tints, not data-series colours (series use --rule-*).
 // Keyed by file, so the dashboard keeps the strict "no primary/NN" rule for its series colours.
 const ALLOWED_PRIMARY_TINTS = new Map([
-  // upload icon chip / drag-over fill (Claude Design upload card) and landing feature icon chips
-  ["bg-primary/10", ["src/components/reports/ReportUpload.tsx", "src/components/Welcome.astro"]],
+  // upload icon chip / drag-over fill (Claude Design upload card), landing feature icon chips and the
+  // report details "Sprawdzone" status pill
+  [
+    "bg-primary/10",
+    [
+      "src/components/reports/ReportUpload.tsx",
+      "src/components/Welcome.astro",
+      "src/components/reports/DeviationsList.tsx",
+    ],
+  ],
 ]);
 
 const hits = [];

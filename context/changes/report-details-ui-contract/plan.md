@@ -469,23 +469,23 @@ Each was approved by the user during implementation; Progress rows were not rena
 
 #### Automated
 
-- [x] 4.1 Type check passes: `npx astro check`
-- [x] 4.2 Lint passes: `npm run lint`
-- [x] 4.3 `/dev/kitchen-sink/report-details` returns HTTP 200
-- [x] 4.4 Both screenshots exist and the 390 run reports `sw` = 390
+- [x] 4.1 Type check passes: `npx astro check` — 0c5eb27
+- [x] 4.2 Lint passes: `npm run lint` — 0c5eb27
+- [x] 4.3 `/dev/kitchen-sink/report-details` returns HTTP 200 — 0c5eb27
+- [x] 4.4 Both screenshots exist and the 390 run reports `sw` = 390 — 0c5eb27
 
 #### Manual
 
-- [x] 4.5 The screenshots show all 7 matrix cells in light and dark, the three page errors, both action errors, and at 390 the review button inside the card
+- [x] 4.5 The screenshots show all 7 matrix cells in light and dark, the three page errors, both action errors, and at 390 the review button inside the card — 0c5eb27
 
 ### Phase 5: Guard
 
 #### Automated
 
-- [ ] 5.1 `npm run check:ui-tokens` exits 0 and lists the three files
-- [ ] 5.2 `npm run check:ui-tokens` exits non-zero when `text-red-600` is temporarily added to `DeviationsList.tsx` (revert after)
-- [ ] 5.3 Lint passes: `npm run lint`
+- [x] 5.1 `npm run check:ui-tokens` exits 0 and lists the three files
+- [x] 5.2 `npm run check:ui-tokens` exits non-zero when `text-red-600` is temporarily added to `DeviationsList.tsx` (revert after)
+- [x] 5.3 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 5.4 The CLAUDE.md bullet reads correctly and points at files that exist
+- [x] 5.4 The CLAUDE.md bullet reads correctly and points at files that exist
