@@ -18,6 +18,7 @@ import DashboardExport from "@/components/dashboard/DashboardExport";
 import RankingTable from "@/components/dashboard/RankingTable";
 import { RULE_SERIES, RULE_SERIES_ORDER } from "@/lib/rule-series";
 import { cn, plural } from "@/lib/utils";
+import { formatDateTime } from "@/lib/format-date";
 import {
   PERIODS,
   formatDelta,
@@ -81,15 +82,6 @@ const ruleBreakdown = (counts: Record<(typeof RULE_SERIES_ORDER)[number], number
 const visitPeriodLabel = periodLabel && `wizyty: ${periodLabel}`;
 // Same focus ring as buttonVariants (src/components/ui/button.tsx) for links styled as plain text/rows.
 const linkFocus = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
-
-const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
-  timeZone: "Europe/Warsaw",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 function reportStatus(report: RecentReport) {
   if (report.deviation_count === 0) return "Brak odstępstw";
@@ -306,7 +298,7 @@ function reportStatus(report: RecentReport) {
               <div class="min-w-0 flex-1">
                 <div class="truncate text-sm font-medium">{report.original_filename}</div>
                 <div class="text-xs text-muted-foreground tabular-nums">
-                  wgrano {dateFormatter.format(new Date(report.uploaded_at))}
+                  wgrano {formatDateTime(report.uploaded_at)}
                   {report.row_count !== null &&
                     ` · ${report.row_count} ${plural(report.row_count, "wiersz", "wiersze", "wierszy")}`}
                 </div>

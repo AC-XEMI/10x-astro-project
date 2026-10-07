@@ -5,6 +5,7 @@ import Topbar from "@/components/Topbar.astro";
 import ReportsList from "@/components/reports/ReportsList";
 import ReportUpload from "@/components/reports/ReportUpload";
 import { createClient } from "@/lib/supabase";
+import { reportErrorMessage } from "@/lib/report-errors";
 import type { Tables } from "@/types";
 
 const PAGE_SIZE = 20;
@@ -48,7 +49,7 @@ if (supabase) {
     </div>
 
     {deleted && <Banner variant="success">Raport został usunięty.</Banner>}
-    {error && <Banner variant="error">{error}</Banner>}
+    {error && <Banner variant="error">{reportErrorMessage(error)}</Banner>}
 
     <div>
       <ReportUpload client:load />

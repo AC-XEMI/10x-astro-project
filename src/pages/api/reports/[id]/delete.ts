@@ -1,12 +1,13 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { reportErrorUrl } from "@/lib/report-errors";
 
 export const prerender = false;
 
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return context.redirect(`/reports?error=${encodeURIComponent("Supabase is not configured")}`);
+    return context.redirect(reportErrorUrl("not_configured"));
   }
 
   const user = context.locals.user;
@@ -26,11 +27,12 @@ export const POST: APIRoute = async (context) => {
     .select();
 
   if (error) {
-    return context.redirect(`/reports?error=${encodeURIComponent(error.message)}`);
+    console.error("Failed to delete report:", error);
+    return context.redirect(reportErrorUrl("delete_failed"));
   }
 
   if (data.length === 0) {
-    return context.redirect(`/reports?error=${encodeURIComponent("Nie znaleziono raportu lub brak uprawnień.")}`);
+    return context.redirect(reportErrorUrl("report_not_found"));
   }
 
   return context.redirect(`/reports?deleted=1${pageParam}`);

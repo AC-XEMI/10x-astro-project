@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
+import { reportErrorUrl } from "@/lib/report-errors";
 import { parseReportFile } from "@/lib/services/report-parser";
 import { detectMissingGps, detectPhoneInsteadOfVisit, detectRouteDeviations } from "@/lib/services/deviation-rules";
 import type { TablesInsert } from "@/types";
@@ -22,7 +23,7 @@ export const prerender = false;
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return context.redirect(`/reports?error=${encodeURIComponent("Supabase is not configured")}`);
+    return context.redirect(reportErrorUrl("not_configured"));
   }
 
   const user = context.locals.user;
@@ -32,20 +33,21 @@ export const POST: APIRoute = async (context) => {
 
   const file = (await context.request.formData()).get("report_file") as File | null;
   if (!file) {
-    return context.redirect(`/reports?error=${encodeURIComponent("Nie wybrano pliku do wgrania.")}`);
+    return context.redirect(reportErrorUrl("no_file"));
   }
 
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    return context.redirect(`/reports?error=${encodeURIComponent("Plik przekracza limit 5 MB.")}`);
+    return context.redirect(reportErrorUrl("too_large"));
   }
 
   if (file.type && !ALLOWED_MIME_TYPES.has(file.type)) {
-    return context.redirect(`/reports?error=${encodeURIComponent("Nieobsługiwany typ pliku.")}`);
+    return context.redirect(reportErrorUrl("bad_type"));
   }
 
   const result = parseReportFile(await file.arrayBuffer(), file.name);
   if ("error" in result) {
-    return context.redirect(`/reports?error=${encodeURIComponent(result.error)}`);
+    // Parser messages are our own Polish, row-specific text - passed as detail for the upload card.
+    return context.redirect(reportErrorUrl("invalid_file", result.error));
   }
 
   const { rows } = result;
@@ -61,7 +63,8 @@ export const POST: APIRoute = async (context) => {
     .single();
 
   if (reportError) {
-    return context.redirect(`/reports?error=${encodeURIComponent(reportError.message)}`);
+    console.error("Failed to insert report:", reportError);
+    return context.redirect(reportErrorUrl("upload_failed"));
   }
 
   const visitsToInsert: TablesInsert<"visits">[] = rows.map((row) => ({
@@ -75,7 +78,8 @@ export const POST: APIRoute = async (context) => {
     // Compensating rollback: report is already committed at this point but would be
     // permanently orphaned with zero visits — mirrors the deviationsError branch below.
     await supabase.from("reports").delete().eq("id", report.id);
-    return context.redirect(`/reports?error=${encodeURIComponent(visitsError.message)}`);
+    console.error("Failed to insert visits:", visitsError);
+    return context.redirect(reportErrorUrl("upload_failed"));
   }
 
   const perVisitDeviations: TablesInsert<"deviations">[] = insertedVisits.flatMap((visit) => {
@@ -109,7 +113,8 @@ export const POST: APIRoute = async (context) => {
       // their deviations they'd be silently and permanently under-reported as compliant.
       // report_id has ON DELETE CASCADE, so deleting the report also removes its visits.
       await supabase.from("reports").delete().eq("id", report.id);
-      return context.redirect(`/reports?error=${encodeURIComponent(deviationsError.message)}`);
+      console.error("Failed to insert deviations:", deviationsError);
+      return context.redirect(reportErrorUrl("upload_failed"));
     }
   }
 

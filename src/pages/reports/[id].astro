@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import DeviationsList from "@/components/reports/DeviationsList";
 import type { VisitWithDeviations } from "@/components/reports/DeviationsList";
 import { createClient } from "@/lib/supabase";
+import { formatDateTime } from "@/lib/format-date";
 import type { Tables } from "@/types";
 
 const { id } = Astro.params;
@@ -33,13 +34,6 @@ if (supabase) {
     visits = visitsResult.data;
   }
 }
-
-/** Formats as dd.mm.yyyy, HH:MM (e.g. "06.10.2026, 09:14"), independent of server locale. */
-function formatUploadedAt(value: string) {
-  const date = new Date(value);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 ---
 
 <Layout title={report ? report.original_filename : "Wynik raportu"}>
@@ -59,7 +53,7 @@ function formatUploadedAt(value: string) {
             <h1 class="truncate text-2xl font-semibold tracking-tight">{report.original_filename}</h1>
           </div>
           <p class="text-sm text-muted-foreground">
-            wgrano {formatUploadedAt(report.uploaded_at)} · {report.row_count ?? visits.length} wierszy
+            wgrano {formatDateTime(report.uploaded_at)} · {report.row_count ?? visits.length} wierszy
           </p>
         </>
       ) : (

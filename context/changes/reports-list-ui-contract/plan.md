@@ -468,30 +468,30 @@ Old bookmarked `?error=<text>` links show the generic message.
 
 #### Automated
 
-- [x] 1.1 `src/components/ui/alert.tsx` exists, imports `cn` from `@/lib/utils`, and `grep -c '"cn"' package.json` returns 0
-- [x] 1.2 `grep -c cursor-pointer src/components/reports/ReportsList.tsx src/components/reports/ReportUpload.tsx` returns 0 for both
-- [x] 1.3 Type check passes: `npx astro check`
-- [x] 1.4 Lint passes: `npm run lint`
+- [x] 1.1 `src/components/ui/alert.tsx` exists, imports `cn` from `@/lib/utils`, and `grep -c '"cn"' package.json` returns 0 — 96ae62b
+- [x] 1.2 `grep -c cursor-pointer src/components/reports/ReportsList.tsx src/components/reports/ReportUpload.tsx` returns 0 for both — 96ae62b
+- [x] 1.3 Type check passes: `npx astro check` — 96ae62b
+- [x] 1.4 Lint passes: `npm run lint` — 96ae62b
 
 #### Manual
 
-- [x] 1.5 Buttons on the reports list, the dashboard and the report details page show a pointer cursor
+- [x] 1.5 Buttons on the reports list, the dashboard and the report details page show a pointer cursor — 96ae62b
 
 ### Phase 2: Shared values — error codes and dates
 
 #### Automated
 
-- [ ] 2.1 Type check passes: `npx astro check`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 `grep -nE "encodeURIComponent\([^)]*\.message" src/pages/api/reports/upload.ts "src/pages/api/reports/[id]/delete.ts"` returns nothing
-- [ ] 2.4 `grep -n getHours src/components/reports/ReportsList.tsx "src/pages/reports/[id].astro" src/components/dashboard/DashboardView.astro` returns nothing
-- [ ] 2.5 A Node one-off run of `formatDateTime` returns `02.10.2026, 14:30` for `2026-10-02T12:30:00Z` and `16.01.2026, 00:30` for `2026-01-15T23:30:00Z`
-- [ ] 2.6 `npm run check:ui-tokens` still passes
+- [x] 2.1 Type check passes: `npx astro check`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 `grep -nE "encodeURIComponent\([^)]*\.message" src/pages/api/reports/upload.ts "src/pages/api/reports/[id]/delete.ts"` returns nothing
+- [x] 2.4 `grep -n getHours src/components/reports/ReportsList.tsx "src/pages/reports/[id].astro" src/components/dashboard/DashboardView.astro` returns nothing
+- [x] 2.5 A Node one-off run of `formatDateTime` returns `02.10.2026, 14:30` for `2026-10-02T12:30:00Z` and `16.01.2026, 00:30` for `2026-01-15T23:30:00Z`
+- [x] 2.6 `npm run check:ui-tokens` still passes
 
 #### Manual
 
-- [ ] 2.7 One report shows the same upload date and time on the list, its details page and the dashboard
-- [ ] 2.8 `/reports?error=dowolny tekst` shows the generic message, not the text
+- [x] 2.7 One report shows the same upload date and time on the list, its details page and the dashboard
+- [x] 2.8 `/reports?error=dowolny tekst` shows the generic message, not the text
 
 ### Phase 3: The view on the contract
 

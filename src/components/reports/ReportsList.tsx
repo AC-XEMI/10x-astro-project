@@ -12,13 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Tables } from "@/types";
 import { plural } from "@/lib/utils";
-
-/** Formats as Y-m-d H:i (e.g. "2026-10-02 14:30"), independent of browser locale. */
-function formatUploadedAt(value: string) {
-  const date = new Date(value);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
+import { formatDateTime } from "@/lib/format-date";
 
 /**
  * What the cascade delete takes with it. row_count = visits (one visit per parsed row),
@@ -104,9 +98,7 @@ export default function ReportsList({ reports, page }: Props) {
                   <span>{report.original_filename}</span>
                 </div>
               </TableCell>
-              <TableCell className="text-muted-foreground tabular-nums">
-                {formatUploadedAt(report.uploaded_at)}
-              </TableCell>
+              <TableCell className="text-muted-foreground tabular-nums">{formatDateTime(report.uploaded_at)}</TableCell>
               <TableCell className="text-right tabular-nums">{report.row_count ?? "—"}</TableCell>
               <TableCell className="text-right tabular-nums">
                 <DeviationCount count={report.deviation_count} />
@@ -156,7 +148,7 @@ export default function ReportsList({ reports, page }: Props) {
                 <dt className="font-medium">Nazwa pliku</dt>
                 <dd>{deletingReport.original_filename}</dd>
                 <dt className="font-medium">Data wgrania</dt>
-                <dd className="tabular-nums">{formatUploadedAt(deletingReport.uploaded_at)}</dd>
+                <dd className="tabular-nums">{formatDateTime(deletingReport.uploaded_at)}</dd>
                 <dt className="font-medium">Liczba wierszy</dt>
                 <dd className="tabular-nums">{deletingReport.row_count ?? "—"}</dd>
               </dl>
