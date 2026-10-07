@@ -1,10 +1,10 @@
 ---
 change_id: report-details-ui-contract
 title: Report details ui contract
-status: impl_reviewed
+status: archived
 created: 2026-10-07
 updated: 2026-10-07
-archived_at: null
+archived_at: 2026-10-07T19:23:12Z
 ---
 
 ## Notes
