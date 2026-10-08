@@ -1,7 +1,7 @@
 ---
 change_id: light-surface-tokens
 title: Light surface tokens
-status: implemented
+status: impl_reviewed
 created: 2026-10-08
 updated: 2026-10-08
 archived_at: null

@@ -28,7 +28,7 @@ bands. All text on the new background measures ≥ 4.5:1, recorded in `token-sou
 | Scope                       | Separate page and surfaces (not Banner hex)         | The only light/dark asymmetry in surface tokens; Banner is a separate concern.    |
 | Background value            | `oklch(0.985 0 0)` (neutral-50)                     | Keeps `--muted-foreground` at 4.53:1 without touching other tokens (0.97 → 4.34). |
 | Outline button / dialog     | Light only: `bg-card`; `bg-popover dark:bg-background` | Stay white in light while dark stays pixel-identical.                          |
-| Landing bands               | `bg-muted/50` → `bg-muted`                          | Keeps the section rhythm; dark bands lighten slightly — accepted, checked visually. |
+| Landing bands               | `bg-muted/50` → `bg-card` (planned `bg-muted`, changed in Phase 1) | Grey text on `--muted` is 4.34:1; white bands on the tinted page keep it at 4.73 and keep the rhythm. |
 | Contrast guard              | One-off measurement in `token-source.md`            | Consistent with previous token changes; no new script to maintain.              |
 
 ## Scope
@@ -59,7 +59,7 @@ re-pointed to surface roles, light-only. Measure, record, then gate visually.
 ## Open Risks & Assumptions
 
 - Card vs page separation at 0.985 is subtle (≈1.04:1); it relies on border + shadow as well — accepted.
-- Landing bands change slightly in dark (`bg-muted` full instead of 50%) — accepted, verified in Phase 2.
+- Landing bands moved to `bg-card`; in dark this is visually identical (`muted/50` over 0.145 ≈ 0.207 vs `--card` 0.205) — verified in Phase 2.
 
 ## Success Criteria (Summary)
 

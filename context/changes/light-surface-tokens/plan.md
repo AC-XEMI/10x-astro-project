@@ -111,6 +111,8 @@ inside cards rather than adopt the page tint.
 **Contract**: `#jak` (`:288`) and `#mozliwosci` (`:339`) `bg-muted/50` → `bg-muted`. Other
 `bg-muted/50` boxes inside cards (`:256`, `:329`) unchanged. No wording changes.
 
+> **Addendum (Phase 1, user-approved):** implemented as `bg-card`, not `bg-muted`. `--muted-foreground` on `--muted` is 4.34:1, and the band intros/feature texts sit directly on the band; white bands on the tinted page keep them at 4.73. Measurements: `token-source.md`.
+
 #### 5. Token source record
 
 **File**: `context/changes/light-surface-tokens/token-source.md`
