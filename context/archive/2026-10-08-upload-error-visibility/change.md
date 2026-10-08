@@ -1,10 +1,10 @@
 ---
 change_id: upload-error-visibility
 title: Durable, structured log entries for failed report uploads and deletions
-status: impl_reviewed
+status: archived
 created: 2026-10-08
 updated: 2026-10-08
-archived_at: null
+archived_at: 2026-10-08T10:37:40Z
 ---
 
 ## Notes
