@@ -5,6 +5,10 @@ import { logAppEvent } from "@/lib/app-events";
 
 export const prerender = false;
 
+// Same check as src/pages/reports/[id].astro: a malformed id is a "not found", decided before any
+// query, so Postgres's uuid-cast error (22P02) never reaches the logs as a database failure.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
@@ -22,11 +26,12 @@ export const POST: APIRoute = async (context) => {
   const page = formData.get("page");
   const pageParam = typeof page === "string" && page ? `&page=${encodeURIComponent(page)}` : "";
 
-  const { data, error } = await supabase
-    .from("reports")
-    .delete()
-    .eq("id", id ?? "")
-    .select();
+  if (!id || !UUID_RE.test(id)) {
+    logAppEvent({ event: "report.delete.rejected", code: "report_not_found", stage: "delete", userId: user.id });
+    return context.redirect(reportErrorUrl("report_not_found"));
+  }
+
+  const { data, error } = await supabase.from("reports").delete().eq("id", id).select();
 
   if (error) {
     logAppEvent({
