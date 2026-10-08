@@ -1,10 +1,10 @@
 ---
 change_id: vitest-mutation-baseline
 title: Vitest setup and first unit tests as a baseline for mutation testing
-status: impl_reviewed
+status: archived
 created: 2026-10-08
 updated: 2026-10-08
-archived_at: null
+archived_at: 2026-10-08T08:22:27Z
 ---
 
 ## Notes
