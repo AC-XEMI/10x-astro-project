@@ -5,7 +5,8 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  /* Page background only (neutral-50): cards, popovers, dialogs and outline buttons stay white on it - see context/archive/2026-10-08-light-surface-tokens/token-source.md */
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
