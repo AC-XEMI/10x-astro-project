@@ -211,26 +211,26 @@ the page (cards, panels, dialogs, outline controls) uses `bg-card` / `bg-popover
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Type check passes: `npx astro check`
-- [x] 1.3 Build passes: `npm run build`
-- [x] 1.4 UI token guard passes: `npm run check:ui-tokens`
-- [x] 1.5 One-off contrast script reports every text pair on the new `--background` ≥ 4.5:1 (results in `token-source.md`)
+- [x] 1.1 Lint passes: `npm run lint` — 6e95f51
+- [x] 1.2 Type check passes: `npx astro check` — 6e95f51
+- [x] 1.3 Build passes: `npm run build` — 6e95f51
+- [x] 1.4 UI token guard passes: `npm run check:ui-tokens` — 6e95f51
+- [x] 1.5 One-off contrast script reports every text pair on the new `--background` ≥ 4.5:1 (results in `token-source.md`) — 6e95f51
 
 #### Manual
 
-- [x] 1.6 `/reports` in light: cards visibly white on a light-grey page; outline buttons inside cards are white
-- [x] 1.7 Delete dialog (`/dev/kitchen-sink/reports-list?dialog=1`) is white in light and unchanged in dark
+- [x] 1.6 `/reports` in light: cards visibly white on a light-grey page; outline buttons inside cards are white — 6e95f51
+- [x] 1.7 Delete dialog (`/dev/kitchen-sink/reports-list?dialog=1`) is white in light and unchanged in dark — 6e95f51
 
 ### Phase 2: Visual gate and rule
 
 #### Automated
 
-- [ ] 2.1 Screenshots exist for all four kitchen-sinks, light and dark, before and after
-- [ ] 2.2 `npm run check:ui-tokens` still passes
+- [x] 2.1 Screenshots exist for all four kitchen-sinks, light and dark, before and after
+- [x] 2.2 `npm run check:ui-tokens` still passes
 
 #### Manual
 
-- [ ] 2.3 Light after-shots: every card, alert, dialog and outline button is white on the tinted page in all four views
-- [ ] 2.4 Dark before/after pairs are identical except the landing bands
-- [ ] 2.5 Landing bands remain distinct from the page in light (desktop and 390px)
+- [x] 2.3 Light after-shots: every card, alert, dialog and outline button is white on the tinted page in all four views
+- [x] 2.4 Dark before/after pairs are identical except the landing bands
+- [x] 2.5 Landing bands remain distinct from the page in light (desktop and 390px)
