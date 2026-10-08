@@ -37,35 +37,47 @@ function loadFixtureRows(filename: string): ExtractedVisit[] {
 const indexesWhere = <T>(items: T[], predicate: (item: T) => boolean) =>
   items.flatMap((item, index) => (predicate(item) ? [index] : []));
 
-// The fixture oracle formerly asserted by scripts/verify-report-detection.mjs (0-indexed, header excluded).
-describe.each(["sample-report.csv", "sample-report.xlsx"])("detection on %s", (filename) => {
+function detectAll(filename: string) {
   const rows = loadFixtureRows(filename);
-  const missingGps = indexesWhere(rows, (row) => detectMissingGps(row) === "missing_gps");
   const routeFlags = detectRouteDeviations(rows.map((row, index) => visit({ ...row, id: String(index) })));
-  const routeIndexes = routeFlags.map((flag) => Number(flag.visit_id));
-  const phoneFlags = rows.map((row) => detectPhoneInsteadOfVisit(row));
-  const detailOf = (index: number) => routeFlags.find((flag) => flag.visit_id === String(index))?.detail;
+  return {
+    rows,
+    missingGps: indexesWhere(rows, (row) => detectMissingGps(row) === "missing_gps"),
+    routeIndexes: routeFlags.map((flag) => Number(flag.visit_id)),
+    routeDetail: (index: number) => routeFlags.find((flag) => flag.visit_id === String(index))?.detail,
+    phoneFlags: rows.map((row) => detectPhoneInsteadOfVisit(row)),
+  };
+}
 
+// The fixture oracle formerly asserted by scripts/verify-report-detection.mjs (0-indexed, header excluded).
+// Production code is only ever called inside it(): code run while Vitest collects tests counts as
+// "static" for Stryker, and its mutants are then never activated (they all "survive").
+describe.each(["sample-report.csv", "sample-report.xlsx"])("detection on %s", (filename) => {
   it("flags missing_gps on rows 1, 3 and 8 of the original nine", () => {
+    const { missingGps } = detectAll(filename);
     expect(missingGps.filter((index) => index < 9)).toEqual([1, 3, 8]);
   });
 
   it("flags route_deviation exactly on rows 4, 6 and 8 (none from rows 9-14)", () => {
+    const { routeIndexes } = detectAll(filename);
     expect([...routeIndexes].sort((a, b) => a - b)).toEqual([4, 6, 8]);
   });
 
   it("explains each route flag", () => {
-    expect(detailOf(4)).toContain("poza zaplanowaną trasą");
-    expect(detailOf(6)).toContain("nadmiarowy dystans");
-    expect(detailOf(8)).toContain("nadmiarowy dystans");
+    const { routeDetail } = detectAll(filename);
+    expect(routeDetail(4)).toContain("poza zaplanowaną trasą");
+    expect(routeDetail(6)).toContain("nadmiarowy dystans");
+    expect(routeDetail(8)).toContain("nadmiarowy dystans");
   });
 
   it("flags row 8 with both missing_gps and route_deviation", () => {
+    const { missingGps, routeIndexes } = detectAll(filename);
     expect(missingGps).toContain(8);
     expect(routeIndexes).toContain(8);
   });
 
   it("leaves rows 0, 2, 5 and 7 without any missing_gps or route deviation", () => {
+    const { missingGps, routeIndexes } = detectAll(filename);
     const clean = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(
       (index) => !missingGps.includes(index) && !routeIndexes.includes(index),
     );
@@ -73,6 +85,7 @@ describe.each(["sample-report.csv", "sample-report.xlsx"])("detection on %s", (f
   });
 
   it("flags phone_instead_of_visit via explicit 'telefon' on rows 3 and 9", () => {
+    const { rows, phoneFlags } = detectAll(filename);
     expect(phoneFlags[3]?.detail).toContain("telefon");
     expect(phoneFlags[9]?.detail).toContain("telefon");
     expect(detectMissingGps(rows[3])).toBe("missing_gps");
@@ -80,6 +93,7 @@ describe.each(["sample-report.csv", "sample-report.xlsx"])("detection on %s", (f
   });
 
   it("flags phone_instead_of_visit via the heuristic on rows 10, 11 and 12", () => {
+    const { rows, phoneFlags } = detectAll(filename);
     for (const index of [10, 11, 12]) {
       expect(phoneFlags[index]?.detail).toContain("brak GPS");
       expect(detectMissingGps(rows[index])).toBe("missing_gps");
@@ -87,6 +101,7 @@ describe.each(["sample-report.csv", "sample-report.xlsx"])("detection on %s", (f
   });
 
   it("does not flag phone_instead_of_visit on rows 13 (GPS on) and 14 (15 min on site)", () => {
+    const { rows, phoneFlags } = detectAll(filename);
     expect(phoneFlags[13]).toBeNull();
     expect(detectMissingGps(rows[13])).toBeNull();
     expect(phoneFlags[14]).toBeNull();
@@ -146,25 +161,26 @@ describe("detectPhoneInsteadOfVisit", () => {
 describe("detectRouteDeviations", () => {
   const A = { visited_latitude: 52.2297, visited_longitude: 21.0122 };
   const B = { visited_latitude: 52.25, visited_longitude: 21.03 };
-  const lineKm = haversineDistanceKm(
-    { lat: A.visited_latitude, lng: A.visited_longitude },
-    { lat: B.visited_latitude, lng: B.visited_longitude },
-  );
+  const lineKm = () =>
+    haversineDistanceKm(
+      { lat: A.visited_latitude, lng: A.visited_longitude },
+      { lat: B.visited_latitude, lng: B.visited_longitude },
+    );
 
   it("never distance-checks the first visit of the day", () => {
     expect(detectRouteDeviations([visit({ id: "1", ...A, distance_km: 999 })])).toEqual([]);
   });
 
   it("does not flag a distance of exactly 1.5x the straight line", () => {
-    const visits = [visit({ id: "1", ...A }), visit({ id: "2", ...B, distance_km: lineKm * 1.5 })];
+    const visits = [visit({ id: "1", ...A }), visit({ id: "2", ...B, distance_km: lineKm() * 1.5 })];
     expect(detectRouteDeviations(visits)).toEqual([]);
   });
 
   it("flags a distance just above 1.5x the straight line, with both numbers in the detail", () => {
-    const reported = Number((lineKm * 1.5 + 0.1).toFixed(2));
+    const reported = Number((lineKm() * 1.5 + 0.1).toFixed(2));
     const visits = [visit({ id: "1", ...A }), visit({ id: "2", ...B, distance_km: reported })];
     expect(detectRouteDeviations(visits)).toEqual([
-      { visit_id: "2", detail: `nadmiarowy dystans: zgłoszono ${reported} km, linia prosta ${lineKm.toFixed(1)} km` },
+      { visit_id: "2", detail: `nadmiarowy dystans: zgłoszono ${reported} km, linia prosta ${lineKm().toFixed(1)} km` },
     ]);
   });
 
@@ -177,6 +193,18 @@ describe("detectRouteDeviations", () => {
     const visits = [
       visit({ id: "1", ...A }),
       visit({ id: "2", distance_km: 1 }),
+      visit({ id: "3", ...B, distance_km: 50 }),
+    ];
+    expect(detectRouteDeviations(visits).map((flag) => flag.visit_id)).toEqual(["3"]);
+  });
+
+  it.each([
+    ["latitude", { visited_latitude: 52.24, visited_longitude: null }],
+    ["longitude", { visited_latitude: null, visited_longitude: 21.02 }],
+  ])("does not use a visit with only its %s as the reference point", (_, partial) => {
+    const visits = [
+      visit({ id: "1", ...A }),
+      visit({ id: "2", ...partial, distance_km: 1 }),
       visit({ id: "3", ...B, distance_km: 50 }),
     ];
     expect(detectRouteDeviations(visits).map((flag) => flag.visit_id)).toEqual(["3"]);
@@ -238,8 +266,8 @@ describe("detectRouteDeviations", () => {
     expect(detectRouteDeviations(visits)).toEqual([]);
   });
 
-  it("skips the plan check when the visited client is blank", () => {
-    expect(detectRouteDeviations([visit({ id: "1", visited_client: "  ", planned_route_raw: ["A"] })])).toEqual([]);
+  it.each(["  ", null])("skips the plan check when the visited client is %j", (client) => {
+    expect(detectRouteDeviations([visit({ id: "1", visited_client: client, planned_route_raw: ["A"] })])).toEqual([]);
   });
 
   it("joins both reasons with '; '", () => {
@@ -250,7 +278,7 @@ describe("detectRouteDeviations", () => {
     expect(detectRouteDeviations(visits)).toEqual([
       {
         visit_id: "2",
-        detail: `poza zaplanowaną trasą; nadmiarowy dystans: zgłoszono 50 km, linia prosta ${lineKm.toFixed(1)} km`,
+        detail: `poza zaplanowaną trasą; nadmiarowy dystans: zgłoszono 50 km, linia prosta ${lineKm().toFixed(1)} km`,
       },
     ]);
   });

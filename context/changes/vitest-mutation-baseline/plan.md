@@ -351,28 +351,28 @@ they remain.
 
 #### Automated
 
-- [x] 2.1 `npm test` passes; suite includes `report-parser.test.ts` and `deviation-rules.test.ts`
-- [x] 2.2 Every assertion from `scripts/verify-report-detection.mjs` has a Vitest counterpart (checked against the script before deletion)
-- [x] 2.3 Lint passes: `npm run lint`
-- [x] 2.4 Type check passes: `npx astro check`
-- [x] 2.5 Build passes: `npm run build`
-- [x] 2.6 `scripts/verify-report-detection.mjs` and the `verify:report-detection` script entry no longer exist
+- [x] 2.1 `npm test` passes; suite includes `report-parser.test.ts` and `deviation-rules.test.ts` — a59f6ce
+- [x] 2.2 Every assertion from `scripts/verify-report-detection.mjs` has a Vitest counterpart (checked against the script before deletion) — a59f6ce
+- [x] 2.3 Lint passes: `npm run lint` — a59f6ce
+- [x] 2.4 Type check passes: `npx astro check` — a59f6ce
+- [x] 2.5 Build passes: `npm run build` — a59f6ce
+- [x] 2.6 `scripts/verify-report-detection.mjs` and the `verify:report-detection` script entry no longer exist — a59f6ce
 
 #### Manual
 
 - [ ] 2.7 CI run on the pushed branch shows the new `npm test` step green
-- [x] 2.8 Staged `CLAUDE.md` diff contains only this change's lines
+- [x] 2.8 Staged `CLAUDE.md` diff contains only this change's lines — a59f6ce
 
 ### Phase 3: Mutation baseline and one strengthening round
 
 #### Automated
 
-- [ ] 3.1 `npm run test:mutation` completes (exit 0) twice; both results recorded in `mutation-baseline.md`
-- [ ] 3.2 `npm test` passes
-- [ ] 3.3 Lint passes: `npm run lint`
-- [ ] 3.4 Type check passes: `npx astro check`
-- [ ] 3.5 The after-round score is higher than the baseline, and no logic survivor remains unexplained in `mutation-baseline.md`
+- [x] 3.1 `npm run test:mutation` completes (exit 0) twice; both results recorded in `mutation-baseline.md`
+- [x] 3.2 `npm test` passes
+- [x] 3.3 Lint passes: `npm run lint`
+- [x] 3.4 Type check passes: `npx astro check`
+- [x] 3.5 The after-round score is higher than the baseline, and no logic survivor remains unexplained in `mutation-baseline.md`
 
 #### Manual
 
-- [ ] 3.6 The HTML report (`reports/mutation/mutation.html`) opens and its remaining survivors match the list in `mutation-baseline.md`
+- [x] 3.6 The HTML report (`reports/mutation/mutation.html`) opens and its remaining survivors match the list in `mutation-baseline.md`

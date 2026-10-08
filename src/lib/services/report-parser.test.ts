@@ -26,15 +26,17 @@ function errorOf(result: ParsedReport): string {
   return result.error;
 }
 
+// Production code is only ever called inside it(): code run while Vitest collects tests counts as
+// "static" for Stryker, and its mutants are then never activated (they all "survive").
 describe.each(["sample-report.csv", "sample-report.xlsx"])("parseReportFile on %s", (filename) => {
-  const rows = rowsOf(parseReportFile(fixture(filename), filename));
+  const parseFixture = () => rowsOf(parseReportFile(fixture(filename), filename));
 
   it("parses all 15 data rows", () => {
-    expect(rows).toHaveLength(15);
+    expect(parseFixture()).toHaveLength(15);
   });
 
   it("maps a full row to typed visit fields", () => {
-    expect(rows[6]).toMatchObject({
+    expect(parseFixture()[6]).toMatchObject({
       representative_name: "Marek Nowicki",
       visit_date: "2026-09-04",
       gps_enabled: true,
@@ -49,7 +51,7 @@ describe.each(["sample-report.csv", "sample-report.xlsx"])("parseReportFile on %
   });
 
   it("maps blank optional cells to null", () => {
-    expect(rows[11]).toMatchObject({
+    expect(parseFixture()[11]).toMatchObject({
       representative_name: "Lucyna Wrona",
       gps_enabled: false,
       activity_type: null,
@@ -61,7 +63,10 @@ describe.each(["sample-report.csv", "sample-report.xlsx"])("parseReportFile on %
   });
 
   it("keeps every source column in raw_data", () => {
-    expect(rows[0].raw_data).toMatchObject({ przedstawiciel: "Jan Kowalski", planowana_trasa: "Klient A;Klient B" });
+    expect(parseFixture()[0].raw_data).toMatchObject({
+      przedstawiciel: "Jan Kowalski",
+      planowana_trasa: "Klient A;Klient B",
+    });
   });
 });
 
@@ -110,6 +115,32 @@ describe("parseReportFile format handling", () => {
       "Brak wymaganych kolumn: data_wizyty, odwiedzony_klient.",
     );
   });
+
+  it.each(["przedstawiciel", "data_wizyty", "gps_wlaczony", "odwiedzony_klient"])(
+    "rejects a file missing only %s",
+    (missing) => {
+      const header = REQUIRED_HEADER.split(",").filter((column) => column !== missing);
+      const row = header.map((column) => ({ data_wizyty: "2026-09-01", gps_wlaczony: "TAK" })[column] ?? "x");
+      expect(errorOf(parseReportFile(csv(`${header.join(",")}\n${row.join(",")}`), "report.csv"))).toBe(
+        `Brak wymaganych kolumn: ${missing}.`,
+      );
+    },
+  );
+
+  it("uses the first column when a header is duplicated", () => {
+    const rows = rowsOf(parseReportFile(csv(`${REQUIRED_HEADER},przedstawiciel\nJan,2026-09-01,TAK,K,Anna`), "r.csv"));
+    expect(rows[0].representative_name).toBe("Jan");
+  });
+
+  it("skips columns with an empty header in raw_data", () => {
+    const rows = rowsOf(parseReportFile(csv(`${REQUIRED_HEADER},\nJan,2026-09-01,TAK,K,extra`), "r.csv"));
+    expect(rows[0].raw_data).toEqual({
+      przedstawiciel: "Jan",
+      data_wizyty: "2026-09-01",
+      gps_wlaczony: "TAK",
+      odwiedzony_klient: "K",
+    });
+  });
 });
 
 describe("parseReportFile row validation", () => {
@@ -125,7 +156,18 @@ describe("parseReportFile row validation", () => {
     expect(errorOf(parseRows("Jan,,TAK,K"))).toBe("Wiersz 1: brak wartości w kolumnie data_wizyty.");
   });
 
-  it.each(["01.09.2026", "2026-9-1", "2026-02-30"])("rejects the date %s", (date) => {
+  it("trims whitespace around cell values", () => {
+    expect(rowsOf(parseRows(" Jan , 2026-09-01 , TAK , K "))[0]).toMatchObject({
+      representative_name: "Jan",
+      visit_date: "2026-09-01",
+      gps_enabled: true,
+      visited_client: "K",
+    });
+  });
+
+  // 2026-13-01 matches the RRRR-MM-DD shape but is not a date at all (Invalid Date), 2026-02-30 is
+  // a real Date that rolls over to March - each hits a different check.
+  it.each(["01.09.2026", "2026-9-1", "2026-02-30", "2026-13-01"])("rejects the date %s", (date) => {
     expect(errorOf(parseRows(`Jan,${date},TAK,K`))).toBe(
       "Wiersz 1: nierozpoznany format daty w kolumnie data_wizyty (oczekiwano RRRR-MM-DD).",
     );
@@ -177,6 +219,10 @@ describe("parseReportFile optional columns", () => {
 
   it("keeps coordinates only when both parse", () => {
     expect(parseOne("Jan,2026-09-01,TAK,K,wizyta,1,1,,52.1,")).toMatchObject({
+      visited_latitude: null,
+      visited_longitude: null,
+    });
+    expect(parseOne("Jan,2026-09-01,TAK,K,wizyta,1,1,,,21.2")).toMatchObject({
       visited_latitude: null,
       visited_longitude: null,
     });
