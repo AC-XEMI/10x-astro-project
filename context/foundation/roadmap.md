@@ -6,10 +6,10 @@ created: 2026-09-25
 updated: 2026-10-08
 prd_version: 2
 main_goal: quality
-top_blocker: time
-milestone_id: ui-contract-quality-baseline
-milestone_seq: 3
-milestone_status: done
+top_blocker: decisions
+milestone_id: error-visibility-and-test-plan
+milestone_seq: 4
+milestone_status: open
 ---
 
 # Roadmap: Kontrola Trasówek
@@ -20,16 +20,21 @@ milestone_status: done
 
 ## Milestone
 
-**M-3: Dopracowanie UI i podstawy jakości** — Status: done
+**M-4: Widoczność błędów i plan testów** — Status: open
 
-- **Intent:** Po wyczerpaniu wymagań funkcjonalnych PRD (M-1, M-2) aplikacja dostaje spójny wygląd i komunikaty na wszystkich widokach oraz pierwszą siatkę testów, która chroni wykrywanie odstępstw przed regresją. Kamień milowy zapisany retroaktywnie: praca powstała jako samodzielne zmiany poza roadmapą i została tu podpięta, żeby roadmapa opowiadała pełną historię projektu.
-- **Source materials:** opis użytkownika (kotwice poniżej), na podstawie zmian zarchiwizowanych 2026-10-07…2026-10-08
-- **Done when:** F-02 oraz S-08…S-15 są wszystkie `done`.
+- **Intent:** Gdy coś w aplikacji zawiedzie, zespół może to później zobaczyć i zrozumieć (dziś błędy są widoczne tylko na żywo przez `wrangler tail`), a najważniejsze przepływy — wybrane na podstawie mapy ryzyk, nie intuicji — są chronione testami w CI.
+- **Source materials:** opis użytkownika (kotwice poniżej): „Observability + plan testów” — dwaj kandydaci z Baseline i z otwartych pytań roadmapy po zamknięciu M-3.
+- **Done when:** F-03 oraz S-16…S-20 są wszystkie `done`.
 - **Scope anchors:**
-  - MS-01: Każdy widok aplikacji (Raporty, Szczegóły raportu, Pulpit, Strona startowa, strony logowania) korzysta z tokenów i wspólnych komponentów design systemu, ma udokumentowany kontrakt i stronę „kitchen sink” z 7 stanami w jasnym i ciemnym motywie, a treść komunikatów z Claude Design zostaje bez zmian.
-  - MS-02: Błędy logowania i rejestracji docierają do strony jako kody, a użytkownik widzi tylko przetłumaczony komunikat — nigdy surowy tekst z Supabase.
-  - MS-03: W jasnym motywie karty, okna i przyciski wyraźnie odcinają się od tła strony, a każdy tekst na tle ma kontrast co najmniej 4.5:1.
-  - MS-04: Logika parsowania raportu i reguł wykrywania odstępstw jest chroniona testami jednostkowymi uruchamianymi w CI, a ich skuteczność zmierzona testami mutacyjnymi.
+  - MS-01: Błędy i kluczowe zdarzenia aplikacji są rejestrowane trwale, z kodem i kontekstem (bez danych osobowych), i można je przejrzeć po fakcie — nie tylko podglądając logi na żywo.
+  - MS-02: Krytyczne przepływy aplikacji, wskazane przez plan testów oparty na ryzykach, są chronione testami uruchamianymi w CI.
+
+Kotwice zamkniętego M-3 (F-02 i S-08…S-15 odwołują się do nich z prefiksem `M-3`, żeby nie mylić ich z kotwicami M-4):
+
+  - M-3 MS-01: Każdy widok aplikacji (Raporty, Szczegóły raportu, Pulpit, Strona startowa, strony logowania) korzysta z tokenów i wspólnych komponentów design systemu, ma udokumentowany kontrakt i stronę „kitchen sink” z 7 stanami w jasnym i ciemnym motywie, a treść komunikatów z Claude Design zostaje bez zmian.
+  - M-3 MS-02: Błędy logowania i rejestracji docierają do strony jako kody, a użytkownik widzi tylko przetłumaczony komunikat — nigdy surowy tekst z Supabase.
+  - M-3 MS-03: W jasnym motywie karty, okna i przyciski wyraźnie odcinają się od tła strony, a każdy tekst na tle ma kontrast co najmniej 4.5:1.
+  - M-3 MS-04: Logika parsowania raportu i reguł wykrywania odstępstw jest chroniona testami jednostkowymi uruchamianymi w CI, a ich skuteczność zmierzona testami mutacyjnymi.
 
 ## Vision recap
 
@@ -41,14 +46,14 @@ Kierownik regionalny ręcznie przegląda raporty aktywności przedstawicieli han
 
 > "Gwiazda przewodnia" (north star) to najmniejszy pełny wycinek funkcjonalności, który — jeśli się uda — dowodzi, że główna hipoteza produktu jest słuszna. Umieszczamy go możliwie wcześnie w kolejności, bo reszta ma sens tylko wtedy, gdy ten pierwszy przepływ faktycznie działa.
 
-M-3 nie ma nowej hipotezy produktu — to praca nad jakością istniejących funkcji. Jego osią jest **S-08 → S-09** (kontrakt widoku listy raportów), bo na nim powstał wzorzec (tokeny → wspólne komponenty → 7 stanów → zrzuty), który potem powtórzono na pozostałych widokach.
+M-4 nie ma nowej hipotezy produktu — to praca nad niezawodnością istniejących funkcji. Pierwszym wycinkiem jest **S-16: nieudane wgranie lub usunięcie raportu zostawia trwały wpis z kodem błędu i kontekstem** — to główny przepływ produktu, a dziś jego błędy kończą jako `console.error` widoczne tylko na żywo. Jeśli ten jeden przepływ da się zdiagnozować po fakcie, ten sam wzorzec obejmie pozostałe (S-17…S-19).
 
 ## At a glance
 
 | ID   | Change ID                        | Outcome (user can …)                                                              | Prerequisites | PRD refs                                              | Status   |
 | ---- | --------------------------------- | ----------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------ | -------- |
 | F-01 | report-data-schema                 | (foundation) Schemat i trwałość danych raportu w Supabase, izolowane per-użytkownik | —              | Access Control, NFR (izolacja danych)                  | done |
-| F-02 | vitest-mutation-baseline           | (foundation) Testy jednostkowe w CI chronią parser i reguły wykrywania odstępstw     | F-01; reguły wykrywania z M-1 w kodzie | MS-04                                                 | done |
+| F-02 | vitest-mutation-baseline           | (foundation) Testy jednostkowe w CI chronią parser i reguły wykrywania odstępstw     | F-01; reguły wykrywania z M-1 w kodzie | M-3 MS-04                                                 | done |
 | S-01 | missing-gps-deviation-detection    | Kierownik wgrywa raport i widzi wizyty bez GPS oznaczone jako odstępstwo             | F-01           | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, US-01  | done |
 | S-02 | route-deviation-detection          | Kierownik widzi wizyty z nieoptymalną trasą/nadmiarowym dystansem jako odstępstwo    | F-01, S-01     | FR-009, US-01                                           | done |
 | S-03 | phone-vs-visit-deviation-detection | Kierownik widzi aktywności "telefon zamiast wizyty" oznaczone jako odstępstwo        | F-01, S-01     | FR-010, US-01                                           | done |
@@ -56,18 +61,24 @@ M-3 nie ma nowej hipotezy produktu — to praca nad jakością istniejących fun
 | S-05 | mark-deviation-reviewed            | Kierownik oznacza odstępstwo jako sprawdzone/fałszywy alarm                          | F-01, S-01     | FR-012, US-03                                           | done |
 | S-06 | filter-sort-deviations-list        | Kierownik filtruje/sortuje listę odstępstw (wg przedstawiciela, daty, reguły, statusu) | F-01, S-01     | FR-007                                                  | done |
 | S-07 | export-deviations-list             | Kierownik eksportuje listę odstępstw do pliku                                        | F-01, S-01     | FR-008                                                  | done |
-| S-08 | reports-list-ui-tokens             | Kierownik widzi listę raportów w spójnych kolorach marki, także w trybie ciemnym     | S-01           | MS-01                                                   | done |
-| S-09 | reports-list-ui-contract           | Kierownik dostaje na liście raportów czytelne komunikaty i błędy wgrywania jako przetłumaczone kody | S-08 | MS-01                                              | done |
-| S-10 | dashboard-ui-tokens                | Kierownik widzi Pulpit w spójnym układzie kart i kolorach serii reguł                | S-08           | MS-01                                                   | done |
-| S-11 | landing-ui-contract                | Odwiedzający widzi czytelną stronę startową, także na telefonie i w trybie ciemnym   | S-08           | MS-01, MS-03                                            | done |
-| S-12 | report-details-ui-contract         | Kierownik przegląda szczegóły raportu z klawiatury i na wąskim ekranie, z jasnymi błędami ładowania | S-08 | MS-01                                             | done |
-| S-13 | ui-leftovers                       | Kierownik widzi wszystkie komunikaty w jednym komponencie Alert na każdym widoku     | S-09, S-12     | MS-01                                                   | done |
-| S-14 | auth-error-codes                   | Użytkownik widzi przy logowaniu i rejestracji tylko przetłumaczony komunikat błędu   | S-01           | MS-02                                                   | done |
-| S-15 | light-surface-tokens               | Kierownik w jasnym motywie odróżnia karty, okna i przyciski od tła strony            | S-09, S-10, S-11, S-12 | MS-03                                           | done |
+| S-08 | reports-list-ui-tokens             | Kierownik widzi listę raportów w spójnych kolorach marki, także w trybie ciemnym     | S-01           | M-3 MS-01                                                   | done |
+| S-09 | reports-list-ui-contract           | Kierownik dostaje na liście raportów czytelne komunikaty i błędy wgrywania jako przetłumaczone kody | S-08 | M-3 MS-01                                              | done |
+| S-10 | dashboard-ui-tokens                | Kierownik widzi Pulpit w spójnym układzie kart i kolorach serii reguł                | S-08           | M-3 MS-01                                                   | done |
+| S-11 | landing-ui-contract                | Odwiedzający widzi czytelną stronę startową, także na telefonie i w trybie ciemnym   | S-08           | M-3 MS-01, M-3 MS-03                                            | done |
+| S-12 | report-details-ui-contract         | Kierownik przegląda szczegóły raportu z klawiatury i na wąskim ekranie, z jasnymi błędami ładowania | S-08 | M-3 MS-01                                             | done |
+| S-13 | ui-leftovers                       | Kierownik widzi wszystkie komunikaty w jednym komponencie Alert na każdym widoku     | S-09, S-12     | M-3 MS-01                                                   | done |
+| S-14 | auth-error-codes                   | Użytkownik widzi przy logowaniu i rejestracji tylko przetłumaczony komunikat błędu   | S-01           | M-3 MS-02                                                   | done |
+| S-15 | light-surface-tokens               | Kierownik w jasnym motywie odróżnia karty, okna i przyciski od tła strony            | S-09, S-10, S-11, S-12 | M-3 MS-03                                           | done |
+| F-03 | risk-based-test-plan               | (foundation) Mapa ryzyk i fazy wdrażania testów zapisane w planie testów             | F-02           | MS-02                                                   | ready |
+| S-16 | upload-error-visibility            | Zespół widzi po fakcie każde nieudane wgranie lub usunięcie raportu, z kodem błędu i kontekstem | —   | MS-01                                                   | ready |
+| S-17 | report-view-error-visibility       | Zespół widzi po fakcie błędy ładowania szczegółów raportu, oznaczania i eksportu      | S-16           | MS-01                                                   | proposed |
+| S-18 | auth-error-visibility              | Zespół widzi po fakcie nieudane logowania i rejestracje jako kody, bez haseł i e-maili | S-16          | MS-01                                                   | proposed |
+| S-19 | upload-duration-visibility         | Zespół widzi czas analizy każdego wgrania i może sprawdzić, czy wynik pojawia się w ciągu kilku sekund | S-16 | MS-01, NFR (wynik w ciągu kilku sekund)   | proposed |
+| S-20 | critical-flows-test-rollout        | Krytyczne przepływy wskazane w planie testów są chronione testami w CI               | F-03           | MS-02                                                   | blocked |
 
 ## Baseline
 
-Co już jest w kodzie na dzień `2026-10-08` (auto-zbadane, po zamknięciu M-3).
+Co już jest w kodzie na dzień `2026-10-08` (auto-zbadane i potwierdzone przy otwarciu M-4).
 Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od nowa.
 
 - **Frontend:** present — Astro 7 SSR + React 19 islands, shadcn/ui; tokeny kolorów w `src/styles/global.css` (marka, serie reguł, rozdzielone powierzchnie w jasnym motywie), kontrakty widoków i strony `src/pages/dev/kitchen-sink/*` (per `CLAUDE.md`)
@@ -75,8 +86,8 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Data:** present — Supabase tabele `reports`, `visits`, `deviations` z RLS per-użytkownik (z F-01)
 - **Auth:** present — Supabase Auth przez `@supabase/ssr` (`src/lib/supabase.ts`), middleware (`src/middleware.ts`)
 - **Deploy / infra:** present — Cloudflare Workers, CI w GitHub Actions (`ci`: lint → `npm test` → `astro check` → build; `smoke` z lokalnym Supabase)
-- **Testy:** present — Vitest (`npm test`, `src/**/*.test.ts`) dla parsera, reguł i `geo`; Stryker (`npm run test:mutation`) lokalnie, wynik 88.54% (z F-02)
-- **Observability:** absent — brak biblioteki logowania, error trackingu, metryk
+- **Testy:** partial — Vitest (`npm test`, `src/**/*.test.ts`) dla parsera, reguł i `geo` (98 testów), Stryker (`npm run test:mutation`) lokalnie, wynik 88.54% (z F-02); wgrywanie, API, auth, RLS i UI chronione tylko skryptami `smoke` i `verify:rls`; brak `context/foundation/test-plan.md`
+- **Observability:** partial — Workers Logs włączone (`wrangler.jsonc` → `"observability": { "enabled": true }`), 18 wywołań `console.*` w `src/`; brak ustrukturyzowanych wpisów z kodem i kontekstem, śledzenia błędów, metryk i alertów; podgląd tylko na żywo przez `wrangler tail`, który pod obciążeniem próbkuje (`infrastructure.md`)
 
 ## Foundations
 
@@ -97,7 +108,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** (foundation) Vitest uruchamia w CI testy parsera raportów i trzech reguł wykrywania odstępstw (wyrocznia na przykładowych raportach CSV/XLSX plus przypadki graniczne); Stryker mierzy ich skuteczność lokalnie. Zastąpiło to wcześniejszy skrypt `verify:report-detection`.
 - **Change ID:** vitest-mutation-baseline
-- **PRD refs:** MS-04
+- **PRD refs:** M-3 MS-04
 - **Unlocks:** ścieżka weryfikacji dla każdej przyszłej zmiany reguł wykrywania lub parsera (regresja łapana w CI, zanim trafi na `master`); punkt wyjścia dla planu testów opartego na ryzykach
 - **Prerequisites:** F-01; reguły wykrywania z M-1 w kodzie
 - **Parallel with:** S-08, S-09, S-10, S-11, S-12, S-13, S-14, S-15
@@ -105,6 +116,19 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 - **Unknowns:** —
 - **Risk:** Narzędzia testów mutacyjnych bywają wrażliwe na wersję Vitest i sposób uruchamiania testów; obie pułapki (Vitest 5, wywołania w ciele `describe`) zostały wykryte i opisane w `CLAUDE.md` oraz w archiwum zmiany.
 - **Status:** done
+
+### F-03: Plan testów oparty na ryzykach
+
+- **Outcome:** (foundation) Plan testów zapisany w `context/foundation/test-plan.md`: 5–7 scenariuszy porażki w języku użytkownika, każdy z oceną skutku i prawdopodobieństwa, oraz fazy wdrażania testów, z których każda staje się osobną zmianą.
+- **Change ID:** risk-based-test-plan
+- **PRD refs:** MS-02
+- **Unlocks:** S-20 (rozstrzyga jego blokujące pytanie „które przepływy chronić i w jakiej kolejności”); zamyka otwarte pytanie o następne kroki testowe z M-3
+- **Prerequisites:** F-02
+- **Parallel with:** S-16, S-17, S-18, S-19
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Powstaje przez `/10x-test-plan`, a nie `/10x-plan` — nie tworzy folderu zmiany o tym Change ID, więc jego status trzeba przestawić ręcznie po zapisaniu planu. Sekwencjonowany wcześnie, bo bez niego S-20 nie da się zaplanować.
+- **Status:** ready
 
 ## Slices
 
@@ -198,7 +222,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Kierownik widzi listę raportów w kolorach marki zdefiniowanych raz jako tokeny (zamiast rozsianych literałów), poprawnie także w trybie ciemnym.
 - **Change ID:** reports-list-ui-tokens
-- **PRD refs:** MS-01
+- **PRD refs:** M-3 MS-01
 - **Prerequisites:** S-01
 - **Parallel with:** S-14, F-02
 - **Blockers:** —
@@ -210,7 +234,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Kierownik widzi na liście raportów komunikaty w jednym komponencie, błędy wgrywania i usuwania jako przetłumaczone komunikaty (nie surowy tekst bazy), daty w jednym formacie, a wszystkie 7 stanów widoku działa w obu motywach.
 - **Change ID:** reports-list-ui-contract
-- **PRD refs:** MS-01
+- **PRD refs:** M-3 MS-01
 - **Prerequisites:** S-08
 - **Parallel with:** S-10, S-11, S-12, S-14, F-02
 - **Blockers:** —
@@ -222,7 +246,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Kierownik widzi Pulpit złożony ze wspólnych kart, z kolorami serii reguł (brak GPS, telefon, trasa) czytelnymi w obu motywach.
 - **Change ID:** dashboard-ui-tokens
-- **PRD refs:** MS-01
+- **PRD refs:** M-3 MS-01
 - **Prerequisites:** S-08
 - **Parallel with:** S-09, S-11, S-12, S-14, F-02
 - **Blockers:** —
@@ -234,7 +258,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Odwiedzający widzi stronę startową zgodną z projektem, obsługiwaną z klawiatury i z menu na telefonie, z tekstem na kolorze marki czytelnym w obu motywach.
 - **Change ID:** landing-ui-contract
-- **PRD refs:** MS-01, MS-03
+- **PRD refs:** M-3 MS-01, M-3 MS-03
 - **Prerequisites:** S-08
 - **Parallel with:** S-09, S-10, S-12, S-14, F-02
 - **Blockers:** —
@@ -246,7 +270,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Kierownik przegląda szczegóły raportu także z klawiatury i na ekranie telefonu; błędy ładowania rozróżniają „nie znaleziono”, „brak konfiguracji” i awarię bazy, a nieudane oznaczenie lub eksport pokazuje komunikat.
 - **Change ID:** report-details-ui-contract
-- **PRD refs:** MS-01
+- **PRD refs:** M-3 MS-01
 - **Prerequisites:** S-08
 - **Parallel with:** S-09, S-10, S-11, S-14, F-02
 - **Blockers:** —
@@ -258,7 +282,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Kierownik widzi każdy komunikat wewnątrz strony (raporty, szczegóły, Pulpit, potwierdzenie e-maila) w tym samym komponencie, a pasek na pełną szerokość zostaje tylko dla ostrzeżenia o konfiguracji.
 - **Change ID:** ui-leftovers
-- **PRD refs:** MS-01
+- **PRD refs:** M-3 MS-01
 - **Prerequisites:** S-09, S-12
 - **Parallel with:** S-10, S-11, S-14, F-02
 - **Blockers:** —
@@ -270,7 +294,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Użytkownik po nieudanym logowaniu, rejestracji lub ponownym wysłaniu potwierdzenia widzi tylko przetłumaczony komunikat; adres strony niesie kod błędu, a nie dowolny tekst.
 - **Change ID:** auth-error-codes
-- **PRD refs:** MS-02
+- **PRD refs:** M-3 MS-02
 - **Prerequisites:** S-01
 - **Parallel with:** S-08, S-09, S-10, S-11, S-12, S-13, S-15, F-02
 - **Blockers:** —
@@ -282,13 +306,77 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 
 - **Outcome:** Kierownik w jasnym motywie widzi karty, okna i przyciski jako białe na lekko szarym tle strony, a każdy tekst na tle ma kontrast co najmniej 4.5:1.
 - **Change ID:** light-surface-tokens
-- **PRD refs:** MS-03
+- **PRD refs:** M-3 MS-03
 - **Prerequisites:** S-09, S-10, S-11, S-12
 - **Parallel with:** S-13, S-14, F-02
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Zmiana jednego tokenu dotyka każdego widoku — zweryfikowana zrzutami wszystkich kitchen-sinków przed i po w obu motywach.
 - **Status:** done
+
+### S-16: Zespół widzi po fakcie nieudane wgrania i usunięcia raportu
+
+- **Outcome:** Zespół widzi po fakcie każde nieudane wgranie lub usunięcie raportu, z kodem błędu i kontekstem (bez danych osobowych), bez podglądania logów na żywo.
+- **Change ID:** upload-error-visibility
+- **PRD refs:** MS-01
+- **Prerequisites:** —
+- **Parallel with:** F-03
+- **Blockers:** —
+- **Unknowns:**
+  - Gdzie mają trafiać wpisy: zapytania do Workers Logs w panelu Cloudflare czy zewnętrzna usługa śledzenia błędów (konto, klucz, koszt)? — Owner: user. Block: no (decyzja na etapie `/10x-plan` tego wycinka; ustala wzorzec dla S-17…S-19).
+  - Jakie pola wpisu są bezpieczne (bez nazwisk przedstawicieli, nazw klientów, e-maili)? — Owner: team. Block: no.
+- **Risk:** Pierwszy, bo to główny przepływ produktu i jego błędy dziś przepadają; tu zapada decyzja o miejscu i formacie wpisów, którą przejmą kolejne wycinki. Ryzyko: wpis z danymi osobowymi z raportu — stąd jawne pytanie o pola.
+- **Status:** ready
+
+### S-17: Zespół widzi po fakcie błędy na widoku raportu
+
+- **Outcome:** Zespół widzi po fakcie błędy ładowania szczegółów raportu oraz nieudane oznaczenie odstępstwa i eksport — także te, które zdarzają się w przeglądarce, a nie na serwerze.
+- **Change ID:** report-view-error-visibility
+- **PRD refs:** MS-01
+- **Prerequisites:** S-16
+- **Parallel with:** S-18, S-19, F-03
+- **Blockers:** —
+- **Unknowns:**
+  - Jak przekazać do rejestru błędy powstające w przeglądarce (eksport po stronie klienta)? — Owner: team. Block: no.
+- **Risk:** Rozszerza wzorzec z S-16 na drugi najważniejszy widok; błędy z przeglądarki to nowa droga, więc osobny wycinek zamiast dopychania do S-16.
+- **Status:** proposed
+
+### S-18: Zespół widzi po fakcie nieudane logowania i rejestracje
+
+- **Outcome:** Zespół widzi po fakcie nieudane logowania, rejestracje i ponowne wysłania potwierdzenia jako kody błędów, bez haseł i e-maili.
+- **Change ID:** auth-error-visibility
+- **PRD refs:** MS-01
+- **Prerequisites:** S-16
+- **Parallel with:** S-17, S-19, F-03
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Kody błędów już istnieją (S-14), więc to głównie podpięcie ich do rejestru z S-16; najwyższe ryzyko wycieku danych logowania, stąd osobny wycinek.
+- **Status:** proposed
+
+### S-19: Zespół widzi czas analizy każdego wgrania
+
+- **Outcome:** Zespół widzi czas analizy każdego wgranego raportu i może sprawdzić, czy wynik pojawia się w ciągu kilku sekund, jak wymaga PRD.
+- **Change ID:** upload-duration-visibility
+- **PRD refs:** MS-01, NFR (wynik w ciągu kilku sekund)
+- **Prerequisites:** S-16
+- **Parallel with:** S-17, S-18, F-03
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** Jedyne wymaganie wydajnościowe PRD nie jest dziś mierzone wcale; korzysta z tego samego rejestru co S-16, więc po nim.
+- **Status:** proposed
+
+### S-20: Krytyczne przepływy chronione testami w CI
+
+- **Outcome:** Krytyczne przepływy wskazane w planie testów (F-03) są chronione testami uruchamianymi w CI, wdrażanymi faza po fazie.
+- **Change ID:** critical-flows-test-rollout
+- **PRD refs:** MS-02
+- **Prerequisites:** F-03
+- **Parallel with:** S-16, S-17, S-18, S-19
+- **Blockers:** —
+- **Unknowns:**
+  - Które przepływy chronić i w jakiej kolejności? — Owner: F-03 (plan testów). Block: yes.
+- **Risk:** Zakres zależy w całości od mapy ryzyk z F-03, więc zablokowany do jej powstania. Każda faza z planu testów to osobna zmiana o własnym Change ID — status tego wycinka przestawia się ręcznie, gdy zamknie się ostatnia faza.
+- **Status:** blocked
 
 ## Backlog Handoff
 
@@ -311,17 +399,24 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
 | S-13       | ui-leftovers                       | Komunikaty w Alert na wszystkich widokach, dopracowanie szczegółów | done                 | Zaimplementowane i zarchiwizowane 2026-10-07 → `context/archive/2026-10-07-ui-leftovers/` |
 | S-14       | auth-error-codes                   | Błędy logowania/rejestracji jako kody                            | done                   | Zaimplementowane i zarchiwizowane 2026-10-07 → `context/archive/2026-10-07-auth-error-codes/` |
 | S-15       | light-surface-tokens               | Rozdzielenie powierzchni od tła w jasnym motywie                 | done                   | Zaimplementowane i zarchiwizowane 2026-10-08 → `context/archive/2026-10-08-light-surface-tokens/` |
+| F-03       | risk-based-test-plan               | Plan testów oparty na ryzykach (`test-plan.md`)                  | yes                    | Uruchom `/10x-test-plan` (nie `/10x-plan`) |
+| S-16       | upload-error-visibility            | Trwałe wpisy o nieudanych wgraniach i usunięciach raportu        | yes                    | Uruchom `/10x-plan upload-error-visibility`; decyzja o miejscu wpisów zapada tutaj |
+| S-17       | report-view-error-visibility       | Trwałe wpisy o błędach widoku szczegółów raportu                 | no                     | Po S-16 |
+| S-18       | auth-error-visibility              | Trwałe wpisy o nieudanych logowaniach i rejestracjach            | no                     | Po S-16 |
+| S-19       | upload-duration-visibility         | Pomiar czasu analizy wgranego raportu                            | no                     | Po S-16 |
+| S-20       | critical-flows-test-rollout        | Testy krytycznych przepływów wg planu testów                     | no                     | Zablokowane do F-03; fazy prowadzi `/10x-test-plan` |
 
 ## Open Roadmap Questions
 
 1. **Czy i kiedy dołączyć realny eksport z systemu firmowego zamiast danych testowych?** — Owner: user. Block: brak (świadomie poza zakresem MVP, patrz Parked). GitHub: [#5](https://github.com/AC-XEMI/10x-astro-project/issues/5)
-2. **Co jest następnym kamieniem milowym, skoro wszystkie wymagania funkcjonalne PRD (FR-001…FR-012) są zrealizowane?** — Owner: user. Block: roadmap-wide. Kandydaci widoczni w artefaktach: plan testów oparty na ryzykach (brak `context/foundation/test-plan.md`), observability (Baseline: absent), nowa wersja PRD.
+2. **Gdzie trafiają trwałe wpisy o błędach i zdarzeniach — zapytania do Workers Logs w Cloudflare czy zewnętrzna usługa śledzenia błędów?** — Owner: user. Block: no (rozstrzygane przy `/10x-plan` dla S-16; wybór obowiązuje też S-17, S-18 i S-19). Jeśli zewnętrzna usługa — `infrastructure.md` trzeba uzupełnić o konto, klucz i koszt.
 
 ## Parked
 
 - **Integracja z realnym systemem firmowym** — Why parked: PRD Non-Goals — MVP działa wyłącznie na danych testowych/przykładowych.
 - **Współdzielenie danych między kierownikami / widoki zbiorcze** — Why parked: PRD Non-Goals — brak takiej funkcji w MVP.
 - **Testy mutacyjne w CI z progiem `break`** — Why parked: decyzja w F-02 — najpierw zapisany wynik bazowy, Stryker uruchamiany lokalnie.
+- **Alerty o skokach liczby błędów i panele metryk** — Why parked: M-4 (MS-01) najpierw sprawia, że błędy w ogóle są widoczne po fakcie; powiadamianie ma sens dopiero, gdy wiadomo, jak wygląda ich normalny poziom.
 
 ## Milestone History
 
