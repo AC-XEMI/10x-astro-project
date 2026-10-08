@@ -106,7 +106,8 @@ block above.
 - `npm run format` — Prettier (includes prettier-plugin-astro + prettier-plugin-tailwindcss)
 - `npm run smoke` — dependency-free auth-flow smoke test (`scripts/smoke.mjs`) against a running server, `BASE_URL` env (default `http://localhost:4321`). Run after dependency upgrades; CI runs it against the production preview with a local Supabase.
 - `npm run verify:rls` — `scripts/verify-rls.mjs`, proves the RLS policies actually isolate per-user data (not just that they exist) against a **local** Supabase instance (reads connection info from `npx supabase status -o env`, not `.env`/`.dev.vars`). Requires `npx supabase start` first.
-- `npm run verify:report-detection` — `scripts/verify-report-detection.mjs`, runs `report-parser.ts` + `deviation-rules.ts` directly against fixture CSV/XLSX files (no Supabase needed) and asserts which row indexes get flagged by each rule. Run this after touching parsing or detection logic.
+- `npm test` — Vitest unit tests (`src/**/*.test.ts`, config in `vitest.config.ts`). `report-parser.test.ts` and `deviation-rules.test.ts` hold the detection oracle on `test-data/sample-report.{csv,xlsx}` (which row indexes each rule flags) plus parser error branches and rule boundaries. Run after touching parsing or detection logic; CI runs it on every push.
+- `npm run test:mutation` — Stryker mutation testing (`stryker.config.json`) over `report-parser.ts`, `deviation-rules.ts` and `geo.ts`; HTML report in `reports/mutation/`. Local only (not in CI), no `break` threshold.
 - `npm run db:types` — regenerates `src/types.ts` from the **local** Supabase schema (`supabase gen types typescript --local`). Run after adding/editing a migration.
 
 Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
@@ -159,8 +160,8 @@ This is the core product flow and spans several files — read all of them befor
 - **Services/helpers** go in `src/lib/` (or `src/lib/services/` for extracted business logic, e.g. `report-parser.ts`, `deviation-rules.ts`, `geo.ts`).
 - **Shared types**: `src/types.ts` is generated output (`npm run db:types`), not hand-written — don't edit it directly, edit the migration and regenerate.
 - **`xlsx`**: the dependency named `xlsx` in `package.json` resolves to the `@e965/xlsx` npm mirror (the original `xlsx` package stopped receiving security patches after 0.18.5). Used both server-side (parsing uploads) and client-side (exporting the deviations list) — same package, two call sites.
-- No test framework is configured (no vitest/jest/playwright). `npm run smoke`, `npm run verify:rls`, and `npm run verify:report-detection` are dependency-free sanity scripts, not a substitute for real tests — add a framework deliberately when needed.
-- Dependency versions are intentionally bleeding-edge: TypeScript `^6.0.3`, ESLint `^10.10.0`, `lucide-react` `^1.14.0` — don't "fix" these thinking they're typos. `eslint-plugin-react` is wrapped with `fixupPluginRules` in `eslint.config.js` since it doesn't yet natively support ESLint 10's context API.
+- **Tests**: Vitest, co-located as `*.test.ts` next to the module (pure modules only so far — no Astro runtime, no Supabase, no DOM). Changes to `report-parser.ts` or `deviation-rules.ts` must keep `report-parser.test.ts` and `deviation-rules.test.ts` green. `npm run smoke` and `npm run verify:rls` stay dependency-free scripts outside Vitest (they need a running server / local Supabase).
+- Dependency versions are intentionally bleeding-edge: TypeScript `^6.0.3`, ESLint `^10.10.0`, `lucide-react` `^1.14.0` — don't "fix" these thinking they're typos. The one deliberate exception is `vitest` `^4.1.10`: `@stryker-mutator/vitest-runner` 10 is built against Vitest 4.1, and on Vitest 5 it silently never activates mutants (every mutant "survives", exit 0) — don't bump it until the runner supports 5 and `npm run test:mutation` still kills mutants. `eslint-plugin-react` is wrapped with `fixupPluginRules` in `eslint.config.js` since it doesn't yet natively support ESLint 10's context API.
 
 #### Environment
 
@@ -172,4 +173,4 @@ This is the core product flow and spans several files — read all of them befor
 
 ### CI
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) has two jobs on every push/PR to master: `ci` (`npx astro sync` → `npm run lint` → `npx astro check` → `npm run build`, using `SUPABASE_URL`/`SUPABASE_KEY` repo secrets) and `smoke` (spins up local Supabase via CLI, builds, `npm run preview`, then `npm run smoke` — no secrets needed).
+GitHub Actions workflow (`.github/workflows/ci.yml`) has two jobs on every push/PR to master: `ci` (`npx astro sync` → `npm run lint` → `npm test` → `npx astro check` → `npm run build`, using `SUPABASE_URL`/`SUPABASE_KEY` repo secrets) and `smoke` (spins up local Supabase via CLI, builds, `npm run preview`, then `npm run smoke` — no secrets needed).

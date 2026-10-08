@@ -12,7 +12,6 @@
     "format": "prettier --write .",
     "smoke": "node scripts/smoke.mjs",
     "verify:rls": "node scripts/verify-rls.mjs",
-    "verify:report-detection": "node scripts/verify-report-detection.mjs",
     "check:ui-tokens": "node scripts/check-ui-tokens.mjs",
     "test": "vitest run",
     "test:mutation": "stryker run",

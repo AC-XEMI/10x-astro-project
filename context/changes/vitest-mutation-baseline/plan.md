@@ -338,30 +338,30 @@ they remain.
 
 #### Automated
 
-- [x] 1.1 `npm test` passes and reports `geo.test.ts`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Type check passes: `npx astro check`
-- [x] 1.4 `npm run test:mutation` completes (exit 0) and mutates exactly the 3 configured files
+- [x] 1.1 `npm test` passes and reports `geo.test.ts` — 683b19e
+- [x] 1.2 Lint passes: `npm run lint` — 683b19e
+- [x] 1.3 Type check passes: `npx astro check` — 683b19e
+- [x] 1.4 `npm run test:mutation` completes (exit 0) and mutates exactly the 3 configured files — 683b19e
 
 #### Manual
 
-- [x] 1.5 `git diff --cached` for this phase contains no unrelated changes from the user's working tree (CLAUDE.md untouched)
+- [x] 1.5 `git diff --cached` for this phase contains no unrelated changes from the user's working tree (CLAUDE.md untouched) — 683b19e
 
 ### Phase 2: Parser and rule tests replace the script
 
 #### Automated
 
-- [ ] 2.1 `npm test` passes; suite includes `report-parser.test.ts` and `deviation-rules.test.ts`
-- [ ] 2.2 Every assertion from `scripts/verify-report-detection.mjs` has a Vitest counterpart (checked against the script before deletion)
-- [ ] 2.3 Lint passes: `npm run lint`
-- [ ] 2.4 Type check passes: `npx astro check`
-- [ ] 2.5 Build passes: `npm run build`
-- [ ] 2.6 `scripts/verify-report-detection.mjs` and the `verify:report-detection` script entry no longer exist
+- [x] 2.1 `npm test` passes; suite includes `report-parser.test.ts` and `deviation-rules.test.ts`
+- [x] 2.2 Every assertion from `scripts/verify-report-detection.mjs` has a Vitest counterpart (checked against the script before deletion)
+- [x] 2.3 Lint passes: `npm run lint`
+- [x] 2.4 Type check passes: `npx astro check`
+- [x] 2.5 Build passes: `npm run build`
+- [x] 2.6 `scripts/verify-report-detection.mjs` and the `verify:report-detection` script entry no longer exist
 
 #### Manual
 
 - [ ] 2.7 CI run on the pushed branch shows the new `npm test` step green
-- [ ] 2.8 Staged `CLAUDE.md` diff contains only this change's lines
+- [x] 2.8 Staged `CLAUDE.md` diff contains only this change's lines
 
 ### Phase 3: Mutation baseline and one strengthening round
 
