@@ -360,19 +360,19 @@ they remain.
 
 #### Manual
 
-- [ ] 2.7 CI run on the pushed branch shows the new `npm test` step green
+- [x] 2.7 CI run on the pushed branch shows the new `npm test` step green — a59f6ce
 - [x] 2.8 Staged `CLAUDE.md` diff contains only this change's lines — a59f6ce
 
 ### Phase 3: Mutation baseline and one strengthening round
 
 #### Automated
 
-- [x] 3.1 `npm run test:mutation` completes (exit 0) twice; both results recorded in `mutation-baseline.md`
-- [x] 3.2 `npm test` passes
-- [x] 3.3 Lint passes: `npm run lint`
-- [x] 3.4 Type check passes: `npx astro check`
-- [x] 3.5 The after-round score is higher than the baseline, and no logic survivor remains unexplained in `mutation-baseline.md`
+- [x] 3.1 `npm run test:mutation` completes (exit 0) twice; both results recorded in `mutation-baseline.md` — 213efa1
+- [x] 3.2 `npm test` passes — 213efa1
+- [x] 3.3 Lint passes: `npm run lint` — 213efa1
+- [x] 3.4 Type check passes: `npx astro check` — 213efa1
+- [x] 3.5 The after-round score is higher than the baseline, and no logic survivor remains unexplained in `mutation-baseline.md` — 213efa1
 
 #### Manual
 
-- [x] 3.6 The HTML report (`reports/mutation/mutation.html`) opens and its remaining survivors match the list in `mutation-baseline.md`
+- [x] 3.6 The HTML report (`reports/mutation/mutation.html`) opens and its remaining survivors match the list in `mutation-baseline.md` — 213efa1
