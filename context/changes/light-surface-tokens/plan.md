@@ -226,11 +226,11 @@ the page (cards, panels, dialogs, outline controls) uses `bg-card` / `bg-popover
 
 #### Automated
 
-- [x] 2.1 Screenshots exist for all four kitchen-sinks, light and dark, before and after
-- [x] 2.2 `npm run check:ui-tokens` still passes
+- [x] 2.1 Screenshots exist for all four kitchen-sinks, light and dark, before and after — 6d62e95
+- [x] 2.2 `npm run check:ui-tokens` still passes — 6d62e95
 
 #### Manual
 
-- [x] 2.3 Light after-shots: every card, alert, dialog and outline button is white on the tinted page in all four views
-- [x] 2.4 Dark before/after pairs are identical except the landing bands
-- [x] 2.5 Landing bands remain distinct from the page in light (desktop and 390px)
+- [x] 2.3 Light after-shots: every card, alert, dialog and outline button is white on the tinted page in all four views — 6d62e95
+- [x] 2.4 Dark before/after pairs are identical except the landing bands — 6d62e95
+- [x] 2.5 Landing bands remain distinct from the page in light (desktop and 390px) — 6d62e95
