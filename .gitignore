@@ -33,3 +33,9 @@ ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
+
+# stryker temp files
+.stryker-tmp
+
+# stryker mutation report
+reports/mutation

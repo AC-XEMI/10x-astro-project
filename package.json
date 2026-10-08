@@ -14,6 +14,8 @@
     "verify:rls": "node scripts/verify-rls.mjs",
     "verify:report-detection": "node scripts/verify-report-detection.mjs",
     "check:ui-tokens": "node scripts/check-ui-tokens.mjs",
+    "test": "vitest run",
+    "test:mutation": "stryker run",
     "db:types": "supabase gen types typescript --local > src/types.ts"
   },
   "dependencies": {
@@ -43,6 +45,8 @@
   "devDependencies": {
     "@eslint/compat": "^2.1.1",
     "@eslint/js": "^10.0.1",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^3.1.0",
@@ -58,6 +62,7 @@
     "supabase": "^2.23.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
+    "vitest": "^4.1.10",
     "wrangler": "^4.131.1"
   },
   "lint-staged": {

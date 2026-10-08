@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.25.1",
   "manifestVersion": 3,
-  "lastApplied": "2026-10-06T10:45:06.219Z",
-  "lessonId": "m3l2",
+  "lastApplied": "2026-10-08T06:16:46.090Z",
+  "lessonId": "m3l1",
   "course": "10xdevs4",
   "tool": "claude-code",
   "files": {
@@ -1149,7 +1149,7 @@
       "installedManifestHash": "af0beb2ee7f7f2e44a0ae20c7ccc90c1cb34885b68219a3a15a6630156f4c6b7"
     },
     "m3l1": {
-      "appliedAt": "2026-10-06T08:21:13.341Z",
+      "appliedAt": "2026-10-08T06:16:46.090Z",
       "skills": {
         "10x-idea-check": {
           "files": [
@@ -1334,8 +1334,8 @@
         "courseRules": true,
         "rules": true
       },
-      "installedReleaseId": "r-369e036bfa63a2c9b525bd6fc5e644639864717354dc5943c23a507ac0232a18",
-      "installedManifestHash": "21cc1edd90b227f1d0d950574cc4762e46f5a0ba408e712067f8d58d52c8ee33"
+      "installedReleaseId": "r-46042df8c5bf0889600972bbf020ca32aafa72c844b5e196533afbc6a496c215",
+      "installedManifestHash": "435038f6a11d77a290a66c602b41b5a174750691d0f8249f282a4f843d5e255a"
     },
     "m2l5": {
       "appliedAt": "2026-10-06T08:01:44.679Z",
@@ -1521,7 +1521,7 @@
       "installedManifestHash": "21cc1edd90b227f1d0d950574cc4762e46f5a0ba408e712067f8d58d52c8ee33"
     },
     "m3l2": {
-      "appliedAt": "2026-10-06T10:45:06.219Z",
+      "appliedAt": "2026-10-08T06:16:27.785Z",
       "skills": {
         "10x-idea-check": {
           "files": [
@@ -1707,12 +1707,6 @@
         "m3l2-ad-hoc-testing.md"
       ],
       "configs": [],
-      "representation": {
-        "lang": "en",
-        "tool": "claude-code",
-        "courseRules": true,
-        "rules": true
-      },
       "installedReleaseId": "r-46042df8c5bf0889600972bbf020ca32aafa72c844b5e196533afbc6a496c215",
       "installedManifestHash": "435038f6a11d77a290a66c602b41b5a174750691d0f8249f282a4f843d5e255a"
     }
@@ -1721,10 +1715,10 @@
     "path": "CLAUDE.md",
     "begin": "<!-- BEGIN @przeprogramowani/10x-cli -->",
     "end": "<!-- END @przeprogramowani/10x-cli -->",
-    "upstreamHash": "f4b9362ae9d22d81418d0dac18f2c90be5c3ff948f1928b789601440708ba3c6"
+    "upstreamHash": "64dd32ad11c5a5ae8c576c808bd7d39c5c7642c0b14abab431acc3c2e75f73c4"
   },
   "toolkit": {
     "version": "v2.59.3",
-    "recordedAt": "2026-10-06T10:45:06.319Z"
+    "recordedAt": "2026-10-08T06:16:46.159Z"
   }
 }
