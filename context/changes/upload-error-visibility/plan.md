@@ -219,6 +219,8 @@ Every error redirect in upload and delete leaves one entry; the rollback result 
 #### Manual Verification:
 
 - Locally (`npm run dev`), uploading a >5 MB file and a CSV missing a required column prints one `report.upload.rejected` object each in the terminal, with `file_ext`/`file_size` and no filename
+
+> **Addendum (Phase 2 manual check):** both scenarios above never reach the server — `ReportUpload.tsx` rejects a >5 MB file (`:60`) and a missing required column (`:211-214`) in the browser. 2.6 was verified instead with a CSV that has all headers but an invalid date in row 2 (`report.upload.rejected`, `code: invalid_file`, parser `detail`, no filename) and a `POST /api/reports/<unknown uuid>/delete` from the browser console (`report.delete.rejected`, `code: report_not_found`).
 - After deployment, a Workers Logs query filtered on `event` shows the rejected-upload entries; the retention period shown in the dashboard is noted in the CLAUDE.md bullet
 
 ---
@@ -251,25 +253,25 @@ Every error redirect in upload and delete leaves one entry; the rollback result 
 
 #### Automated
 
-- [x] 1.1 `npm test` passes and includes `app-events.test.ts`
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 Type check passes: `npx astro check`
+- [x] 1.1 `npm test` passes and includes `app-events.test.ts` — 80de091
+- [x] 1.2 Lint passes: `npm run lint` — 80de091
+- [x] 1.3 Type check passes: `npx astro check` — 80de091
 
 #### Manual
 
-- [x] 1.4 Reviewer confirms the whitelist in `app-events.ts` contains no field that can carry a filename, sheet value or raw database message
+- [x] 1.4 Reviewer confirms the whitelist in `app-events.ts` contains no field that can carry a filename, sheet value or raw database message — 80de091
 
 ### Phase 2: Wire the routes and document
 
 #### Automated
 
-- [ ] 2.1 `npm test` passes
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Type check passes: `npx astro check`
-- [ ] 2.4 Build passes: `npm run build`
-- [ ] 2.5 No `console.error`/`console.warn` remains in `src/pages/api/reports/` (grep returns nothing)
+- [x] 2.1 `npm test` passes
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Type check passes: `npx astro check`
+- [x] 2.4 Build passes: `npm run build`
+- [x] 2.5 No `console.error`/`console.warn` remains in `src/pages/api/reports/` (grep returns nothing)
 
 #### Manual
 
-- [ ] 2.6 Locally (`npm run dev`), uploading a >5 MB file and a CSV missing a required column prints one `report.upload.rejected` object each in the terminal, with `file_ext`/`file_size` and no filename
+- [x] 2.6 Locally (`npm run dev`), uploading a >5 MB file and a CSV missing a required column prints one `report.upload.rejected` object each in the terminal, with `file_ext`/`file_size` and no filename
 - [ ] 2.7 After deployment, a Workers Logs query filtered on `event` shows the rejected-upload entries; the retention period shown in the dashboard is noted in the CLAUDE.md bullet

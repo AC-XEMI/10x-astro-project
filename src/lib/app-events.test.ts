@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildAppEvent, fileExtension, logAppEvent, type AppEventInput } from "@/lib/app-events";
 
+const USER_ID = "0b6f1c2e-3d4a-4b5c-8d9e-0f1a2b3c4d5e";
+const REPORT_ID = "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d";
+
 describe("buildAppEvent", () => {
   it("derives the level from the event name", () => {
     expect(buildAppEvent({ event: "report.upload.failed" }).level).toBe("error");
@@ -17,8 +20,8 @@ describe("buildAppEvent", () => {
         event: "report.upload.failed",
         code: "upload_failed",
         stage: "insert_visits",
-        userId: "u-1",
-        reportId: "r-1",
+        userId: USER_ID,
+        reportId: REPORT_ID,
         fileExt: ".csv",
         fileSize: 1234,
         rowCount: 15,
@@ -28,12 +31,18 @@ describe("buildAppEvent", () => {
       level: "error",
       code: "upload_failed",
       stage: "insert_visits",
-      user_id: "u-1",
-      report_id: "r-1",
+      user_id: USER_ID,
+      report_id: REPORT_ID,
       file_ext: ".csv",
       file_size: 1234,
       row_count: 15,
     });
+  });
+
+  it.each(["Jan Kowalski", "not-a-uuid", "../../etc", ""])("drops a report or user id that is not a UUID: %j", (id) => {
+    const entry = buildAppEvent({ event: "report.delete.rejected", userId: id, reportId: id });
+    expect(entry.user_id).toBeUndefined();
+    expect(entry.report_id).toBeUndefined();
   });
 
   it("omits fields that were not given", () => {

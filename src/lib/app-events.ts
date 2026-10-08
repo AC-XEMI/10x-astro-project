@@ -63,12 +63,16 @@ export interface AppEvent {
 
 const MAX_DETAIL_LENGTH = 300;
 
+// Ids are kept only when UUID-shaped: a report id can come straight from a URL parameter, and
+// arbitrary text typed there must not reach the logs.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function buildAppEvent(input: AppEventInput): AppEvent {
   const entry: AppEvent = { event: input.event, level: EVENT_LEVELS[input.event] };
   if (input.code !== undefined) entry.code = input.code;
   if (input.stage !== undefined) entry.stage = input.stage;
-  if (input.userId !== undefined) entry.user_id = input.userId;
-  if (input.reportId !== undefined) entry.report_id = input.reportId;
+  if (input.userId !== undefined && UUID_RE.test(input.userId)) entry.user_id = input.userId;
+  if (input.reportId !== undefined && UUID_RE.test(input.reportId)) entry.report_id = input.reportId;
   if (input.fileExt !== undefined) entry.file_ext = input.fileExt;
   if (input.fileSize !== undefined) entry.file_size = input.fileSize;
   if (input.rowCount !== undefined) entry.row_count = input.rowCount;
