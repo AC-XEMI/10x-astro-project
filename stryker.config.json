@@ -19,16 +19,16 @@
     "src/lib/services/geo.ts"
   ],
   "ignorePatterns": [
-    ".claude",
-    ".agents",
-    ".ds-sync",
-    ".design-sync",
-    "ds-bundle",
-    "context",
-    "dist",
-    ".astro",
-    ".wrangler",
-    "reports"
+    "/.claude",
+    "/.agents",
+    "/.ds-sync",
+    "/.design-sync",
+    "/ds-bundle",
+    "/context",
+    "/dist",
+    "/.astro",
+    "/.wrangler",
+    "/reports"
   ],
   "concurrency": 4,
   "thresholds": {

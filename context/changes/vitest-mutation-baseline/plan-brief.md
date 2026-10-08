@@ -31,6 +31,7 @@ recorded in `mutation-baseline.md`. The old script is gone.
 | Old script          | Replace with Vitest, delete script                             | One oracle; Stryker measures the same expectations the team relies on.          |
 | CI                  | `npm test` in CI; Stryker local only (`test:mutation`)          | Cheap protection on every push without ~1000-mutant runs in CI.                 |
 | Mutation scope      | parser, rules, `geo.ts`; `break: null`                          | Report covers exactly the tested code; baseline first, no arbitrary threshold.  |
+| Vitest version      | `^4.1.10` (planned `^5.0.3`, changed in Phase 1)               | The Stryker runner silently never activates mutants on Vitest 5; 4.1 is what it is built against. |
 | Done criterion      | One strengthening round on logic survivors                     | Shows Stryker's value now; message-text mutants are listed, not chased.         |
 
 ## Scope

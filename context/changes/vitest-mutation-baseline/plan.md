@@ -106,6 +106,8 @@ user's two Stryker devDependencies. Add the scripts.
 - devDependencies: `vitest` (`^5.0.3`), `@stryker-mutator/core`, `@stryker-mutator/vitest-runner`.
 - scripts: `"test": "vitest run"`, `"test:mutation": "stryker run"`.
 
+> **Addendum (Phase 1, user-approved):** implemented as `vitest ^4.1.10`, not `^5.0.3`. `@stryker-mutator/vitest-runner` 10.0.0 is built against Vitest 4.1.10; on Vitest 5 it silently never activates mutants (0/14 killed on `geo.ts`, exit 0), versus 13/14 on 4.1.10. Recorded in CLAUDE.md so nobody bumps it back.
+
 #### 2. Vitest config
 
 **File**: `vitest.config.ts` (new)
@@ -128,6 +130,8 @@ user's two Stryker devDependencies. Add the scripts.
 - `mutate`: `src/lib/services/report-parser.ts`, `src/lib/services/deviation-rules.ts`, `src/lib/services/geo.ts`.
 - Keep `ignorePatterns`, `testRunner: "vitest"`, `coverageAnalysis: "perTest"`, thresholds 80/60 and `break: null`.
 - Point the runner at the config: `vitest.configFile: "vitest.config.ts"`.
+
+> **Addendum (Phase 1 + impl-review, user-approved):** `vitest.configFile` was dropped — Stryker resolved it to the original repo path instead of the sandbox, so Vitest found `vitest.config.ts` in the sandbox on its own. `ignorePatterns` are anchored with a leading `/` (impl-review F1): unanchored `"reports"` also removed `src/components/reports/` and `src/pages/reports/` from the sandbox.
 - `.gitignore` keeps `.stryker-tmp`; add `reports/mutation` (the HTML reporter's output).
 
 #### 4. First test
