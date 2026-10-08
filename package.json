@@ -15,6 +15,7 @@
     "check:ui-tokens": "node scripts/check-ui-tokens.mjs",
     "test": "vitest run",
     "test:mutation": "stryker run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "db:types": "supabase gen types typescript --local > src/types.ts"
   },
   "dependencies": {
