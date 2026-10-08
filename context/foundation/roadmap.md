@@ -70,7 +70,7 @@ M-4 nie ma nowej hipotezy produktu — to praca nad niezawodnością istniejący
 | S-14 | auth-error-codes                   | Użytkownik widzi przy logowaniu i rejestracji tylko przetłumaczony komunikat błędu   | S-01           | M-3 MS-02                                                   | done |
 | S-15 | light-surface-tokens               | Kierownik w jasnym motywie odróżnia karty, okna i przyciski od tła strony            | S-09, S-10, S-11, S-12 | M-3 MS-03                                           | done |
 | F-03 | risk-based-test-plan               | (foundation) Mapa ryzyk i fazy wdrażania testów zapisane w planie testów             | F-02           | MS-02                                                   | ready |
-| S-16 | upload-error-visibility            | Zespół widzi po fakcie każde nieudane wgranie lub usunięcie raportu, z kodem błędu i kontekstem | —   | MS-01                                                   | ready |
+| S-16 | upload-error-visibility            | Zespół widzi po fakcie każde nieudane wgranie lub usunięcie raportu, z kodem błędu i kontekstem | —   | MS-01                                                   | in-progress |
 | S-17 | report-view-error-visibility       | Zespół widzi po fakcie błędy ładowania szczegółów raportu, oznaczania i eksportu      | S-16           | MS-01                                                   | proposed |
 | S-18 | auth-error-visibility              | Zespół widzi po fakcie nieudane logowania i rejestracje jako kody, bez haseł i e-maili | S-16          | MS-01                                                   | proposed |
 | S-19 | upload-duration-visibility         | Zespół widzi czas analizy każdego wgrania i może sprawdzić, czy wynik pojawia się w ciągu kilku sekund | S-16 | MS-01, NFR (wynik w ciągu kilku sekund)   | proposed |
@@ -326,7 +326,7 @@ Foundations poniżej zakładają, że to jest już gotowe i tego nie budują od 
   - Gdzie mają trafiać wpisy: zapytania do Workers Logs w panelu Cloudflare czy zewnętrzna usługa śledzenia błędów (konto, klucz, koszt)? — Owner: user. Block: no (decyzja na etapie `/10x-plan` tego wycinka; ustala wzorzec dla S-17…S-19).
   - Jakie pola wpisu są bezpieczne (bez nazwisk przedstawicieli, nazw klientów, e-maili)? — Owner: team. Block: no.
 - **Risk:** Pierwszy, bo to główny przepływ produktu i jego błędy dziś przepadają; tu zapada decyzja o miejscu i formacie wpisów, którą przejmą kolejne wycinki. Ryzyko: wpis z danymi osobowymi z raportu — stąd jawne pytanie o pola.
-- **Status:** ready
+- **Status:** in-progress
 
 ### S-17: Zespół widzi po fakcie błędy na widoku raportu
 
