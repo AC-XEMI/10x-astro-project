@@ -265,13 +265,13 @@ Every error redirect in upload and delete leaves one entry; the rollback result 
 
 #### Automated
 
-- [x] 2.1 `npm test` passes
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 Type check passes: `npx astro check`
-- [x] 2.4 Build passes: `npm run build`
-- [x] 2.5 No `console.error`/`console.warn` remains in `src/pages/api/reports/` (grep returns nothing)
+- [x] 2.1 `npm test` passes — b36c84e
+- [x] 2.2 Lint passes: `npm run lint` — b36c84e
+- [x] 2.3 Type check passes: `npx astro check` — b36c84e
+- [x] 2.4 Build passes: `npm run build` — b36c84e
+- [x] 2.5 No `console.error`/`console.warn` remains in `src/pages/api/reports/` (grep returns nothing) — b36c84e
 
 #### Manual
 
-- [x] 2.6 Locally (`npm run dev`), uploading a >5 MB file and a CSV missing a required column prints one `report.upload.rejected` object each in the terminal, with `file_ext`/`file_size` and no filename
-- [ ] 2.7 After deployment, a Workers Logs query filtered on `event` shows the rejected-upload entries; the retention period shown in the dashboard is noted in the CLAUDE.md bullet
+- [x] 2.6 Locally (`npm run dev`), uploading a >5 MB file and a CSV missing a required column prints one `report.upload.rejected` object each in the terminal, with `file_ext`/`file_size` and no filename — b36c84e
+- [x] 2.7 After deployment, a Workers Logs query filtered on `event` shows the rejected-upload entries; the retention period shown in the dashboard is noted in the CLAUDE.md bullet — b36c84e

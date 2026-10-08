@@ -2,7 +2,7 @@ import type { ReportErrorCode } from "@/lib/report-errors";
 
 /**
  * Structured log entries for server-side failures, kept by Cloudflare Workers Logs
- * (`observability.enabled` in wrangler.jsonc) and queryable there by `event`.
+ * (`observability.logs.enabled` in wrangler.jsonc) and queryable there by `event`.
  *
  * Every entry goes through buildAppEvent, which copies only whitelisted fields: no filename,
  * no raw Supabase `message`/`details` (Postgres can splice row values into them), no value from
