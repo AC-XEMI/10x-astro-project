@@ -458,10 +458,10 @@ Brak migracji. Triggery testowe istnieją tylko w czasie przebiegu, na lokalnej 
 
 #### Automated
 
-- [x] 5.1 `npx prettier --check context/foundation/test-plan.md` zielony
-- [x] 5.2 `grep -n "TBD — see §3 Phase 2" context/foundation/test-plan.md` nic nie zwraca
+- [x] 5.1 `npx prettier --check context/foundation/test-plan.md` zielony — 6b2ddb4
+- [x] 5.2 `grep -n "TBD — see §3 Phase 2" context/foundation/test-plan.md` nic nie zwraca — 6b2ddb4
 
 #### Manual
 
-- [x] 5.3 §6 opisuje tylko wzorce, które istnieją w `tests/integration/`
-- [x] 5.4 Notatka §6.5 Phase 2 zawiera wyniki kontroli czułości z Faz 1–4
+- [x] 5.3 §6 opisuje tylko wzorce, które istnieją w `tests/integration/` — 6b2ddb4
+- [x] 5.4 Notatka §6.5 Phase 2 zawiera wyniki kontroli czułości z Faz 1–4 — 6b2ddb4
