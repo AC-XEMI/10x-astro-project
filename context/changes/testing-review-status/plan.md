@@ -309,9 +309,9 @@ Brak zmian schematu i danych.
 
 #### Automated
 
-- [x] 4.1 Formatowanie test-planu
-- [ ] 4.2 CI na PR do `master` zielone, z nowym plikiem w logu
+- [x] 4.1 Formatowanie test-planu — 68a0f1b
+- [x] 4.2 CI na PR do `master` zielone, z nowym plikiem w logu — 68a0f1b
 
 #### Manual
 
-- [ ] 4.3 Przegląd test-planu: §2, §3, §6.1, §6.3, §6.5 spójne
+- [x] 4.3 Przegląd test-planu: §2, §3, §6.1, §6.3, §6.5 spójne — 68a0f1b
