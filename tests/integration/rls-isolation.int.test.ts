@@ -2,45 +2,10 @@ import { randomUUID } from "node:crypto";
 import { beforeAll, describe, expect, it } from "vitest";
 import { account, supabaseEnv } from "./helpers/context";
 import { anonClient, clientAs, type DbClient } from "./helpers/db";
+import { type SeededRows, seedAs, VISIT_DATE, VISIT_FIELDS } from "./helpers/seed-db";
 
 // Postgres error code PostgREST returns when a row fails an RLS USING / WITH CHECK expression.
 const RLS_VIOLATION = "42501";
-
-interface SeededRows {
-  reportId: string;
-  visitId: string;
-  deviationId: string;
-  filename: string;
-}
-
-const VISIT_DATE = "2026-09-01T00:00:00Z";
-const VISIT_FIELDS = {
-  representative_name: "RLS Isolation Rep",
-  gps_enabled: true,
-  visited_client: "Klient RLS",
-};
-
-async function seedAs(db: DbClient, userId: string, label: string): Promise<SeededRows> {
-  const filename = `rls-isolation-${label}-${randomUUID()}.csv`;
-  const report = await db.from("reports").insert({ user_id: userId, original_filename: filename }).select().single();
-  if (report.error) throw new Error(`seed: insert report as ${label} failed: ${report.error.message}`);
-
-  const visit = await db
-    .from("visits")
-    .insert({ report_id: report.data.id, visit_date: VISIT_DATE, ...VISIT_FIELDS })
-    .select()
-    .single();
-  if (visit.error) throw new Error(`seed: insert visit as ${label} failed: ${visit.error.message}`);
-
-  const deviation = await db
-    .from("deviations")
-    .insert({ visit_id: visit.data.id, rule: "missing_gps" })
-    .select()
-    .single();
-  if (deviation.error) throw new Error(`seed: insert deviation as ${label} failed: ${deviation.error.message}`);
-
-  return { reportId: report.data.id, visitId: visit.data.id, deviationId: deviation.data.id, filename };
-}
 
 async function countReportsOf(db: DbClient, userId: string): Promise<number> {
   const { count, error } = await db.from("reports").select("id", { count: "exact", head: true }).eq("user_id", userId);
@@ -81,9 +46,9 @@ describe("RLS isolation between accounts", () => {
   let b: SeededRows;
 
   beforeAll(async () => {
-    a = await seedAs(dbA, userA.userId, "a");
+    a = await seedAs(dbA, userA.userId, "rls-isolation-a");
     // B's own rows, for the re-parenting check (B moving its own visit under A's report).
-    b = await seedAs(dbB, userB.userId, "b");
+    b = await seedAs(dbB, userB.userId, "rls-isolation-b");
   });
 
   describe("SELECT", () => {
