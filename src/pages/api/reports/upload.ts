@@ -33,8 +33,15 @@ export const POST: APIRoute = async (context) => {
     return context.redirect("/auth/signin");
   }
 
-  const file = (await context.request.formData()).get("report_file") as File | null;
-  if (!file) {
+  // A crafted request (non-multipart body, or report_file sent as text) gets the same refusal as a
+  // missing file instead of an exception: formData() throws on a body it cannot parse.
+  let file: FormDataEntryValue | null;
+  try {
+    file = (await context.request.formData()).get("report_file");
+  } catch {
+    file = null;
+  }
+  if (!(file instanceof File)) {
     logAppEvent({ event: "report.upload.rejected", code: "no_file", stage: "validate", userId: user.id });
     return context.redirect(reportErrorUrl("no_file"));
   }

@@ -415,30 +415,30 @@ Brak migracji. Triggery testowe istnieją tylko w czasie przebiegu, na lokalnej 
 
 #### Automated
 
-- [x] 2.1 `npm run lint`, `npx astro check`
-- [x] 2.2 `npm run test:integration` zielony: 2 warianty (CSV, XLSX) w `upload-oracle.int.test.ts`
-- [ ] 2.3 Job `smoke` w CI zielony
+- [x] 2.1 `npm run lint`, `npx astro check` — b5f817e
+- [x] 2.2 `npm run test:integration` zielony: 2 warianty (CSV, XLSX) w `upload-oracle.int.test.ts` — b5f817e
+- [x] 2.3 Job `smoke` w CI zielony — b5f817e
 
 #### Manual
 
-- [x] 2.4 Kontrola czułości 1: `.reverse()` na `insertedVisits` daje czerwony test
-- [x] 2.5 Kontrola czułości 2: podwojenie `routeDeviations` daje czerwony test
+- [x] 2.4 Kontrola czułości 1: `.reverse()` na `insertedVisits` daje czerwony test — b5f817e
+- [x] 2.5 Kontrola czułości 2: podwojenie `routeDeviations` daje czerwony test — b5f817e
 
 ### Phase 3: #5 — serwer sam odrzuca to, co odrzuca przeglądarka (+ poprawka 500)
 
 #### Automated
 
-- [ ] 3.1 Przed poprawką: przypadki 13 i 14 czerwone (status 500), pozostałe zielone
-- [ ] 3.2 Po poprawce: `npm run test:integration` zielony, 14 przypadków w `upload-validation.int.test.ts`
-- [ ] 3.3 `npm test` zielony (parser bez zmian)
-- [ ] 3.4 `npm run lint`, `npx astro check`
+- [x] 3.1 Przed poprawką: przypadki 13 i 14 czerwone (status 500), pozostałe zielone
+- [x] 3.2 Po poprawce: `npm run test:integration` zielony, 14 przypadków w `upload-validation.int.test.ts`
+- [x] 3.3 `npm test` zielony (parser bez zmian)
+- [x] 3.4 `npm run lint`, `npx astro check`
 - [ ] 3.5 Job `smoke` w CI zielony
 
 #### Manual
 
-- [ ] 3.6 Kontrola czułości 1: `>=` zamiast `>` daje czerwony przypadek 1
-- [ ] 3.7 Kontrola czułości 2: komunikat bez nazw kolumn daje czerwony przypadek 6
-- [ ] 3.8 Przegląd: poprawka nie zmienia żadnego komunikatu ani kodu widocznego dla użytkownika
+- [x] 3.6 Kontrola czułości 1: `>=` zamiast `>` daje czerwony przypadek 1
+- [x] 3.7 Kontrola czułości 2: komunikat bez nazw kolumn daje czerwony przypadek 6
+- [x] 3.8 Przegląd: poprawka nie zmienia żadnego komunikatu ani kodu widocznego dla użytkownika
 
 ### Phase 4: #3 — wszystko albo nic przy wymuszonych błędach zapisu
 
