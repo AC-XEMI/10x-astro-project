@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format-date";
 import { buildCsv, downloadBlob } from "@/lib/export-file";
+import { applyReviewResult, isPartialReview } from "@/lib/review-result";
 import { Constants, type Tables } from "@/types";
 import type { DeviationRule } from "@/lib/services/deviation-rules";
 // "xlsx" resolves to the @e965/xlsx npm mirror (see package.json) - same package already used
@@ -331,17 +332,10 @@ export default function DeviationsList({
 
       const { updated } = (await response.json()) as { updated: Tables<"deviations">[] };
 
-      setVisits((prevVisits) =>
-        prevVisits.map((visit) => ({
-          ...visit,
-          deviations: visit.deviations.map((deviation) => {
-            const match = updated.find((u) => u.id === deviation.id);
-            return match ? { ...deviation, status: match.status, reviewed_at: match.reviewed_at } : deviation;
-          }),
-        })),
-      );
+      setVisits((prevVisits) => applyReviewResult(prevVisits, ids, updated).visits);
       // Rows hidden by RLS or deleted meanwhile come back missing - the change did not happen for them.
-      if (updated.length < ids.length) {
+      // Checked outside the updater: React may run it later, and the answer depends only on ids/updated.
+      if (isPartialReview(ids, updated)) {
         console.error(`Zaktualizowano ${updated.length} z ${ids.length} odstępstw`);
         setActionError("review");
       }

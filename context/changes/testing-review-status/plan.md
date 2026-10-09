@@ -282,28 +282,28 @@ Brak zmian schematu i danych.
 
 #### Automated
 
-- [x] 2.1 Nowy przypadek i `rls-isolation.int.test.ts` zielone lokalnie
-- [x] 2.2 Lint i typy
-- [x] 2.3 Kontrola czułości C: 404 przy częściowym wyniku → czerwone; cofnięte
+- [x] 2.1 Nowy przypadek i `rls-isolation.int.test.ts` zielone lokalnie — e979010
+- [x] 2.2 Lint i typy — e979010
+- [x] 2.3 Kontrola czułości C: 404 przy częściowym wyniku → czerwone; cofnięte — e979010
 
 #### Manual
 
-- [x] 2.4 Przegląd: obcy wiersz sprawdzany jako B z kontrolą widoczności
+- [x] 2.4 Przegląd: obcy wiersz sprawdzany jako B z kontrolą widoczności — e979010
 
 ### Phase 3: #6 / klient — częściowy sukces włącza komunikat
 
 #### Automated
 
-- [ ] 3.1 Test jednostkowy czerwony przed modułem, zielony po
-- [ ] 3.2 Wszystkie testy jednostkowe
-- [ ] 3.3 Lint, typy, tokeny UI, build
-- [ ] 3.4 Kontrola czułości D: `partial` zawsze `false` → czerwone; cofnięte
-- [ ] 3.5 Testy integracyjne nadal zielone
+- [x] 3.1 Test jednostkowy czerwony przed modułem, zielony po
+- [x] 3.2 Wszystkie testy jednostkowe
+- [x] 3.3 Lint, typy, tokeny UI, build
+- [x] 3.4 Kontrola czułości D: `partial` zawsze `false` → czerwone; cofnięte
+- [x] 3.5 Testy integracyjne nadal zielone
 
 #### Manual
 
-- [ ] 3.6 `/reports/[id]`: oznaczenie i cofnięcie działa jak wcześniej
-- [ ] 3.7 Kitchen sink `report-details` bez zmian wizualnych
+- [x] 3.6 `/reports/[id]`: oznaczenie i cofnięcie działa jak wcześniej
+- [x] 3.7 Kitchen sink `report-details` bez zmian wizualnych
 
 ### Phase 4: Cookbook §6 i backport do test-planu
 
