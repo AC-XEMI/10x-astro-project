@@ -464,16 +464,16 @@ Brak migracji bazy. Zmiana kontraktu `review.ts` dla 0 wierszy (200 → 404) jes
 #### Manual
 
 - [x] 3.3 Test inwentarza pada po dodaniu tymczasowej trasy `src/pages/api/probe.ts` — sprawdzone i cofnięte — 12a8c22
-- [x] 3.4 Wynik testu wariantów ścieżki i testu wylogowania odnotowany w §6.5 test-planu
+- [x] 3.4 Wynik testu wariantów ścieżki i testu wylogowania odnotowany w §6.5 test-planu — a22760e
 
 ### Phase 4: Dokumentacja i cookbook
 
 #### Automated
 
-- [x] 4.1 `npx prettier --check CLAUDE.md context/foundation/test-plan.md` przechodzi
-- [x] 4.2 `grep -n "TBD — see §3 Phase 1" context/foundation/test-plan.md` nie zwraca §6.2
+- [x] 4.1 `npx prettier --check CLAUDE.md context/foundation/test-plan.md` przechodzi — a22760e
+- [x] 4.2 `grep -n "TBD — see §3 Phase 1" context/foundation/test-plan.md` nie zwraca §6.2 — a22760e
 
 #### Manual
 
-- [x] 4.3 §6.2 i §6.3 wystarczą, żeby dodać nowy test integracyjny bez czytania kodu helperów od zera
-- [x] 4.4 Treść CLAUDE.md zgadza się z faktycznymi poleceniami i krokami CI
+- [x] 4.3 §6.2 i §6.3 wystarczą, żeby dodać nowy test integracyjny bez czytania kodu helperów od zera — a22760e
+- [x] 4.4 Treść CLAUDE.md zgadza się z faktycznymi poleceniami i krokami CI — a22760e
