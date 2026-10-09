@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { account, baseUrl, supabaseEnv } from "./helpers/context";
 import { clientAs } from "./helpers/db";
@@ -5,6 +6,7 @@ import { HttpClient, signInViaApp } from "./helpers/http";
 import { EXPECTED_RULES_BY_CLIENT } from "./helpers/oracle";
 import { type DeviationState, type ReviewStatus, reportDeviationState } from "./helpers/report-state";
 import { uploadSampleReport } from "./helpers/seed";
+import { seedAs } from "./helpers/seed-db";
 
 const REVIEW_PATH = "/api/deviations/review";
 
@@ -21,12 +23,12 @@ const TWO_DEVIATION_CLIENTS = Object.entries(EXPECTED_RULES_BY_CLIENT)
   .sort();
 
 // Each case works on its own visit, so no case depends on another one's result or order.
-// Klient T4 is left untouched here.
 const CLIENT = {
   bulk: "Klient F",
   oneOfTwo: "Klient S",
   undo: "Klient T2",
   cycle: "Klient T3",
+  mixed: "Klient T4",
 } as const;
 
 interface UpdatedRow {
@@ -41,11 +43,17 @@ interface UpdatedRow {
 // on the response alone) would let an update without its `.in("id", ids)` filter pass.
 // One app sign-in for A in this file: sign-ins share Supabase's per-IP auth rate limit.
 describe("deviation review through the endpoint", () => {
+  const env = supabaseEnv();
   const userA = account("a");
-  const dbA = clientAs(supabaseEnv(), userA);
+  const dbA = clientAs(env, userA);
+  // B only owns the foreign deviation of the mixed case: seeded and re-read with its globalSetup
+  // token, never signed in through the app.
+  const userB = account("b");
+  const dbB = clientAs(env, userB);
   const httpA = new HttpClient(baseUrl());
 
   let reportId: string | null = null;
+  let foreignReportId: string | null = null;
 
   async function readState(): Promise<DeviationState[]> {
     if (!reportId) throw new Error("upload did not produce a report");
@@ -59,8 +67,14 @@ describe("deviation review through the endpoint", () => {
   }
 
   // Snapshot → POST → response check → re-read → the whole report equals the snapshot with only
-  // the requested rows changed. Returns the re-read state.
-  async function reviewAndCompare(ids: string[], status: ReviewStatus): Promise<DeviationState[]> {
+  // the rows expected to change changed. `expectedChanged` defaults to every requested id; the mixed
+  // case also sends ids that must change nothing in A's report (foreign, non-existent).
+  // Returns the re-read state.
+  async function reviewAndCompare(
+    ids: string[],
+    status: ReviewStatus,
+    expectedChanged: string[] = ids,
+  ): Promise<DeviationState[]> {
     const snapshot = await readState();
 
     const startedAt = Date.now();
@@ -70,14 +84,14 @@ describe("deviation review through the endpoint", () => {
     expect(response.status).toBe(200);
     const { updated } = JSON.parse(response.body ?? "null") as { updated: UpdatedRow[] };
     // Order of the returned rows is not guaranteed: compare as sets.
-    expect(updated.map((row) => row.id).sort()).toEqual([...ids].sort());
+    expect(updated.map((row) => row.id).sort()).toEqual([...expectedChanged].sort());
 
     // A marked row is expected to hold the stamp the update returned (checked against the request's
     // time window below); an un-marked row must hold null, whatever the response says.
     const returnedStamp = new Map(updated.map((row) => [row.id, row.reviewed_at]));
-    const requested = new Set(ids);
+    const changed = new Set(expectedChanged);
     const expected = snapshot.map((d) =>
-      requested.has(d.id)
+      changed.has(d.id)
         ? { ...d, status, reviewed_at: status === "reviewed" ? (returnedStamp.get(d.id) ?? null) : null }
         : d,
     );
@@ -85,7 +99,7 @@ describe("deviation review through the endpoint", () => {
     expect(actual).toEqual(expected);
 
     if (status === "reviewed") {
-      for (const d of actual.filter((row) => requested.has(row.id))) {
+      for (const d of actual.filter((row) => changed.has(row.id))) {
         const stampedAt = Date.parse(d.reviewed_at ?? "");
         expect(stampedAt, `reviewed_at of ${d.id}: ${d.reviewed_at}`).toBeGreaterThanOrEqual(startedAt - CLOCK_SKEW_MS);
         expect(stampedAt, `reviewed_at of ${d.id}: ${d.reviewed_at}`).toBeLessThanOrEqual(finishedAt + CLOCK_SKEW_MS);
@@ -117,6 +131,10 @@ describe("deviation review through the endpoint", () => {
   afterAll(async () => {
     if (reportId) {
       const { error } = await dbA.from("reports").delete().eq("id", reportId);
+      expect(error).toBeNull();
+    }
+    if (foreignReportId) {
+      const { error } = await dbB.from("reports").delete().eq("id", foreignReportId);
       expect(error).toBeNull();
     }
   });
@@ -152,5 +170,21 @@ describe("deviation review through the endpoint", () => {
       expect(d.status).toBe("reviewed");
       expect(d.reviewed_at).not.toBeNull();
     }
+  });
+
+  it("updates only the owner's rows of a mixed set (own + foreign + non-existent) and returns that subset", async () => {
+    const own = idsOf(await readState(), CLIENT.mixed);
+    const foreign = await seedAs(dbB, userB.userId, "deviation-review-b");
+    foreignReportId = foreign.reportId;
+
+    // 200 with exactly the two own rows in `updated` (a set check, not a length check), and A's
+    // report equal to the snapshot with only those two changed.
+    await reviewAndCompare([...own, foreign.deviationId, randomUUID()], "reviewed", own);
+
+    // The foreign row, re-read as its owner B, is untouched. The non-empty result is the control
+    // that B does see the row — an empty one would also mean "no access", not "unchanged".
+    const asB = await dbB.from("deviations").select("id, status, reviewed_at").eq("id", foreign.deviationId);
+    expect(asB.error).toBeNull();
+    expect(asB.data).toEqual([{ id: foreign.deviationId, status: "unreviewed", reviewed_at: null }]);
   });
 });

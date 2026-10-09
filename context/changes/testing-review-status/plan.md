@@ -268,27 +268,27 @@ Brak zmian schematu i danych.
 
 #### Automated
 
-- [x] 1.1 Nowy plik zielony lokalnie
-- [x] 1.2 Cały zestaw integracyjny zielony lokalnie
-- [x] 1.3 Lint i typy
-- [x] 1.4 Kontrola czułości A: usunięcie `.in("id", ids)` → czerwone; cofnięte
-- [x] 1.5 Kontrola czułości B: `reviewedAt` zawsze `null` → czerwone; cofnięte
+- [x] 1.1 Nowy plik zielony lokalnie — fb5be06
+- [x] 1.2 Cały zestaw integracyjny zielony lokalnie — fb5be06
+- [x] 1.3 Lint i typy — fb5be06
+- [x] 1.4 Kontrola czułości A: usunięcie `.in("id", ids)` → czerwone; cofnięte — fb5be06
+- [x] 1.5 Kontrola czułości B: `reviewedAt` zawsze `null` → czerwone; cofnięte — fb5be06
 
 #### Manual
 
-- [x] 1.6 Przegląd: każda asercja kończy się porównaniem pełnej migawki z bazy
+- [x] 1.6 Przegląd: każda asercja kończy się porównaniem pełnej migawki z bazy — fb5be06
 
 ### Phase 2: #6 / serwer — częściowa aktualizacja przy zbiorze mieszanym
 
 #### Automated
 
-- [ ] 2.1 Nowy przypadek i `rls-isolation.int.test.ts` zielone lokalnie
-- [ ] 2.2 Lint i typy
-- [ ] 2.3 Kontrola czułości C: 404 przy częściowym wyniku → czerwone; cofnięte
+- [x] 2.1 Nowy przypadek i `rls-isolation.int.test.ts` zielone lokalnie
+- [x] 2.2 Lint i typy
+- [x] 2.3 Kontrola czułości C: 404 przy częściowym wyniku → czerwone; cofnięte
 
 #### Manual
 
-- [ ] 2.4 Przegląd: obcy wiersz sprawdzany jako B z kontrolą widoczności
+- [x] 2.4 Przegląd: obcy wiersz sprawdzany jako B z kontrolą widoczności
 
 ### Phase 3: #6 / klient — częściowy sukces włącza komunikat
 
