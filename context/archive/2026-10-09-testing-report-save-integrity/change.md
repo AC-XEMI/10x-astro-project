@@ -1,10 +1,10 @@
 ---
 change_id: testing-report-save-integrity
 title: Testy integracyjne kompletnego i poprawnego zapisu wgranego raportu (Phase 2)
-status: impl_reviewed
+status: archived
 created: 2026-10-09
 updated: 2026-10-09
-archived_at: null
+archived_at: 2026-10-09T10:54:43Z
 ---
 
 ## Notes
