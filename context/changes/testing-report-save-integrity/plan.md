@@ -444,24 +444,24 @@ Brak migracji. Triggery testowe istnieją tylko w czasie przebiegu, na lokalnej 
 
 #### Automated
 
-- [x] 4.1 `npm run test:integration` zielony: 4 przypadki w `upload-compensation.int.test.ts` + Faza 2 nadal zielona
-- [x] 4.2 Po przebiegu 0 triggerów `it_fault_%` i 0 raportów z prefiksem `it-fault-`
-- [x] 4.3 `npm run lint`, `npx astro check`
-- [ ] 4.4 Job `smoke` w CI zielony
+- [x] 4.1 `npm run test:integration` zielony: 4 przypadki w `upload-compensation.int.test.ts` + Faza 2 nadal zielona — b40f8bc
+- [x] 4.2 Po przebiegu 0 triggerów `it_fault_%` i 0 raportów z prefiksem `it-fault-` — b40f8bc
+- [x] 4.3 `npm run lint`, `npx astro check` — b40f8bc
+- [x] 4.4 Job `smoke` w CI zielony — b40f8bc
 
 #### Manual
 
-- [x] 4.5 Kontrola czułości 1: bez `rollbackReport()` w gałęzi `deviationsError` przypadek (b) jest czerwony
-- [x] 4.6 Kontrola czułości 2: `rollbackReport()` w gałęzi `countError` daje czerwony przypadek (c)
+- [x] 4.5 Kontrola czułości 1: bez `rollbackReport()` w gałęzi `deviationsError` przypadek (b) jest czerwony — b40f8bc
+- [x] 4.6 Kontrola czułości 2: `rollbackReport()` w gałęzi `countError` daje czerwony przypadek (c) — b40f8bc
 
 ### Phase 5: Cookbook §6 i backport do test-planu
 
 #### Automated
 
-- [ ] 5.1 `npx prettier --check context/foundation/test-plan.md` zielony
-- [ ] 5.2 `grep -n "TBD — see §3 Phase 2" context/foundation/test-plan.md` nic nie zwraca
+- [x] 5.1 `npx prettier --check context/foundation/test-plan.md` zielony
+- [x] 5.2 `grep -n "TBD — see §3 Phase 2" context/foundation/test-plan.md` nic nie zwraca
 
 #### Manual
 
-- [ ] 5.3 §6 opisuje tylko wzorce, które istnieją w `tests/integration/`
-- [ ] 5.4 Notatka §6.5 Phase 2 zawiera wyniki kontroli czułości z Faz 1–4
+- [x] 5.3 §6 opisuje tylko wzorce, które istnieją w `tests/integration/`
+- [x] 5.4 Notatka §6.5 Phase 2 zawiera wyniki kontroli czułości z Faz 1–4
