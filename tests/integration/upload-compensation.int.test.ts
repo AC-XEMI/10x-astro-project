@@ -9,6 +9,7 @@ import {
   installFault,
   markerRowCounts,
   removeFault,
+  resetFaults,
 } from "./helpers/db-fault";
 import { HttpClient, type HttpResponse, signInViaApp } from "./helpers/http";
 import { EXPECTED_RULES_BY_CLIENT, rulesByClient } from "./helpers/oracle";
@@ -26,6 +27,8 @@ const httpA = new HttpClient(baseUrl());
 let sampleCsv: Uint8Array<ArrayBuffer>;
 
 beforeAll(async () => {
+  // Leftovers of an interrupted earlier run would fail the final assertion of every later run.
+  resetFaults();
   expect(await signInViaApp(httpA, userA)).toMatchObject({ status: 302, location: "/reports" });
   sampleCsv = await readFixture("csv");
 });

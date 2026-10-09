@@ -37,6 +37,8 @@ function execLocalSql(sql: string): string {
     return execSync(`npx supabase db query ${connectionArgs()} --agent no --output-format json -f "${file}"`, {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
+      // execSync blocks the event loop, so Vitest's own timeouts cannot stop a hung CLI call.
+      timeout: 30_000,
     });
   } catch (err) {
     // With encoding "utf8" both streams are strings; stdout carries the CLI's JSON error.
@@ -144,6 +146,24 @@ export function removeFault(kind: FaultKind): void {
 begin
   drop trigger if exists ${name} on public.${target.table};
   drop function if exists public.${name}();
+end
+$it$;`);
+}
+
+// Clears what an interrupted earlier run may have left: every fault trigger and every report with a
+// fault marker (with their visits and deviations, by cascade). Such a report belongs to that run's
+// accounts, which no later run can sign in as, so only `postgres` can remove it.
+export function resetFaults(): void {
+  const drops = (Object.keys(TARGETS) as FaultKind[])
+    .map((kind) => {
+      const name = `it_fault_${kind}`;
+      return `  drop trigger if exists ${name} on public.${TARGETS[kind].table};\n  drop function if exists public.${name}();`;
+    })
+    .join("\n");
+  runLocalSql(`do $it$
+begin
+${drops}
+  delete from public.reports where original_filename like 'it-fault-%';
 end
 $it$;`);
 }

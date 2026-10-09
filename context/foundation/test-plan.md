@@ -129,7 +129,7 @@ see §3 Phase <N>”.
 - **Location**: `tests/integration/<obszar>.int.test.ts` (config `vitest.integration.config.ts`, `include: ["tests/integration/**/*.int.test.ts"]`); helpery w `tests/integration/helpers/`.
 - **Naming**: `<obszar>.int.test.ts` — sufiks `.int` trzyma plik poza `npm test` i Strykerem.
 - **Reference test**: `tests/integration/rls-isolation.int.test.ts` (macierz operacji B→A i anon na poziomie bazy).
-- **Run locally**: `npx supabase start`, aplikacja pod `BASE_URL` (domyślnie `http://localhost:4321`) podłączona do **lokalnego** Supabase (`.dev.vars` z wartościami z `npx supabase status -o env`), potem `npm run test:integration`. W CI: job `smoke`, osobny krok po `npm run smoke`. Jeden przebieg zużywa ok. 10 z 30 logowań/rejestracji na 5 min (limit lokalnego Supabase na IP); przy trzecim uruchomieniu z rzędu `globalSetup` zgłasza limit — odczekaj albo zrestartuj Supabase.
+- **Run locally**: `npx supabase start`, aplikacja pod `BASE_URL` (domyślnie `http://localhost:4321`) podłączona do **lokalnego** Supabase (`.dev.vars` z wartościami z `npx supabase status -o env`), potem `npm run test:integration`. W CI: job `smoke`, osobny krok po `npm run smoke`. Jeden przebieg zużywa ok. 14 z 30 logowań/rejestracji na 5 min (limit lokalnego Supabase na IP); po dwóch uruchomieniach z rzędu `globalSetup` zgłasza limit — odczekaj albo zrestartuj Supabase.
 - **Accounts**: `account("a" | "b" | "c")` z `globalSetup` (jedno `signUp` na konto na przebieg); klient bazy `clientAs(supabaseEnv(), account)` lub `anonClient`. Konto C tylko do testów, które się wylogowują (`signOut()` jest globalne).
 - **Rules**:
   - każda odmowa = asercja na stan bazy odczytany ponownie jako właściciel **plus** kontrola, że właściciel ten wiersz widzi (inaczej „pusto” może znaczyć „nie istnieje”);
@@ -137,8 +137,9 @@ see §3 Phase <N>”.
   - najwyżej jedno logowanie przez aplikację na konto na plik (limit 30/5 min na IP, wspólny ze smoke);
   - nowa tabela potomna (wzorzec `EXISTS` do `reports`) → dopisz ją do macierzy SELECT/INSERT/UPDATE/DELETE.
 - **Wymuszony błąd zapisu w bazie** (reference: `tests/integration/upload-compensation.int.test.ts`):
-  - `tests/integration/helpers/db-fault.ts` wykonuje SQL jako `postgres` przez `npx supabase db query --local --agent no --output-format json -f <plik>`. Działa lokalnie i w CI (CLI 2.117.0 z `package-lock.json`); fallback to `--db-url` z `DB_URL` w `connectionArgs()`. CLI przyjmuje jedną instrukcję na wywołanie, dlatego DDL jest w jednym bloku `do $it$ … $it$`. Testy nie piszą SQL-a samodzielnie.
+  - `tests/integration/helpers/db-fault.ts` wykonuje SQL jako `postgres` przez `npx supabase db query --local --agent no --output-format json -f <plik>`. Działa lokalnie i w CI (CLI 2.117.0 z `package-lock.json`); gdyby `--local` przestało działać, przełącz `connectionArgs()` na `--db-url` z `DB_URL` (z `npx supabase status -o env`). CLI przyjmuje jedną instrukcję na wywołanie, dlatego DDL jest w jednym bloku `do $it$ … $it$`. Testy nie piszą SQL-a samodzielnie.
   - `installFault(kind, faultMarker(kind))` zakłada trigger `BEFORE` (`visits_insert`, `deviations_insert`, `reports_update`, `reports_delete`), który rzuca wyjątek tylko dla raportów z `original_filename` zaczynającym się od markera `it-fault-<kind>-<uuid>` (sprawdzanego regexem). Funkcja jest `security definer`, żeby lookup nie zależał od RLS. Zakładanie i zdejmowanie (`removeFault`) są idempotentne; zdejmuj w `afterAll` w `finally`.
+  - `resetFaults()` w `beforeAll` usuwa triggery i raporty `it-fault-%` pozostawione przez przerwany przebieg (należą do kont, których nowy przebieg nie ma).
   - Asercja „nic nie zostało” = pusto jako właściciel **oraz** `markerRowCounts(marker)` = 0 jako `postgres` (pusty wynik pod RLS mógłby znaczyć brak dostępu) **plus** kontrolne wgranie bez markera widoczne dla właściciela.
   - Trigger na `DELETE` blokuje też sprzątanie: najpierw `removeFault("reports_delete")`, potem usuwanie. Na końcu pliku `installedFaultTriggers()` = `[]` i `faultReportCount()` = 0.
   - `execSync` blokuje pętlę zdarzeń na kilka sekund, dlatego `HttpClient` wysyła `Connection: close` (inaczej POST trafia w martwe gniazdo keep-alive: „other side closed”).
@@ -176,7 +177,7 @@ see §3 Phase <N>”.
   - Bez Dockera lokalnie pętla testów integracyjnych idzie przez CI (PR do `master`). Kontrole czułości robimy na tymczasowym PR, który potem zamykamy bez scalania.
 - **Phase 2 (zapis raportu, `testing-report-save-integrity`)**:
   - Realny błąd był w trasie wgrywania: ciało nie-multipart i `report_file` jako tekst dawały 500. Testy #13–#14 powstały najpierw jako czerwone, a teraz oba przypadki dostają `no_file` (try/catch wokół `formData()` + `instanceof File`).
-  - Kontrole czułości (wszystkie czerwone, cofnięte): odwrócona kolejność wizyt przed regułą trasy przeniosła flagę Q→P i S→R (asercja per klient, nie per reguła); podwojone flagi trasy; `>=` w limicie rozmiaru; komunikat parsera bez nazw kolumn; brak `rollbackReport()` po błędzie odstępstw; wycofanie przy `count_failed`.
+  - Kontrole czułości (wszystkie czerwone, cofnięte): sonda bez `installFault` (wgranie z markerem przeszło); odwrócona kolejność wizyt przed regułą trasy przeniosła flagę Q→P i S→R (asercja per klient, nie per reguła); podwojone flagi trasy; `>=` w limicie rozmiaru; komunikat parsera bez nazw kolumn; brak `rollbackReport()` po błędzie odstępstw; wycofanie przy `count_failed`.
   - `supabase db query --local` działa w CI mimo wyłączonych `postgres-meta`/`supavisor`. Znana luka: pusty plik, uszkodzony plik i złe rozszerzenie dają ten sam `invalid_file` bez tokenu — test ich nie rozróżnia. Kolejność `RETURNING` jest przypięta testem, nie gwarantowana.
 
 ## 7. What We Deliberately Don't Test
