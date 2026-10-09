@@ -1,4 +1,5 @@
 import type { ReportErrorCode } from "@/lib/report-errors";
+import type { ReviewErrorCode } from "@/lib/review-errors";
 
 /**
  * Structured log entries for server-side failures, kept by Cloudflare Workers Logs
@@ -34,9 +35,6 @@ export type AppEventStage =
   | "rollback"
   | "delete"
   | "review";
-
-/** Codes answered by POST /api/deviations/review (JSON `{ error }`, not a `?error=` redirect). */
-export type ReviewErrorCode = "not_found" | "update_failed";
 
 export type AppEventCode = ReportErrorCode | ReviewErrorCode;
 

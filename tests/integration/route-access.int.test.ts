@@ -84,10 +84,12 @@ interface PageRoute {
 function pageRoutes(): PageRoute[] {
   const files = readdirSync(PAGES_DIR, { recursive: true, encoding: "utf8" })
     .map((file) => file.replace(/\\/g, "/"))
-    .filter((file) => /\.(astro|ts)$/.test(file) && !file.split("/").some((part) => part.startsWith("_")));
+    .filter(
+      (file) => /\.(astro|md|mdx|html|js|ts)$/.test(file) && !file.split("/").some((part) => part.startsWith("_")),
+    );
 
   return files.map((file) => {
-    const segments = file.replace(/\.(astro|ts)$/, "").split("/");
+    const segments = file.replace(/\.(astro|md|mdx|html|js|ts)$/, "").split("/");
     if (segments.at(-1) === "index") segments.pop();
     const pattern = `/${segments.join("/")}`;
     const matcher = new RegExp(
@@ -176,7 +178,10 @@ describe("route access without a session", () => {
   describe("path variants are not served", () => {
     it.each(PATH_VARIANTS)("$name", async (variant) => {
       const response = await anonymous.request(variant.path(seed), variant.options?.(seed));
-      expect(response.status >= 200 && response.status < 300, `answered ${response.status}`).toBe(false);
+      // Either the router does not match it (404) or the middleware refuses it - never a crash or a page.
+      const refused =
+        response.status === 404 || (response.status === 302 && !!response.location?.startsWith("/auth/signin"));
+      expect(refused, `answered ${response.status} ${response.location ?? ""}`).toBe(true);
     });
   });
 

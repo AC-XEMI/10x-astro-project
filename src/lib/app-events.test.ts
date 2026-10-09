@@ -28,6 +28,22 @@ describe("buildAppEvent", () => {
     });
   });
 
+  it("keeps the review codes for a rejected body and a missing configuration", () => {
+    expect(
+      buildAppEvent({
+        event: "deviation.review.rejected",
+        code: "invalid_request",
+        stage: "validate",
+        userId: USER_ID,
+      }),
+    ).toMatchObject({ level: "warn", code: "invalid_request", stage: "validate" });
+    expect(buildAppEvent({ event: "deviation.review.failed", code: "not_configured", stage: "config" })).toMatchObject({
+      level: "error",
+      code: "not_configured",
+      stage: "config",
+    });
+  });
+
   it("maps every allowed field to its snake_case key", () => {
     expect(
       buildAppEvent({

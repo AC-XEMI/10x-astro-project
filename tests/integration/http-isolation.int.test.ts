@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { reportErrorUrl } from "@/lib/report-errors";
+import type { ReviewErrorCode } from "@/lib/review-errors";
 import { account, baseUrl, supabaseEnv } from "./helpers/context";
 import { clientAs } from "./helpers/db";
 import { HttpClient, type HttpResponse, signInViaApp } from "./helpers/http";
@@ -89,7 +90,7 @@ describe("HTTP isolation between accounts", () => {
         readBody: true,
       });
       expect(response.status).toBe(404);
-      expect(jsonBody(response)).toEqual({ error: "not_found" });
+      expect(jsonBody(response)).toEqual({ error: "not_found" satisfies ReviewErrorCode });
 
       const deviations = await deviationsOfA();
       expect(deviations.map((d) => d.id)).toEqual(deviationIds);
@@ -104,7 +105,7 @@ describe("HTTP isolation between accounts", () => {
         readBody: true,
       });
       expect(response.status).toBe(400);
-      expect(jsonBody(response)).toEqual({ error: "invalid_request" });
+      expect(jsonBody(response)).toEqual({ error: "invalid_request" satisfies ReviewErrorCode });
     });
 
     it("answers 400 invalid_request to an empty id list", async () => {
@@ -113,7 +114,7 @@ describe("HTTP isolation between accounts", () => {
         readBody: true,
       });
       expect(response.status).toBe(400);
-      expect(jsonBody(response)).toEqual({ error: "invalid_request" });
+      expect(jsonBody(response)).toEqual({ error: "invalid_request" satisfies ReviewErrorCode });
     });
   });
 

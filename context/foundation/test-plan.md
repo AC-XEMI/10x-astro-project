@@ -129,7 +129,7 @@ see §3 Phase <N>”.
 - **Location**: `tests/integration/<obszar>.int.test.ts` (config `vitest.integration.config.ts`, `include: ["tests/integration/**/*.int.test.ts"]`); helpery w `tests/integration/helpers/`.
 - **Naming**: `<obszar>.int.test.ts` — sufiks `.int` trzyma plik poza `npm test` i Strykerem.
 - **Reference test**: `tests/integration/rls-isolation.int.test.ts` (macierz operacji B→A i anon na poziomie bazy).
-- **Run locally**: `npx supabase start`, aplikacja pod `BASE_URL` (domyślnie `http://localhost:4321`) podłączona do **lokalnego** Supabase (`.dev.vars` z wartościami z `npx supabase status -o env`), potem `npm run test:integration`. W CI: job `smoke`, po `npm run smoke`.
+- **Run locally**: `npx supabase start`, aplikacja pod `BASE_URL` (domyślnie `http://localhost:4321`) podłączona do **lokalnego** Supabase (`.dev.vars` z wartościami z `npx supabase status -o env`), potem `npm run test:integration`. W CI: job `smoke`, osobny krok po `npm run smoke`. Jeden przebieg zużywa ok. 10 z 30 logowań/rejestracji na 5 min (limit lokalnego Supabase na IP); przy trzecim uruchomieniu z rzędu `globalSetup` zgłasza limit — odczekaj albo zrestartuj Supabase.
 - **Accounts**: `account("a" | "b" | "c")` z `globalSetup` (jedno `signUp` na konto na przebieg); klient bazy `clientAs(supabaseEnv(), account)` lub `anonClient`. Konto C tylko do testów, które się wylogowują (`signOut()` jest globalne).
 - **Rules**:
   - każda odmowa = asercja na stan bazy odczytany ponownie jako właściciel **plus** kontrola, że właściciel ten wiersz widzi (inaczej „pusto” może znaczyć „nie istnieje”);

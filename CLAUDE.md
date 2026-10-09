@@ -1,60 +1,38 @@
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
-## 10xDevs AI Toolkit - Module 3, Lesson 3 (10xDevs 4.0 Hooks)
+## 10xDevs AI Toolkit - Module 3, Lesson 4 (E2E Tests)
 
-Treat a hook as a **quality gate the harness runs for the agent**, not a script you hope the agent notices. Hooks run outside the model, so they survive context compaction and forgotten instructions — but only a hook whose signal actually reaches the agent closes the loop:
+**For E2E tests, use the two M3L4 skills in this order:**
 
-```
-test-plan.md "Quality Gates" -> pick the moment per gate -> /10x-configure-hook -> prove with sample JSON -> watch the agent fix a deliberate error
-```
+1. **`/10x-e2e-setup`** — one-time setup: Playwright config (`webServer`,
+   auth `setup` project, `storageState`), a green seed test, and `context/foundation/test-stack.md`.
+2. **`/10x-e2e`** — the per-risk loop: risk → explore the running app with
+   `playwright-cli` → generate → review against the five anti-patterns →
+   re-prompt by name → verify with a deliberate break.
 
-### Task Router - Where to start
+The skills' `references/` carry the full rules, anti-patterns, seed pattern, and
+prompt-template.
 
-| Skill                                                            | Use it when                                                                                                                                                                                                                                          |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/10x-configure-hook`                                            | Turning the gates from `context/foundation/test-plan.md` into agent hooks, fixing hooks that fire but the agent never reacts to, or auditing an existing hook config. It detects the harness from the repo and carries dated per-harness references. |
-| `/10x-test-plan --status`                                        | Read the current gates and rollout state. Changing which gates exist belongs to Lesson 1, not here.                                                                                                                                                  |
-| `/10x-new` -> `/10x-research` -> `/10x-plan` -> `/10x-implement` | A hook surfaced a failure the agent cannot fix with a trivial correction (wrong business logic, flaky integration). Open a change instead of looping the hook.                                                                                       |
+A few hard rules that hold even before you invoke the skill:
 
-### Hook lifecycle
+- **Locators:** `getByRole` / `getByLabel` / `getByText` first; `getByTestId`
+  only when accessibility attributes are ambiguous. Never CSS selectors, XPath,
+  or DOM structure.
+- **Never `page.waitForTimeout()`.** Wait for state: `toBeVisible()`,
+  `waitForURL()`, `waitForResponse()`.
+- **Test independence + cleanup.** Each test runs standalone — its own setup,
+  action, assertion, and cleanup; unique ids (timestamp suffix) so parallel runs
+  and re-runs don't collide.
 
-1. **Trigger** — an event in the harness: a tool finished editing a file, the agent is about to end its turn.
-2. **Matcher** — narrows which tool calls or files the hook reacts to. Not every harness honours matchers the same way.
-3. **Handler** — usually a shell command or script that reads the event payload as JSON on stdin.
-4. **Signal** — what the hook returns. The exit code, stderr, stdout and JSON fields mean different things in different harnesses, and only one channel per event actually reaches the agent. **The signal channel differs per harness — check the skill's references before writing or reviewing a hook.**
+Two boundaries to keep straight:
 
-A hook that runs but sends its message down the wrong channel is the most common failure: the user sees "hook error", the agent sees nothing and keeps going.
-
-### Moments and layers
-
-The slower the check, the rarer the moment:
-
-| Moment                               | Typical checks                                                          | Reaches the agent?               |
-| ------------------------------------ | ----------------------------------------------------------------------- | -------------------------------- |
-| Per edit                             | Lint/format of **the edited file only**; related tests if they are fast | Yes, mid-work                    |
-| End of turn (Stop or its equivalent) | Lint + tests for every file changed this turn, whole-project typecheck  | Yes, before the agent hands back |
-| Pre-commit (git)                     | Lint + tests on staged files; catches edits made without the agent      | No — blocks the commit           |
-| Pre-push (git)                       | Heavier suites, e2e that run locally                                    | No — blocks the push             |
-| CI                                   | Integration, shared state, infrastructure you do not have locally       | No — PR feedback                 |
-
-Local layers do not replace CI; each one saves a CI round-trip. Start with one per-edit lint hook and one end-of-turn typecheck, then add layers when you see what escapes.
-
-### Contract
-
-- Read the gates from the "Quality Gates" section of `context/foundation/test-plan.md` (by title, not section number). A gate the plan explicitly defers stays deferred unless the user overrides it — quote the deferral when you ask.
-- Per-edit hooks check only the file that was edited. Never run `--fix` or a linter over the whole project on every edit.
-- End-of-turn hooks that can send the agent back must stop after one retry (the harness's "already continued" flag or equivalent), so an unfixable error does not loop.
-- Per-edit hooks only see the harness's edit tools; a file rewritten through a shell command skips them. The end-of-turn hook re-checks every file changed this turn (`git diff`), so it is the net for those edits.
-- Timeouts are usually in **seconds**. Check the unit before copying a number.
-- Prove every hook before trusting it: run the script with a sample payload on a deliberately broken file and on a clean one, then revert the error.
-- Never overwrite existing hook config silently. Audit it, name the defects, merge, and show the diff.
-
-### Lesson boundaries
-
-- Do not change the risk strategy or the gate definitions — that is Lesson 1 (`/10x-test-plan`).
-- Do not write new tests here — hooks only run the tests Lesson 2 produced.
-- Do not write E2E scenarios or browser verification — that is Lesson 4.
-- Do not author CI pipelines or install git-hook managers unasked; recommend pre-commit/pre-push gates, let the user decide.
+- **DOM (snapshot) is the default.** Vision (`--caps=vision`) is a supplement for
+  visual-only risks (layout, z-index, animation); for pixel regression prefer
+  deterministic tools (`toHaveScreenshot`, Argos, Lost Pixel). VLM model
+  selection/cost is a debugging topic (Lesson 5), not testing.
+- **A red test is a signal, not a chore.** A changed selector → update the
+  locator in a reviewed diff. A changed business behavior → the test caught a
+  bug; never edit the assertion to match it. Fixing failing tests is Lesson 5.
 
 <!-- END @przeprogramowani/10x-cli -->
 
@@ -75,7 +53,7 @@ block above.
 - `npm run lint:fix` — auto-fix lint issues
 - `npm run format` — Prettier (includes prettier-plugin-astro + prettier-plugin-tailwindcss)
 - `npm run smoke` — dependency-free auth-flow smoke test (`scripts/smoke.mjs`) against a running server, `BASE_URL` env (default `http://localhost:4321`). Run after dependency upgrades; CI runs it against the production preview with a local Supabase.
-- `npm run test:integration` — Vitest with `vitest.integration.config.ts` over `tests/integration/**/*.int.test.ts`: proves per-user data isolation (RLS on every table and operation, and the HTTP routes) against a **local** Supabase (reads connection info from `npx supabase status -o env`, not `.env`/`.dev.vars`). Requires `npx supabase start` and the app running at `BASE_URL` (default `http://localhost:4321`) connected to that local Supabase — e.g. `.dev.vars` with `API_URL`/`ANON_KEY` from `npx supabase status -o env`. CI runs it in the `smoke` job after `npm run smoke`.
+- `npm run test:integration` — Vitest with `vitest.integration.config.ts` over `tests/integration/**/*.int.test.ts`: proves per-user data isolation (RLS on every table and operation, and the HTTP routes) against a **local** Supabase (reads connection info from `npx supabase status -o env`, not `.env`/`.dev.vars`). Requires `npx supabase start` and the app running at `BASE_URL` (default `http://localhost:4321`) connected to that local Supabase — e.g. `.dev.vars` with `SUPABASE_URL`/`SUPABASE_KEY` set to `API_URL`/`ANON_KEY` from `npx supabase status -o env`. CI runs it in the `smoke` job after `npm run smoke`.
 - `npm test` — Vitest unit tests (`src/**/*.test.ts`, config in `vitest.config.ts`). `report-parser.test.ts` and `deviation-rules.test.ts` hold the detection oracle on `test-data/sample-report.{csv,xlsx}` (which row indexes each rule flags) plus parser error branches and rule boundaries. Run after touching parsing or detection logic; CI runs it on every push.
 - `npm run test:mutation` — Stryker mutation testing (`stryker.config.json`) over `report-parser.ts`, `deviation-rules.ts` and `geo.ts`; HTML report in `reports/mutation/`. Local only (not in CI), no `break` threshold.
 - `npm run db:types` — regenerates `src/types.ts` from the **local** Supabase schema (`supabase gen types typescript --local`). Run after adding/editing a migration.
@@ -131,7 +109,7 @@ This is the core product flow and spans several files — read all of them befor
 - **Services/helpers** go in `src/lib/` (or `src/lib/services/` for extracted business logic, e.g. `report-parser.ts`, `deviation-rules.ts`, `geo.ts`).
 - **Shared types**: `src/types.ts` is generated output (`npm run db:types`), not hand-written — don't edit it directly, edit the migration and regenerate.
 - **`xlsx`**: the dependency named `xlsx` in `package.json` resolves to the `@e965/xlsx` npm mirror (the original `xlsx` package stopped receiving security patches after 0.18.5). Used both server-side (parsing uploads) and client-side (exporting the deviations list) — same package, two call sites.
-- **Tests**: Vitest, co-located as `*.test.ts` next to the module (pure modules only so far — no Astro runtime, no Supabase, no DOM). Changes to `report-parser.ts` or `deviation-rules.ts` must keep `report-parser.test.ts` and `deviation-rules.test.ts` green. `npm run smoke` stays a dependency-free script outside Vitest (it needs a running server); integration tests that need local Supabase live in `tests/integration/*.int.test.ts` (`npm run test:integration`, `vitest.integration.config.ts`), outside `npm test` and Stryker. `globalSetup` creates three accounts per run (A and B for isolation, C only for the sign-out test — `signOut()` is global) and fails loudly if the app at `BASE_URL` is not connected to the local Supabase; reuse `tests/integration/helpers/` (`clientAs`/`anonClient`, `HttpClient` with `Origin` + cookie jar, `signInViaApp`, `uploadSampleReport`). Every denial asserts the database state re-read as the owner (and a control that the owner does see the row), never only a status code; at most one app sign-in per account per file (auth rate limit 30/5 min, shared with smoke). A new route under `src/pages` must be added to `PROTECTED_REQUESTS` or `PUBLIC_ROUTES` in `route-access.int.test.ts` — the inventory test fails otherwise. How-to: `context/foundation/test-plan.md` §6.2–§6.3.
+- **Tests**: Vitest unit tests co-located as `src/**/*.test.ts` next to the module (pure modules only — no Astro runtime, no Supabase, no DOM). Changes to `report-parser.ts` or `deviation-rules.ts` must keep `report-parser.test.ts` and `deviation-rules.test.ts` green. `npm run smoke` stays a dependency-free script outside Vitest (it needs a running server); integration tests that need local Supabase live in `tests/integration/*.int.test.ts` (`npm run test:integration`, `vitest.integration.config.ts`), outside `npm test` and Stryker. `globalSetup` creates three accounts per run (A and B for isolation, C only for the sign-out test — `signOut()` is global) and fails loudly if the app at `BASE_URL` is not connected to the local Supabase; reuse `tests/integration/helpers/` (`clientAs`/`anonClient`, `HttpClient` with `Origin` + cookie jar, `signInViaApp`, `uploadSampleReport`). Every denial asserts the database state re-read as the owner (and a control that the owner does see the row), never only a status code; at most one app sign-in per account per file (auth rate limit 30/5 min, shared with smoke). A new route under `src/pages` must be added to `PROTECTED_REQUESTS` or `PUBLIC_ROUTES` in `route-access.int.test.ts` — the inventory test fails otherwise. How-to: `context/foundation/test-plan.md` §6.2–§6.3.
 - Dependency versions are intentionally bleeding-edge: TypeScript `^6.0.3`, ESLint `^10.10.0`, `lucide-react` `^1.14.0` — don't "fix" these thinking they're typos. The one deliberate exception is `vitest` `^4.1.10`: `@stryker-mutator/vitest-runner` 10 is built against Vitest 4.1, and on Vitest 5 it silently never activates mutants (every mutant "survives", exit 0) — don't bump it until the runner supports 5 and `npm run test:mutation` still kills mutants. `eslint-plugin-react` is wrapped with `fixupPluginRules` in `eslint.config.js` since it doesn't yet natively support ESLint 10's context API.
 
 #### Environment

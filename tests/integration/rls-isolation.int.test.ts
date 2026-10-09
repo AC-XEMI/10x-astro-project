@@ -98,6 +98,7 @@ describe("RLS isolation between accounts", () => {
 
       const asA = await dbA.from("reports").select("id").eq("id", a.reportId);
       expect(asA.error).toBeNull();
+      expect(asA.error).toBeNull();
       expect(asA.data).toEqual([{ id: a.reportId }]);
     });
 
@@ -112,6 +113,7 @@ describe("RLS isolation between accounts", () => {
 
       const asA = await dbA.from("visits").select("id").eq("id", a.visitId);
       expect(asA.error).toBeNull();
+      expect(asA.error).toBeNull();
       expect(asA.data).toEqual([{ id: a.visitId }]);
     });
 
@@ -125,6 +127,7 @@ describe("RLS isolation between accounts", () => {
       expect(listedByB.data?.map((d) => d.id)).not.toContain(a.deviationId);
 
       const asA = await dbA.from("deviations").select("id").eq("id", a.deviationId);
+      expect(asA.error).toBeNull();
       expect(asA.error).toBeNull();
       expect(asA.data).toEqual([{ id: a.deviationId }]);
     });
@@ -234,6 +237,7 @@ describe("RLS isolation between accounts", () => {
       expect(data).toEqual([]);
 
       const asA = await dbA.from("deviations").select("id").eq("id", a.deviationId);
+      expect(asA.error).toBeNull();
       expect(asA.data).toEqual([{ id: a.deviationId }]);
     });
 
@@ -243,6 +247,7 @@ describe("RLS isolation between accounts", () => {
       expect(data).toEqual([]);
 
       const asA = await dbA.from("visits").select("id").eq("id", a.visitId);
+      expect(asA.error).toBeNull();
       expect(asA.data).toEqual([{ id: a.visitId }]);
     });
 
@@ -252,6 +257,7 @@ describe("RLS isolation between accounts", () => {
       expect(data).toEqual([]);
 
       const asA = await dbA.from("reports").select("id").eq("id", a.reportId);
+      expect(asA.error).toBeNull();
       expect(asA.data).toEqual([{ id: a.reportId }]);
     });
   });
@@ -281,7 +287,7 @@ describe("RLS isolation between accounts", () => {
         .insert({ report_id: a.reportId, visit_date: VISIT_DATE, ...VISIT_FIELDS });
       const deviation = await anon.from("deviations").insert({ visit_id: a.visitId, rule: "missing_gps" });
       for (const result of [report, visit, deviation]) {
-        expect(result.error).not.toBeNull();
+        expect(result.error?.code).toBe(RLS_VIOLATION);
       }
 
       expect(await countReportsOf(dbA, userA.userId)).toBe(reportsBefore);

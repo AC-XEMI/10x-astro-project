@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { logAppEvent } from "@/lib/app-events";
+import { reviewErrorResponse } from "@/lib/review-errors";
 
 export const prerender = false;
 
@@ -11,19 +12,21 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export const POST: APIRoute = async (context) => {
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
-    return Response.json({ error: "not_configured" }, { status: 503 });
+    logAppEvent({ event: "deviation.review.failed", code: "not_configured", stage: "config" });
+    return reviewErrorResponse("not_configured", 503);
   }
 
   const user = context.locals.user;
   if (!user) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
+    return reviewErrorResponse("unauthorized", 401);
   }
 
   let body: unknown;
   try {
     body = await context.request.json();
   } catch {
-    return Response.json({ error: "invalid_request" }, { status: 400 });
+    logAppEvent({ event: "deviation.review.rejected", code: "invalid_request", stage: "validate", userId: user.id });
+    return reviewErrorResponse("invalid_request", 400);
   }
 
   const { ids, status } = (body ?? {}) as { ids?: unknown; status?: unknown };
@@ -33,7 +36,8 @@ export const POST: APIRoute = async (context) => {
   const statusValid = status === "reviewed" || status === "unreviewed";
 
   if (!idsValid || !statusValid) {
-    return Response.json({ error: "invalid_request" }, { status: 400 });
+    logAppEvent({ event: "deviation.review.rejected", code: "invalid_request", stage: "validate", userId: user.id });
+    return reviewErrorResponse("invalid_request", 400);
   }
 
   const reviewedAt = status === "reviewed" ? new Date().toISOString() : null;
@@ -52,14 +56,14 @@ export const POST: APIRoute = async (context) => {
       userId: user.id,
       dbError: error,
     });
-    return Response.json({ error: "update_failed" }, { status: 500 });
+    return reviewErrorResponse("update_failed", 500);
   }
 
   // RLS hides foreign (or deleted) deviations, so an update that touched nothing means none of the
   // ids belongs to this user. A partial update still answers 200 with only the rows that changed.
   if (data.length === 0) {
     logAppEvent({ event: "deviation.review.rejected", code: "not_found", stage: "review", userId: user.id });
-    return Response.json({ error: "not_found" }, { status: 404 });
+    return reviewErrorResponse("not_found", 404);
   }
 
   return Response.json({ updated: data });
