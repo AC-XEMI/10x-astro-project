@@ -90,7 +90,7 @@ function reportStatus(report: RecentReport) {
 }
 ---
 
-<div class="flex flex-wrap items-end justify-between gap-4">
+<div class="flex flex-col gap-4">
   <div class="space-y-1">
     <h1 class="text-2xl font-semibold tracking-tight">Pulpit</h1>
     {stats && (
@@ -102,7 +102,7 @@ function reportStatus(report: RecentReport) {
     )}
   </div>
   {stats && (
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center justify-end gap-2">
       <nav
         class="flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-0.5"
         aria-label="Okres wizyt"
