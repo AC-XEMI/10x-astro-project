@@ -29,7 +29,7 @@ async function createAccount(
   if (error?.status === 429) {
     throw new Error(
       "Local Supabase auth rate limit hit (sign_in_sign_ups = 30 per 5 minutes per IP, supabase/config.toml). " +
-        "One run spends about 10 - wait a few minutes or restart Supabase before re-running.",
+        "One run spends about 14 - wait a few minutes or restart Supabase before re-running.",
       { cause: error },
     );
   }
