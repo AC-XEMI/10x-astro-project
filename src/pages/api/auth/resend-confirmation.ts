@@ -27,7 +27,7 @@ export const POST: APIRoute = async (context) => {
     options: { emailRedirectTo: new URL("/auth/confirm", context.url).toString() },
   });
   if (error) {
-    return context.redirect(authErrorUrl("/auth/confirm-email", authErrorCode(error.message)));
+    return context.redirect(authErrorUrl("/auth/confirm-email", authErrorCode(error)));
   }
 
   return context.redirect("/auth/confirm-email?resent=1");

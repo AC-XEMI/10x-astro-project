@@ -22,7 +22,7 @@ export const POST: APIRoute = async (context) => {
   });
 
   if (error) {
-    return context.redirect(authErrorUrl("/auth/signup", authErrorCode(error.message)));
+    return context.redirect(authErrorUrl("/auth/signup", authErrorCode(error)));
   }
 
   setPendingSignupEmail(context.cookies, email);

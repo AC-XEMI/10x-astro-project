@@ -17,7 +17,7 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return context.redirect(authErrorUrl("/auth/signin", authErrorCode(error.message)));
+    return context.redirect(authErrorUrl("/auth/signin", authErrorCode(error)));
   }
 
   clearPendingSignupEmail(context.cookies);
