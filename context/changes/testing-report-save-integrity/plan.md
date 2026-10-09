@@ -401,28 +401,28 @@ Brak migracji. Triggery testowe istnieją tylko w czasie przebiegu, na lokalnej 
 
 #### Automated
 
-- [x] 1.1 Lint i typy: `npm run lint`, `npx astro check`
-- [x] 1.2 `npm run test:integration` zielony lokalnie (jeśli Docker działa), w tym test-sonda
-- [ ] 1.3 Job `smoke` w CI zielony na PR z tą zmianą (`gh pr checks`), w tym test-sonda
-- [x] 1.4 Po przebiegu w bazie nie zostaje żaden trigger `it_fault_%`
+- [x] 1.1 Lint i typy: `npm run lint`, `npx astro check` — de98ffe
+- [x] 1.2 `npm run test:integration` zielony lokalnie (jeśli Docker działa), w tym test-sonda — de98ffe
+- [x] 1.3 Job `smoke` w CI zielony na PR z tą zmianą (`gh pr checks`), w tym test-sonda — de98ffe
+- [x] 1.4 Po przebiegu w bazie nie zostaje żaden trigger `it_fault_%` — de98ffe
 
 #### Manual
 
-- [x] 1.5 Kontrola czułości sondy: z zakomentowanym `installFault` sonda jest czerwona
-- [x] 1.6 Wybrany wariant uruchamiania SQL (`--local` / `--db-url` / `pg`) jest zapisany w komentarzu helpera
+- [x] 1.5 Kontrola czułości sondy: z zakomentowanym `installFault` sonda jest czerwona — de98ffe
+- [x] 1.6 Wybrany wariant uruchamiania SQL (`--local` / `--db-url` / `pg`) jest zapisany w komentarzu helpera — de98ffe
 
 ### Phase 2: #4 — wynik w bazie zgodny z wyrocznią, per wizyta
 
 #### Automated
 
-- [ ] 2.1 `npm run lint`, `npx astro check`
-- [ ] 2.2 `npm run test:integration` zielony: 2 warianty (CSV, XLSX) w `upload-oracle.int.test.ts`
+- [x] 2.1 `npm run lint`, `npx astro check`
+- [x] 2.2 `npm run test:integration` zielony: 2 warianty (CSV, XLSX) w `upload-oracle.int.test.ts`
 - [ ] 2.3 Job `smoke` w CI zielony
 
 #### Manual
 
-- [ ] 2.4 Kontrola czułości 1: `.reverse()` na `insertedVisits` daje czerwony test
-- [ ] 2.5 Kontrola czułości 2: podwojenie `routeDeviations` daje czerwony test
+- [x] 2.4 Kontrola czułości 1: `.reverse()` na `insertedVisits` daje czerwony test
+- [x] 2.5 Kontrola czułości 2: podwojenie `routeDeviations` daje czerwony test
 
 ### Phase 3: #5 — serwer sam odrzuca to, co odrzuca przeglądarka (+ poprawka 500)
 
