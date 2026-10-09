@@ -12,6 +12,20 @@ describe("buildAppEvent", () => {
     expect(buildAppEvent({ event: "report.upload.count_failed" }).level).toBe("warn");
     expect(buildAppEvent({ event: "report.delete.failed" }).level).toBe("error");
     expect(buildAppEvent({ event: "report.delete.rejected" }).level).toBe("warn");
+    expect(buildAppEvent({ event: "deviation.review.failed" }).level).toBe("error");
+    expect(buildAppEvent({ event: "deviation.review.rejected" }).level).toBe("warn");
+  });
+
+  it("keeps the review code and stage of a deviation review event", () => {
+    expect(
+      buildAppEvent({ event: "deviation.review.rejected", code: "not_found", stage: "review", userId: USER_ID }),
+    ).toEqual({
+      event: "deviation.review.rejected",
+      level: "warn",
+      code: "not_found",
+      stage: "review",
+      user_id: USER_ID,
+    });
   });
 
   it("maps every allowed field to its snake_case key", () => {

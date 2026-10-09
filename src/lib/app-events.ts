@@ -16,6 +16,8 @@ const EVENT_LEVELS = {
   "report.upload.count_failed": "warn",
   "report.delete.rejected": "warn",
   "report.delete.failed": "error",
+  "deviation.review.rejected": "warn",
+  "deviation.review.failed": "error",
 } as const;
 
 export type AppEventName = keyof typeof EVENT_LEVELS;
@@ -30,11 +32,17 @@ export type AppEventStage =
   | "insert_deviations"
   | "store_count"
   | "rollback"
-  | "delete";
+  | "delete"
+  | "review";
+
+/** Codes answered by POST /api/deviations/review (JSON `{ error }`, not a `?error=` redirect). */
+export type ReviewErrorCode = "not_found" | "update_failed";
+
+export type AppEventCode = ReportErrorCode | ReviewErrorCode;
 
 export interface AppEventInput {
   event: AppEventName;
-  code?: ReportErrorCode;
+  code?: AppEventCode;
   stage?: AppEventStage;
   userId?: string;
   reportId?: string;
@@ -50,7 +58,7 @@ export interface AppEventInput {
 export interface AppEvent {
   event: AppEventName;
   level: AppEventLevel;
-  code?: ReportErrorCode;
+  code?: AppEventCode;
   stage?: AppEventStage;
   user_id?: string;
   report_id?: string;
