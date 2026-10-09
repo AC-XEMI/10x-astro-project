@@ -18,25 +18,20 @@ export function isPartialReview(requestedIds: string[], updated: { id: string }[
 /**
  * Merges the review endpoint's response into the visits held by DeviationsList.tsx: only rows
  * present in `updated` get their `status`/`reviewed_at` replaced, everything else is kept as is.
- * Pulled out of the component (generic over the visit shape) so the partial-success branch is
- * unit-testable without a DOM.
+ * Pulled out of the component (generic over the visit shape) so it is unit-testable without a DOM.
  */
 export function applyReviewResult<V extends ReviewableVisit>(
   visits: V[],
-  requestedIds: string[],
   updated: Pick<V["deviations"][number], ReviewedFields>[],
-): { visits: V[]; partial: boolean } {
+): V[] {
   type Deviation = V["deviations"][number];
   const byId = new Map(updated.map((row) => [row.id, row]));
 
-  return {
-    visits: visits.map((visit) => ({
-      ...visit,
-      deviations: visit.deviations.map((deviation: Deviation): Deviation => {
-        const match = byId.get(deviation.id);
-        return match ? { ...deviation, status: match.status, reviewed_at: match.reviewed_at } : deviation;
-      }),
-    })),
-    partial: isPartialReview(requestedIds, updated),
-  };
+  return visits.map((visit) => ({
+    ...visit,
+    deviations: visit.deviations.map((deviation: Deviation): Deviation => {
+      const match = byId.get(deviation.id);
+      return match ? { ...deviation, status: match.status, reviewed_at: match.reviewed_at } : deviation;
+    }),
+  }));
 }

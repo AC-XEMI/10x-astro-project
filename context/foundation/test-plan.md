@@ -201,7 +201,7 @@ see §3 Phase <N>”.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-10-08
+- Strategy (§1–§5) last reviewed: 2026-10-09 (§2 #6 po Phase 3)
 - Stack versions last verified: 2026-10-09 (warstwa integration po Phase 2; `supabase db query` z CLI 2.117.0)
 - AI-native tool references last verified: 2026-10-08 (none in use)
 

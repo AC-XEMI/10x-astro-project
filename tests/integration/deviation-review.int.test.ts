@@ -128,15 +128,15 @@ describe("deviation review through the endpoint", () => {
     expect(twoDeviationClients).toHaveLength(5);
   });
 
+  // Both deletes run before any assertion, so a failed delete of A's report cannot leave B's
+  // seeded rows behind for the later files that share account B.
   afterAll(async () => {
-    if (reportId) {
-      const { error } = await dbA.from("reports").delete().eq("id", reportId);
-      expect(error).toBeNull();
-    }
-    if (foreignReportId) {
-      const { error } = await dbB.from("reports").delete().eq("id", foreignReportId);
-      expect(error).toBeNull();
-    }
+    const [deletedA, deletedB] = await Promise.all([
+      reportId ? dbA.from("reports").delete().eq("id", reportId) : null,
+      foreignReportId ? dbB.from("reports").delete().eq("id", foreignReportId) : null,
+    ]);
+    expect(deletedA?.error ?? null).toBeNull();
+    expect(deletedB?.error ?? null).toBeNull();
   });
 
   it("marks both deviations of a visit at once and leaves every other deviation unchanged", async () => {

@@ -1,7 +1,7 @@
 ---
 change_id: testing-review-status
 title: Test rollout Phase 3 — trwałość i zakres statusu przeglądu odstępstw
-status: implemented
+status: impl_reviewed
 created: 2026-10-09
 updated: 2026-10-09
 archived_at: null

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyReviewResult } from "@/lib/review-result";
+import { applyReviewResult, isPartialReview } from "@/lib/review-result";
 
 type Status = "reviewed" | "unreviewed";
 
@@ -38,9 +38,9 @@ function makeVisits(): Visit[] {
 describe("applyReviewResult", () => {
   it("replaces status and reviewed_at only on the rows that came back", () => {
     const visits = makeVisits();
-    const result = applyReviewResult(visits, ["d1"], [{ id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT }]);
+    const result = applyReviewResult(visits, [{ id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT }]);
 
-    expect(result.visits).toEqual([
+    expect(result).toEqual([
       {
         id: "v1",
         deviations: [
@@ -52,99 +52,77 @@ describe("applyReviewResult", () => {
       makeVisits()[2],
     ]);
     // The neighbour on the same visit is the same object, untouched.
-    expect(result.visits[0].deviations[1]).toBe(visits[0].deviations[1]);
+    expect(result[0].deviations[1]).toBe(visits[0].deviations[1]);
   });
 
   it("does not mutate the visits it was given", () => {
     const visits = makeVisits();
-    applyReviewResult(
-      visits,
-      ["d1", "d3"],
-      [
-        { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
-        { id: "d3", status: "unreviewed", reviewed_at: null },
-      ],
-    );
+    applyReviewResult(visits, [
+      { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
+      { id: "d3", status: "unreviewed", reviewed_at: null },
+    ]);
 
     expect(visits).toEqual(makeVisits());
   });
 
   it("applies an unmark (status back to unreviewed, reviewed_at null)", () => {
-    const result = applyReviewResult(makeVisits(), ["d3"], [{ id: "d3", status: "unreviewed", reviewed_at: null }]);
+    const result = applyReviewResult(makeVisits(), [{ id: "d3", status: "unreviewed", reviewed_at: null }]);
 
-    expect(result.visits[1].deviations[0]).toEqual({
+    expect(result[1].deviations[0]).toEqual({
       id: "d3",
       rule: "route_deviation",
       status: "unreviewed",
       reviewed_at: null,
     });
-    expect(result.visits[0]).toEqual(makeVisits()[0]);
-    expect(result.partial).toBe(false);
+    expect(result[0]).toEqual(makeVisits()[0]);
   });
 
-  it("is not partial when every requested id came back", () => {
-    const result = applyReviewResult(
-      makeVisits(),
-      ["d1", "d2"],
-      [
-        { id: "d2", status: "reviewed", reviewed_at: REVIEWED_AT },
-        { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
-      ],
-    );
+  it("leaves a requested row that did not come back unchanged", () => {
+    // d2 was requested but the endpoint did not return it (RLS-hidden or deleted).
+    const result = applyReviewResult(makeVisits(), [
+      { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
+      { id: "d3", status: "reviewed", reviewed_at: REVIEWED_AT },
+    ]);
 
-    expect(result.partial).toBe(false);
-    expect(result.visits[0].deviations.map((d) => d.status)).toEqual(["reviewed", "reviewed"]);
+    expect(result[0].deviations[0].status).toBe("reviewed");
+    expect(result[0].deviations[1]).toEqual(makeVisits()[0].deviations[1]);
   });
 
-  it("is partial when one requested id out of several is missing, and leaves that row unchanged", () => {
-    const result = applyReviewResult(
-      makeVisits(),
-      ["d1", "d2", "d3"],
-      [
-        { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
-        { id: "d3", status: "reviewed", reviewed_at: REVIEWED_AT },
-      ],
-    );
+  it("ignores a returned id that is not in the visits", () => {
+    const result = applyReviewResult(makeVisits(), [
+      { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
+      { id: "foreign", status: "reviewed", reviewed_at: REVIEWED_AT },
+    ]);
 
-    expect(result.partial).toBe(true);
-    expect(result.visits[0].deviations[1]).toEqual(makeVisits()[0].deviations[1]);
-    expect(result.visits[0].deviations[0].status).toBe("reviewed");
+    expect(result[0].deviations[0].status).toBe("reviewed");
+    expect(result[0].deviations[1]).toEqual(makeVisits()[0].deviations[1]);
+    expect(result[1]).toEqual(makeVisits()[1]);
+    expect(result[2]).toEqual(makeVisits()[2]);
+  });
+});
+
+describe("isPartialReview", () => {
+  it("is not partial when every requested id came back, in any order", () => {
+    expect(isPartialReview(["d1", "d2"], [{ id: "d2" }, { id: "d1" }])).toBe(false);
+  });
+
+  it("is partial when one requested id out of several is missing", () => {
+    expect(isPartialReview(["d1", "d2", "d3"], [{ id: "d1" }, { id: "d3" }])).toBe(true);
   });
 
   it("is partial when all but one requested id are missing", () => {
-    const result = applyReviewResult(
-      makeVisits(),
-      ["d1", "d2", "d3"],
-      [{ id: "d2", status: "reviewed", reviewed_at: REVIEWED_AT }],
-    );
-
-    expect(result.partial).toBe(true);
-    expect(result.visits[0].deviations[0]).toEqual(makeVisits()[0].deviations[0]);
-    expect(result.visits[0].deviations[1].status).toBe("reviewed");
-    expect(result.visits[1]).toEqual(makeVisits()[1]);
+    expect(isPartialReview(["d1", "d2", "d3"], [{ id: "d2" }])).toBe(true);
   });
 
   it("is partial when nothing came back", () => {
-    const result = applyReviewResult(makeVisits(), ["d1"], []);
-
-    expect(result.partial).toBe(true);
-    expect(result.visits).toEqual(makeVisits());
+    expect(isPartialReview(["d1"], [])).toBe(true);
   });
 
-  it("ignores a returned id that was not requested and is not in the visits", () => {
-    const result = applyReviewResult(
-      makeVisits(),
-      ["d1"],
-      [
-        { id: "d1", status: "reviewed", reviewed_at: REVIEWED_AT },
-        { id: "foreign", status: "reviewed", reviewed_at: REVIEWED_AT },
-      ],
-    );
+  it("is not partial when an extra, unrequested id came back", () => {
+    expect(isPartialReview(["d1"], [{ id: "d1" }, { id: "foreign" }])).toBe(false);
+  });
 
-    expect(result.partial).toBe(false);
-    expect(result.visits[0].deviations[0].status).toBe("reviewed");
-    expect(result.visits[0].deviations[1]).toEqual(makeVisits()[0].deviations[1]);
-    expect(result.visits[1]).toEqual(makeVisits()[1]);
-    expect(result.visits[2]).toEqual(makeVisits()[2]);
+  it("is not partial when a requested id is repeated and came back once", () => {
+    expect(isPartialReview(["d1", "d1"], [{ id: "d1" }])).toBe(false);
   });
 });

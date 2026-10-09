@@ -79,6 +79,7 @@ Nowy plik integracyjny z przypadkami pozytywnymi przez prawdziwy endpoint; aserc
 - **zbiorczo** — oba id wizyty z dwoma odstępstwami, `reviewed` → 200, `updated` ma dokładnie te 2 id; w bazie oba `reviewed`, `reviewed_at` ≠ null i w granicach czasu żądania; pozostałe 13 bez zmian;
 - **jedno z dwóch** — jedno id innej wizyty z dwoma odstępstwami → zmienione tylko ono; sąsiad na tej samej wizycie `unreviewed`/`null`;
 - **cofnięcie** — `unreviewed` dla wizyty z przypadku „zbiorczo” → oba `unreviewed` + `reviewed_at: null`; reszta (w tym wynik „jedno z dwóch”) bez zmian;
+  - _Adaptacja (implementacja):_ cofnięcie działa na własnej wizycie (Klient T2) — najpierw oznacza, potem cofa, z pełnym porównaniem po każdym kroku — żeby nie zależeć od kolejności przypadków; „zbiorczo” = Klient F, „jedno z dwóch” = Klient S, „cykl” = Klient T3, przypadek mieszany (Faza 2) = Klient T4.
 - **cykl** — na kolejnej wizycie oznacz → cofnij → oznacz, każdy krok z ponownym odczytem; stan końcowy `reviewed`.
 
 ### Success Criteria:
@@ -162,6 +163,8 @@ Wydzielić scalanie odpowiedzi endpointu z `updateDeviationStatus` do czystej fu
 **Intent**: Logika z `DeviationsList.tsx:334-347` w postaci czystej funkcji, generycznej po kształcie wizyty (bez importu z komponentu).
 
 **Contract**: `applyReviewResult<V extends { deviations: D[] }, D extends { id: string; status: …; reviewed_at: string | null }>(visits: V[], requestedIds: string[], updated: Pick<D, "id" | "status" | "reviewed_at">[]) → { visits: V[]; partial: boolean }`. `partial` = któryś z `requestedIds` nie występuje w `updated` (dla unikalnych id równoważne obecnemu `updated.length < ids.length`).
+
+_Adaptacja (implementacja + przegląd F3):_ moduł eksportuje `isPartialReview(requestedIds, updated): boolean` (któryś żądany id nie wrócił) i `applyReviewResult(visits, updated): V[]` (samo scalanie, bez pola `partial`). Komponent woła `isPartialReview` poza updaterem `setVisits`, bo React może uruchomić updater później; testy jednostkowe celują bezpośrednio w obie funkcje.
 
 #### 3. Komponent korzysta z funkcji
 

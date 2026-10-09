@@ -46,9 +46,9 @@ describe("RLS isolation between accounts", () => {
   let b: SeededRows;
 
   beforeAll(async () => {
-    a = await seedAs(dbA, userA.userId, "a");
+    a = await seedAs(dbA, userA.userId, "rls-isolation-a");
     // B's own rows, for the re-parenting check (B moving its own visit under A's report).
-    b = await seedAs(dbB, userB.userId, "b");
+    b = await seedAs(dbB, userB.userId, "rls-isolation-b");
   });
 
   describe("SELECT", () => {

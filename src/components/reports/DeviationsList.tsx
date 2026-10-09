@@ -332,7 +332,7 @@ export default function DeviationsList({
 
       const { updated } = (await response.json()) as { updated: Tables<"deviations">[] };
 
-      setVisits((prevVisits) => applyReviewResult(prevVisits, ids, updated).visits);
+      setVisits((prevVisits) => applyReviewResult(prevVisits, updated));
       // Rows hidden by RLS or deleted meanwhile come back missing - the change did not happen for them.
       // Checked outside the updater: React may run it later, and the answer depends only on ids/updated.
       if (isPartialReview(ids, updated)) {
