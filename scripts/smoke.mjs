@@ -2,6 +2,8 @@
 // Zero dependencies on purpose. Run against a live server: BASE_URL=http://localhost:4321 node scripts/smoke.mjs
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:4321";
+// Local Supabase's mail catcher (Mailpit, [inbucket] in supabase/config.toml): the activation email lands here.
+const MAILPIT_URL = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 const email = `smoke-${Date.now()}@example.com`;
 const password = "Smoke-Test-Passw0rd!";
 const jar = new Map();
@@ -35,6 +37,23 @@ async function request(path, { method = "GET", form } = {}) {
   return { status: response.status, location: response.headers.get("location") ?? "" };
 }
 
+// Path + query of the activation link in the newest email to `email`; polls while it is being delivered.
+async function activationLinkPath() {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const search = await fetch(`${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`);
+    const id = search.ok ? (await search.json()).messages?.[0]?.ID : undefined;
+    if (id) {
+      const message = await (await fetch(`${MAILPIT_URL}/api/v1/message/${id}`)).json();
+      // The link's host is the Supabase site_url; only its path + query are requested from BASE_URL.
+      const path = /https?:\/\/[^/"\s<]+(\/auth\/confirm\?[^"\s<]+)/.exec(message.HTML || message.Text)?.[1];
+      if (!path) throw new Error(`No /auth/confirm link in the activation email to ${email}`);
+      return path.replaceAll("&amp;", "&");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  throw new Error(`No activation email for ${email} in Mailpit at ${MAILPIT_URL}`);
+}
+
 const steps = [
   ["home renders", () => request("/"), { status: 200 }],
   ["reports redirects anonymous user", () => request("/reports"), { status: 302, location: "/auth/signin" }],
@@ -43,6 +62,18 @@ const steps = [
     () => request("/api/auth/signup", { method: "POST", form: { email, password } }),
     { status: 302, location: "/auth/confirm-email" },
   ],
+  [
+    "signin refused before activation",
+    () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
+    { status: 302, location: "/auth/signin?error=email_not_confirmed" },
+  ],
+  [
+    "forged activation link rejected",
+    () => request("/auth/confirm?token_hash=forged&type=email"),
+    { status: 302, location: "/auth/confirm-email?error=confirmation_link_invalid" },
+  ],
+  ["activation link signs in", async () => request(await activationLinkPath()), { status: 302, location: "/reports" }],
+  ["signout after activation", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   [
     "signin rejects wrong password",
     () => request("/api/auth/signin", { method: "POST", form: { email, password: "wrong" } }),

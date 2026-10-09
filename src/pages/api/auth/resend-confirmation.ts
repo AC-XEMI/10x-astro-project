@@ -21,7 +21,11 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(authErrorUrl("/auth/confirm-email", "not_configured"));
   }
 
-  const { error } = await supabase.auth.resend({ type: "signup", email });
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: new URL("/auth/confirm", context.url).toString() },
+  });
   if (error) {
     return context.redirect(authErrorUrl("/auth/confirm-email", authErrorCode(error.message)));
   }

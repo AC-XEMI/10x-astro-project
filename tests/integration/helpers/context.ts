@@ -7,7 +7,7 @@ export interface TestAccount {
   email: string;
   password: string;
   userId: string;
-  // From signUp in globalSetup, so tests get a database client without spending another sign-in.
+  // From the sign-in in globalSetup, so tests get a database client without spending another sign-in.
   accessToken: string;
 }
 

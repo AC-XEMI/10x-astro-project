@@ -13,6 +13,8 @@ export const AUTH_ERROR_MESSAGES = {
   weak_password: "Hasło jest za słabe: potrzeba co najmniej 8 znaków, w tym litery i cyfry.",
   resend_too_soon: "Odczekaj chwilę przed ponownym wysłaniem linku.",
   signup_session_expired: "Sesja rejestracji wygasła. Zarejestruj się ponownie albo zaloguj się.",
+  confirmation_link_invalid:
+    "Link aktywacyjny jest nieprawidłowy lub wygasł. Wyślij nowy link albo zarejestruj się ponownie.",
   not_configured: REPORT_ERROR_MESSAGES.not_configured,
 } as const;
 

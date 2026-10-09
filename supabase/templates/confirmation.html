@@ -1,0 +1,74 @@
+<!-- Signup confirmation email. The link goes straight to the app's /auth/confirm route with a token
+     hash (verifyOtp), so it works on any device - not only in the browser that signed up.
+     Hosted project: paste this into Authentication -> Email Templates -> Confirm signup
+     (subject: "Aktywuj konto w Kontroli Trasówek").
+     Email clients ignore CSS variables and <style> blocks, so the app's light tokens from
+     src/styles/global.css are inlined as hex: --background #fafafa, --card #ffffff, --border #e5e5e5,
+     --foreground #0a0a0a, --muted-foreground #737373, --primary #4f46e5 (indigo-600),
+     --primary-foreground #fafafa, --muted #f5f5f5. -->
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Aktywuj konto w Kontroli Trasówek</title>
+  </head>
+  <body
+    style="margin: 0; padding: 0; background-color: #fafafa; color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+  >
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fafafa">
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 480px">
+            <tr>
+              <td style="padding: 0 4px 16px; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #0a0a0a">
+                <span style="color: #4f46e5">&#9679;</span>&nbsp;Kontrola Trasówek
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 32px 28px"
+              >
+                <h1 style="margin: 0 0 8px; font-size: 22px; line-height: 1.3; font-weight: 600; letter-spacing: -0.02em">
+                  Potwierdź adres email
+                </h1>
+                <p style="margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #737373">
+                  Dziękujemy za rejestrację w Kontroli Trasówek. Kliknij przycisk poniżej, aby potwierdzić adres
+                  {{ .Email }} i aktywować konto. Bez aktywacji nie zalogujesz się do aplikacji.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center" style="border-radius: 8px; background-color: #4f46e5">
+                      <a
+                        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email"
+                        style="display: block; padding: 10px 16px; font-size: 14px; font-weight: 500; color: #fafafa; text-decoration: none; border-radius: 8px"
+                        >Aktywuj konto</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+                <p
+                  style="margin: 24px 0 0; padding: 12px; background-color: #f5f5f5; border-radius: 8px; font-size: 13px; line-height: 1.6; color: #0a0a0a"
+                >
+                  Link jest ważny przez ograniczony czas. Jeśli przycisk nie działa, skopiuj ten adres do przeglądarki:<br />
+                  <a
+                    href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email"
+                    style="color: #4f46e5; word-break: break-all"
+                    >{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=email</a
+                  >
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px 4px 0; font-size: 12px; line-height: 1.6; color: #737373">
+                Jeśli ta rejestracja nie pochodzi od Ciebie, zignoruj tę wiadomość — bez kliknięcia w link konto nie
+                zostanie aktywowane.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

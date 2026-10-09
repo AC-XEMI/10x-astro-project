@@ -8,7 +8,9 @@ export interface LocalSupabaseEnv {
 export const BASE_URL = process.env.BASE_URL ?? "http://localhost:4321";
 
 // Read from the local CLI, never from .env/.dev.vars: those point at the cloud project in this repo.
-export function getLocalSupabaseEnv(): LocalSupabaseEnv {
+// The service-role key is used only in globalSetup (to create pre-confirmed accounts) and is never
+// provided to the tests, which must act as anon/authenticated users.
+export function getLocalSupabaseEnv(): LocalSupabaseEnv & { serviceRoleKey: string } {
   let output: string;
   try {
     output = execSync("npx supabase status -o env", { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
@@ -23,8 +25,11 @@ export function getLocalSupabaseEnv(): LocalSupabaseEnv {
 
   const apiUrl = /^API_URL="?([^"\r\n]*)"?/m.exec(output)?.[1];
   const anonKey = /^ANON_KEY="?([^"\r\n]*)"?/m.exec(output)?.[1];
-  if (!apiUrl || !anonKey) {
-    throw new Error(`Could not parse API_URL/ANON_KEY from \`npx supabase status -o env\`:\n${output}`);
+  const serviceRoleKey = /^SERVICE_ROLE_KEY="?([^"\r\n]*)"?/m.exec(output)?.[1];
+  if (!apiUrl || !anonKey || !serviceRoleKey) {
+    throw new Error(
+      `Could not parse API_URL/ANON_KEY/SERVICE_ROLE_KEY from \`npx supabase status -o env\`:\n${output}`,
+    );
   }
-  return { apiUrl, anonKey };
+  return { apiUrl, anonKey, serviceRoleKey };
 }

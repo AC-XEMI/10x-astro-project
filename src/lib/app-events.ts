@@ -1,3 +1,4 @@
+import type { AuthErrorCode } from "@/lib/auth-errors";
 import type { ReportErrorCode } from "@/lib/report-errors";
 import type { ReviewErrorCode } from "@/lib/review-errors";
 
@@ -19,6 +20,7 @@ const EVENT_LEVELS = {
   "report.delete.failed": "error",
   "deviation.review.rejected": "warn",
   "deviation.review.failed": "error",
+  "auth.confirm.failed": "warn",
 } as const;
 
 export type AppEventName = keyof typeof EVENT_LEVELS;
@@ -34,9 +36,10 @@ export type AppEventStage =
   | "store_count"
   | "rollback"
   | "delete"
-  | "review";
+  | "review"
+  | "confirm";
 
-export type AppEventCode = ReportErrorCode | ReviewErrorCode;
+export type AppEventCode = ReportErrorCode | ReviewErrorCode | AuthErrorCode;
 
 export interface AppEventInput {
   event: AppEventName;

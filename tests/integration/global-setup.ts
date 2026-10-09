@@ -1,3 +1,4 @@
+import { createClient } from "@supabase/supabase-js";
 import type { TestProject } from "vitest/node";
 import type { AccountRole, TestAccount } from "./helpers/context";
 import { anonClient } from "./helpers/db";
@@ -7,12 +8,24 @@ import { HttpClient, signInViaApp } from "./helpers/http";
 // Satisfies password_requirements = "letters_digits" in supabase/config.toml.
 const PASSWORD = "Int-Test-Passw0rd!";
 
-// One signUp per account for the whole run: sign-ins and sign-ups share a limit of 30 per 5 minutes
-// per IP (supabase/config.toml), and the smoke test in the same CI job already spends some of it.
-async function createAccount(env: LocalSupabaseEnv, role: AccountRole, runId: string): Promise<TestAccount> {
+// Accounts are created already confirmed through the admin API (enable_confirmations = true in
+// supabase/config.toml, and no mail is read here), then signed in once for a token: sign-ins and
+// sign-ups share a limit of 30 per 5 minutes per IP, and the smoke test in the same CI job already
+// spends some of it.
+async function createAccount(
+  env: LocalSupabaseEnv,
+  serviceRoleKey: string,
+  role: AccountRole,
+  runId: string,
+): Promise<TestAccount> {
   const email = `${role}-${runId}@example.com`;
-  const client = anonClient(env);
-  const { data, error } = await client.auth.signUp({ email, password: PASSWORD });
+  const admin = createClient(env.apiUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const created = await admin.auth.admin.createUser({ email, password: PASSWORD, email_confirm: true });
+  if (created.error) throw new Error(`createUser failed for ${email}: ${created.error.message}`);
+
+  const { data, error } = await anonClient(env).auth.signInWithPassword({ email, password: PASSWORD });
   if (error?.status === 429) {
     throw new Error(
       "Local Supabase auth rate limit hit (sign_in_sign_ups = 30 per 5 minutes per IP, supabase/config.toml). " +
@@ -20,16 +33,8 @@ async function createAccount(env: LocalSupabaseEnv, role: AccountRole, runId: st
       { cause: error },
     );
   }
-  if (error) throw new Error(`signUp failed for ${email}: ${error.message}`);
-
-  let session = data.session;
-  if (!session) {
-    // Fallback in case local email confirmation is required after all.
-    const signIn = await client.auth.signInWithPassword({ email, password: PASSWORD });
-    if (signIn.error) throw new Error(`signIn failed for ${email}: ${signIn.error.message}`);
-    session = signIn.data.session;
-  }
-  return { email, password: PASSWORD, userId: session.user.id, accessToken: session.access_token };
+  if (error) throw new Error(`signIn failed for ${email}: ${error.message}`);
+  return { email, password: PASSWORD, userId: data.session.user.id, accessToken: data.session.access_token };
 }
 
 async function assertAppReachable(): Promise<void> {
@@ -43,14 +48,14 @@ async function assertAppReachable(): Promise<void> {
 }
 
 export default async function setup(project: TestProject): Promise<void> {
-  const env = getLocalSupabaseEnv();
+  const { serviceRoleKey, ...env } = getLocalSupabaseEnv();
   await assertAppReachable();
 
   const runId = Date.now().toString(36);
   const accounts: Record<AccountRole, TestAccount> = {
-    a: await createAccount(env, "a", runId),
-    b: await createAccount(env, "b", runId),
-    c: await createAccount(env, "c", runId),
+    a: await createAccount(env, serviceRoleKey, "a", runId),
+    b: await createAccount(env, serviceRoleKey, "b", runId),
+    c: await createAccount(env, serviceRoleKey, "c", runId),
   };
 
   // A signed up in the local Supabase only, so the app accepts it only when it talks to the same

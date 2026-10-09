@@ -6,8 +6,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { getPendingSignupEmail } from "@/lib/pending-signup";
 import { authErrorMessage } from "@/lib/auth-errors";
 
-// With email confirmations disabled (local Supabase, see supabase/config.toml) signUp() already
-// returns a session, so the user arrives here signed in and confirmed - nothing to wait for.
+// Email confirmations are required (enable_confirmations in supabase/config.toml; "Confirm email"
+// in the hosted project), so the user normally arrives here signed out and waits for the link to
+// /auth/confirm. Only a project with confirmations disabled returns a session from signUp() - then
+// the user arrives signed in and confirmed, with nothing to wait for.
 const user = Astro.locals.user;
 const isConfirmed = Boolean(user?.email_confirmed_at);
 const email = getPendingSignupEmail(Astro.cookies);
