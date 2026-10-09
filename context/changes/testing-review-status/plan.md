@@ -294,22 +294,22 @@ Brak zmian schematu i danych.
 
 #### Automated
 
-- [x] 3.1 Test jednostkowy czerwony przed modułem, zielony po
-- [x] 3.2 Wszystkie testy jednostkowe
-- [x] 3.3 Lint, typy, tokeny UI, build
-- [x] 3.4 Kontrola czułości D: `partial` zawsze `false` → czerwone; cofnięte
-- [x] 3.5 Testy integracyjne nadal zielone
+- [x] 3.1 Test jednostkowy czerwony przed modułem, zielony po — fab9143
+- [x] 3.2 Wszystkie testy jednostkowe — fab9143
+- [x] 3.3 Lint, typy, tokeny UI, build — fab9143
+- [x] 3.4 Kontrola czułości D: `partial` zawsze `false` → czerwone; cofnięte — fab9143
+- [x] 3.5 Testy integracyjne nadal zielone — fab9143
 
 #### Manual
 
-- [x] 3.6 `/reports/[id]`: oznaczenie i cofnięcie działa jak wcześniej
-- [x] 3.7 Kitchen sink `report-details` bez zmian wizualnych
+- [x] 3.6 `/reports/[id]`: oznaczenie i cofnięcie działa jak wcześniej — fab9143
+- [x] 3.7 Kitchen sink `report-details` bez zmian wizualnych — fab9143
 
 ### Phase 4: Cookbook §6 i backport do test-planu
 
 #### Automated
 
-- [ ] 4.1 Formatowanie test-planu
+- [x] 4.1 Formatowanie test-planu
 - [ ] 4.2 CI na PR do `master` zielone, z nowym plikiem w logu
 
 #### Manual
