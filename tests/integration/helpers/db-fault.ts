@@ -69,6 +69,14 @@ export function queryLocalSql<T>(sql: string): T[] {
   return parseRows<T>(execLocalSql(sql));
 }
 
+// The validated marker cannot contain a quote, `$` or `%`, so embedding it as a SQL literal is
+// safe. Its `_` is a LIKE wildcard, harmless next to the UUID.
+function assertMarker(markerPrefix: string): void {
+  if (!MARKER_PATTERN.test(markerPrefix)) {
+    throw new Error(`Fault marker must match ${String(MARKER_PATTERN)}, got: ${markerPrefix}`);
+  }
+}
+
 export function faultMarker(kind: FaultKind): string {
   return `it-fault-${kind}-${randomUUID()}`;
 }
@@ -103,11 +111,7 @@ const TARGETS: Record<FaultKind, FaultTarget> = {
 // Installs (or replaces) a BEFORE trigger that raises `it_fault_<kind>` for rows of reports whose
 // original_filename starts with markerPrefix. Idempotent.
 export function installFault(kind: FaultKind, markerPrefix: string): void {
-  // The validated marker cannot contain a quote, `$` or `%`, so embedding it as a SQL literal is
-  // safe. Its `_` is a LIKE wildcard, harmless next to the UUID.
-  if (!MARKER_PATTERN.test(markerPrefix)) {
-    throw new Error(`Fault marker must match ${String(MARKER_PATTERN)}, got: ${markerPrefix}`);
-  }
+  assertMarker(markerPrefix);
   const name = `it_fault_${kind}`;
   const target = TARGETS[kind];
   // security definer: the lookup runs as the function owner, not under the caller's RLS.
@@ -148,4 +152,34 @@ export function installedFaultTriggers(): string[] {
   return queryLocalSql<{ tgname: string }>("select tgname from pg_trigger where tgname like 'it_fault_%'").map(
     (row) => row.tgname,
   );
+}
+
+export interface MarkerRowCounts {
+  reports: number;
+  visits: number;
+  deviations: number;
+}
+
+// Rows of reports whose original_filename starts with markerPrefix, counted as `postgres` (no RLS):
+// an empty result read as a user could also mean "no access".
+export function markerRowCounts(markerPrefix: string): MarkerRowCounts {
+  assertMarker(markerPrefix);
+  const like = `'${markerPrefix}%'`;
+  const row = queryLocalSql<MarkerRowCounts>(`select
+  (select count(*)::int from public.reports r where r.original_filename like ${like}) as reports,
+  (select count(*)::int from public.visits v join public.reports r on r.id = v.report_id
+    where r.original_filename like ${like}) as visits,
+  (select count(*)::int from public.deviations d join public.visits v on v.id = d.visit_id
+    join public.reports r on r.id = v.report_id where r.original_filename like ${like}) as deviations`).at(0);
+  if (!row) throw new Error(`No counts returned for marker ${markerPrefix}`);
+  return { reports: row.reports, visits: row.visits, deviations: row.deviations };
+}
+
+// Reports left behind by any fault-injection test (every marker starts with `it-fault-`).
+export function faultReportCount(): number {
+  const row = queryLocalSql<{ count: number }>(
+    "select count(*)::int as count from public.reports where original_filename like 'it-fault-%'",
+  ).at(0);
+  if (!row) throw new Error("No count returned for fault reports");
+  return row.count;
 }

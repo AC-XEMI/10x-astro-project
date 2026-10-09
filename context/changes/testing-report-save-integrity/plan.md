@@ -428,31 +428,31 @@ Brak migracji. Triggery testowe istnieją tylko w czasie przebiegu, na lokalnej 
 
 #### Automated
 
-- [x] 3.1 Przed poprawką: przypadki 13 i 14 czerwone (status 500), pozostałe zielone
-- [x] 3.2 Po poprawce: `npm run test:integration` zielony, 14 przypadków w `upload-validation.int.test.ts`
-- [x] 3.3 `npm test` zielony (parser bez zmian)
-- [x] 3.4 `npm run lint`, `npx astro check`
-- [ ] 3.5 Job `smoke` w CI zielony
+- [x] 3.1 Przed poprawką: przypadki 13 i 14 czerwone (status 500), pozostałe zielone — e17a387
+- [x] 3.2 Po poprawce: `npm run test:integration` zielony, 14 przypadków w `upload-validation.int.test.ts` — e17a387
+- [x] 3.3 `npm test` zielony (parser bez zmian) — e17a387
+- [x] 3.4 `npm run lint`, `npx astro check` — e17a387
+- [x] 3.5 Job `smoke` w CI zielony — e17a387
 
 #### Manual
 
-- [x] 3.6 Kontrola czułości 1: `>=` zamiast `>` daje czerwony przypadek 1
-- [x] 3.7 Kontrola czułości 2: komunikat bez nazw kolumn daje czerwony przypadek 6
-- [x] 3.8 Przegląd: poprawka nie zmienia żadnego komunikatu ani kodu widocznego dla użytkownika
+- [x] 3.6 Kontrola czułości 1: `>=` zamiast `>` daje czerwony przypadek 1 — e17a387
+- [x] 3.7 Kontrola czułości 2: komunikat bez nazw kolumn daje czerwony przypadek 6 — e17a387
+- [x] 3.8 Przegląd: poprawka nie zmienia żadnego komunikatu ani kodu widocznego dla użytkownika — e17a387
 
 ### Phase 4: #3 — wszystko albo nic przy wymuszonych błędach zapisu
 
 #### Automated
 
-- [ ] 4.1 `npm run test:integration` zielony: 4 przypadki w `upload-compensation.int.test.ts` + Faza 2 nadal zielona
-- [ ] 4.2 Po przebiegu 0 triggerów `it_fault_%` i 0 raportów z prefiksem `it-fault-`
-- [ ] 4.3 `npm run lint`, `npx astro check`
+- [x] 4.1 `npm run test:integration` zielony: 4 przypadki w `upload-compensation.int.test.ts` + Faza 2 nadal zielona
+- [x] 4.2 Po przebiegu 0 triggerów `it_fault_%` i 0 raportów z prefiksem `it-fault-`
+- [x] 4.3 `npm run lint`, `npx astro check`
 - [ ] 4.4 Job `smoke` w CI zielony
 
 #### Manual
 
-- [ ] 4.5 Kontrola czułości 1: bez `rollbackReport()` w gałęzi `deviationsError` przypadek (b) jest czerwony
-- [ ] 4.6 Kontrola czułości 2: `rollbackReport()` w gałęzi `countError` daje czerwony przypadek (c)
+- [x] 4.5 Kontrola czułości 1: bez `rollbackReport()` w gałęzi `deviationsError` przypadek (b) jest czerwony
+- [x] 4.6 Kontrola czułości 2: `rollbackReport()` w gałęzi `countError` daje czerwony przypadek (c)
 
 ### Phase 5: Cookbook §6 i backport do test-planu
 

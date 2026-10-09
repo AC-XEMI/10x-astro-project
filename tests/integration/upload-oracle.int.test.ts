@@ -3,30 +3,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { account, baseUrl, supabaseEnv } from "./helpers/context";
 import { clientAs } from "./helpers/db";
 import { HttpClient, signInViaApp } from "./helpers/http";
+import { EXPECTED_RULES_BY_CLIENT, rulesByClient } from "./helpers/oracle";
 import { readFixture, reportIdFromLocation, uploadFile } from "./helpers/seed";
-
-// Expected rules per visit of test-data/sample-report.{csv,xlsx}, typed in by hand: the oracle in
-// src/lib/services/deviation-rules.test.ts:55-110 (row indexes) joined with the fixture's
-// visited_client column (research #4, testing-report-save-integrity). Never compute it with the
-// rule functions or from the fixture — the point is to catch the stored result drifting from it.
-// Lists are sorted; an empty list means "no deviation", asserted, not skipped.
-const EXPECTED_RULES_BY_CLIENT: Record<string, string[]> = {
-  "Klient A": [],
-  "Klient C": ["missing_gps"],
-  "Klient D": [],
-  "Klient F": ["missing_gps", "phone_instead_of_visit"],
-  "Klient Z": ["route_deviation"],
-  "Klient P": [],
-  "Klient Q": ["route_deviation"],
-  "Klient R": [],
-  "Klient S": ["missing_gps", "route_deviation"],
-  "Klient T1": ["phone_instead_of_visit"],
-  "Klient T2": ["missing_gps", "phone_instead_of_visit"],
-  "Klient T3": ["missing_gps", "phone_instead_of_visit"],
-  "Klient T4": ["missing_gps", "phone_instead_of_visit"],
-  "Klient T5": [],
-  "Klient T6": ["missing_gps"],
-};
 
 const VARIANTS = [
   { kind: "csv", type: "text/csv" },
@@ -74,10 +52,7 @@ describe.each(VARIANTS)("stored result of sample-report.$kind", ({ kind, type })
     const clients = visits.map((v) => v.visited_client);
     expect(new Set(clients).size).toBe(clients.length);
 
-    const rulesByClient: Record<string, string[]> = Object.fromEntries(
-      visits.map((v): [string, string[]] => [String(v.visited_client), v.deviations.map((d) => d.rule).sort()]),
-    );
-    expect(rulesByClient).toEqual(EXPECTED_RULES_BY_CLIENT);
+    expect(rulesByClient(visits)).toEqual(EXPECTED_RULES_BY_CLIENT);
 
     const deviations = visits.flatMap((v) => v.deviations);
     for (const d of deviations) {

@@ -42,7 +42,10 @@ export class HttpClient {
   }
 
   async request(path: string, options: RequestOptions = {}): Promise<HttpResponse> {
-    const headers: Record<string, string> = { Origin: this.baseUrl };
+    // A fresh connection per request: helpers/db-fault.ts blocks the event loop (execSync) for
+    // seconds, so a pooled keep-alive socket the server closed meanwhile would be reused before
+    // its close is noticed ("other side closed"), and a POST is not retried.
+    const headers: Record<string, string> = { Origin: this.baseUrl, Connection: "close" };
     if (this.jar.size > 0) headers.Cookie = [...this.jar].map(([k, v]) => `${k}=${v}`).join("; ");
 
     let body: string | FormData | undefined;
