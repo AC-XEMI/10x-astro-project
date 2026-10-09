@@ -1,10 +1,10 @@
 ---
 change_id: testing-data-isolation-access
 title: Izolacja danych i dostęp w CI — testy integracyjne (rollout Phase 1)
-status: impl_reviewed
+status: archived
 created: 2026-10-08
 updated: 2026-10-09
-archived_at: null
+archived_at: 2026-10-09T05:05:37Z
 ---
 
 ## Notes
