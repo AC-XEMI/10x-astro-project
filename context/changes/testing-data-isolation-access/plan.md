@@ -431,14 +431,14 @@ Brak migracji bazy. Zmiana kontraktu `review.ts` dla 0 wierszy (200 → 404) jes
 
 #### Automated
 
-- [x] 1.1 `npm run lint` przechodzi (z nowymi plikami w `tests/`)
-- [x] 1.2 `npx astro check` przechodzi
-- [x] 1.3 `npm test` przechodzi i nie uruchamia plików `*.int.test.ts`
-- [ ] 1.4 Job `smoke` w CI (PR `dev` → `master`) przechodzi z krokiem `npm run test:integration` i testem szkieletu
+- [x] 1.1 `npm run lint` przechodzi (z nowymi plikami w `tests/`) — c49004e
+- [x] 1.2 `npx astro check` przechodzi — c49004e
+- [x] 1.3 `npm test` przechodzi i nie uruchamia plików `*.int.test.ts` — c49004e
+- [x] 1.4 Job `smoke` w CI (PR `dev` → `master`) przechodzi z krokiem `npm run test:integration` i testem szkieletu — c49004e
 
 #### Manual
 
-- [ ] 1.5 Log CI pokazuje, że `test:integration` faktycznie uruchomił `harness.int.test.ts` (liczba testów > 0)
+- [x] 1.5 Log CI pokazuje, że `test:integration` faktycznie uruchomił `harness.int.test.ts` (liczba testów > 0) — c49004e
 
 ### Phase 2: Izolacja danych między kontami (ryzyko #1)
 
