@@ -458,22 +458,22 @@ Brak migracji bazy. Zmiana kontraktu `review.ts` dla 0 wierszy (200 → 404) jes
 
 #### Automated
 
-- [ ] 3.1 `npm run lint`, `npx astro check` i `npm test` przechodzą
-- [ ] 3.2 Job `smoke` w CI przechodzi z `route-access.int.test.ts` i `signout.int.test.ts`
+- [x] 3.1 `npm run lint`, `npx astro check` i `npm test` przechodzą — 12a8c22
+- [x] 3.2 Job `smoke` w CI przechodzi z `route-access.int.test.ts` i `signout.int.test.ts` — 12a8c22
 
 #### Manual
 
-- [ ] 3.3 Test inwentarza pada po dodaniu tymczasowej trasy `src/pages/api/probe.ts` — sprawdzone i cofnięte
-- [ ] 3.4 Wynik testu wariantów ścieżki i testu wylogowania odnotowany w §6.5 test-planu
+- [x] 3.3 Test inwentarza pada po dodaniu tymczasowej trasy `src/pages/api/probe.ts` — sprawdzone i cofnięte — 12a8c22
+- [x] 3.4 Wynik testu wariantów ścieżki i testu wylogowania odnotowany w §6.5 test-planu
 
 ### Phase 4: Dokumentacja i cookbook
 
 #### Automated
 
-- [ ] 4.1 `npx prettier --check CLAUDE.md context/foundation/test-plan.md` przechodzi
-- [ ] 4.2 `grep -n "TBD — see §3 Phase 1" context/foundation/test-plan.md` nie zwraca §6.2
+- [x] 4.1 `npx prettier --check CLAUDE.md context/foundation/test-plan.md` przechodzi
+- [x] 4.2 `grep -n "TBD — see §3 Phase 1" context/foundation/test-plan.md` nie zwraca §6.2
 
 #### Manual
 
-- [ ] 4.3 §6.2 i §6.3 wystarczą, żeby dodać nowy test integracyjny bez czytania kodu helperów od zera
-- [ ] 4.4 Treść CLAUDE.md zgadza się z faktycznymi poleceniami i krokami CI
+- [x] 4.3 §6.2 i §6.3 wystarczą, żeby dodać nowy test integracyjny bez czytania kodu helperów od zera
+- [x] 4.4 Treść CLAUDE.md zgadza się z faktycznymi poleceniami i krokami CI

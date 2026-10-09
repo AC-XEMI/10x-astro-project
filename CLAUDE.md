@@ -1,90 +1,60 @@
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
-## 10xDevs AI Toolkit - Module 3, Lesson 1
+## 10xDevs AI Toolkit - Module 3, Lesson 3 (10xDevs 4.0 Hooks)
 
-Open Module 3 by producing a **durable, risk-first quality contract** before any test is written — then drive each rollout phase through the standard change chain.
+Treat a hook as a **quality gate the harness runs for the agent**, not a script you hope the agent notices. Hooks run outside the model, so they survive context compaction and forgotten instructions — but only a hook whose signal actually reaches the agent closes the loop:
 
 ```
-PRD + roadmap + archive
-        │
-        ▼
-   /10x-test-plan  ──►  context/foundation/test-plan.md  (strategy §1–§5 frozen + cookbook §6 grows)
-        │
-        ▼  (one rollout phase at a time, /clear between handoffs)
-   /10x-new ──► /10x-research ──► /10x-plan ──► /10x-implement
+test-plan.md "Quality Gates" -> pick the moment per gate -> /10x-configure-hook -> prove with sample JSON -> watch the agent fix a deliberate error
 ```
-
-`/10x-test-plan` is a **stateful orchestrator**, not a one-shot generator. On first run it writes the phased rollout to `context/foundation/test-plan.md`. On every subsequent run it re-derives state from on-disk artifacts and presents the next handoff. The lesson focus is **strategy and rollout sequencing, not configuration**. Hooks, MCP servers, and CI YAML are configured in later lessons of this module.
 
 ### Task Router - Where to start
 
-| Skill | Use it when |
-| --- | --- |
-| **Quality strategy as a rules-file (lesson focus)** | |
-| `/10x-test-plan` | You have a PRD (and ideally a roadmap and a few archived slices) and you are about to write the project's first tests, or you noticed that AI-generated tests are landing on helpers while critical flows go uncovered. First invocation runs discovery (PRD + roadmap + archive + hot-spot scan), a 5-question user interview, and a synthesis pass with a mandatory challenger check, then writes `test-plan.md` in `context/foundation/` with a risk map (5–7 failure scenarios), a phased rollout table, a stack table, a quality-gates table, a cookbook section (`§6`, fills in as phases ship), and a negative-space section (what we deliberately don't test). Subsequent invocations advance the rollout one handoff at a time. |
-| `/10x-test-plan --status` | A `test-plan.md` already exists and you want a compact snapshot of where the rollout stands — which phases are `not started`, `change opened`, `researched`, `planned`, `implementing`, or `complete`, and what the next action is. Does no work; safe to run any time. |
-| `/10x-test-plan --refresh` | A `test-plan.md` already exists and one of: a new top-3 risk surfaced from the roadmap or archive, a tool's `checked:` date is older than three months, the project's tech stack changed, or §7 negative-space no longer matches what the team believes. Opens a new `test-plan-refresh-<YYYY-MM-DD>` change folder rather than editing the guide in place. |
+| Skill                                                            | Use it when                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/10x-configure-hook`                                            | Turning the gates from `context/foundation/test-plan.md` into agent hooks, fixing hooks that fire but the agent never reacts to, or auditing an existing hook config. It detects the harness from the repo and carries dated per-harness references. |
+| `/10x-test-plan --status`                                        | Read the current gates and rollout state. Changing which gates exist belongs to Lesson 1, not here.                                                                                                                                                  |
+| `/10x-new` -> `/10x-research` -> `/10x-plan` -> `/10x-implement` | A hook surfaced a failure the agent cannot fix with a trivial correction (wrong business logic, flaky integration). Open a change instead of looping the hook.                                                                                       |
 
-### Rollout chain — what happens after the guide is written
+### Hook lifecycle
 
-The guide's §3 *Phased Rollout* table is the orchestrator's state. For each non-`complete` row the orchestrator selects the next handoff based on which artifacts exist in `context/changes/<change-id>/`:
+1. **Trigger** — an event in the harness: a tool finished editing a file, the agent is about to end its turn.
+2. **Matcher** — narrows which tool calls or files the hook reacts to. Not every harness honours matchers the same way.
+3. **Handler** — usually a shell command or script that reads the event payload as JSON on stdin.
+4. **Signal** — what the hook returns. The exit code, stderr, stdout and JSON fields mean different things in different harnesses, and only one channel per event actually reaches the agent. **The signal channel differs per harness — check the skill's references before writing or reviewing a hook.**
 
-| State on disk | Next handoff | Status transitions to |
-| --- | --- | --- |
-| change folder missing | `/10x-new <change-id>` | `change opened` |
-| `change.md` only | `/10x-research` (with a risks-to-verify brief) | `researched` |
-| `+ research.md` | `/10x-plan` (with cost × signal + cookbook-update constraints) | `planned` |
-| `+ plan.md` with pending `## Progress` items | `/10x-implement <change-id> phase <N>` | `implementing` / `complete` |
-| `+ plan.md` fully `[x]` | Mark §3 row `complete`; loop to next pending row | — |
+A hook that runs but sends its message down the wrong channel is the most common failure: the user sees "hook error", the agent sees nothing and keeps going.
 
-Each handoff is a **STOP point**. The orchestrator copies the next command to the clipboard, asks the user to `/clear` and run it, then exits. Re-invoke `/10x-test-plan` (no arguments) to advance.
+### Moments and layers
 
-### Risk-first prioritization rules
+The slower the check, the rarer the moment:
 
-- Risks are **failure scenarios in user / business terms**, not test names. "Logged-out user reaches paid content via stale token" is a risk; "test the login form" is not.
-- 5 to 7 risks. Fewer is too coarse; more makes prioritization useless.
-- Impact and likelihood are user/business ratings, not technical complexity.
-- Every risk traces to a source: PRD section, archived slice, roadmap entry, Phase 2 interview question, hot-spot **directory** with churn count, or a tech-stack constraint. No invented risks.
-- **Signal, not knowledge.** §2 cites *evidence that raised the risk*, never a file as "where the failure lives." File:line anchors, function names, schema names, and module names are forbidden in §2 — they belong in `/10x-research`'s output, produced per rollout phase against current code. The plan is a QA spec; it is not a code audit.
-- Coverage is not the metric. **Risk coverage** is the metric.
+| Moment                               | Typical checks                                                          | Reaches the agent?               |
+| ------------------------------------ | ----------------------------------------------------------------------- | -------------------------------- |
+| Per edit                             | Lint/format of **the edited file only**; related tests if they are fast | Yes, mid-work                    |
+| End of turn (Stop or its equivalent) | Lint + tests for every file changed this turn, whole-project typecheck  | Yes, before the agent hands back |
+| Pre-commit (git)                     | Lint + tests on staged files; catches edits made without the agent      | No — blocks the commit           |
+| Pre-push (git)                       | Heavier suites, e2e that run locally                                    | No — blocks the push             |
+| CI                                   | Integration, shared state, infrastructure you do not have locally       | No — PR feedback                 |
 
-### Dual-layer mapping rules
+Local layers do not replace CI; each one saves a CI round-trip. Start with one per-edit lint hook and one end-of-turn typecheck, then add layers when you see what escapes.
 
-- Classic layer first: the cheapest test that gives a real signal wins. Promote to e2e only when no cheaper layer covers the risk.
-- AI-native layer second, and only where it adds signal classic tests do not give cheaply.
-- Every AI-native row has a **"When NOT to use"** line. If you cannot write one, drop the row.
-- Every tool name carries a `checked: <YYYY-MM-DD>` date. Tool names are examples of the category, not endorsements.
-- Both layers must be non-empty in the final guide if the project warrants them. Classic-only is a 2020 plan; AI-native-only is hype. AI-native phases are not mandatory — include them only when the brief justified them under cost × signal.
+### Contract
 
-### Quality gates rules
-
-- Required gates (lint, typecheck, unit+integration, e2e on critical flows) must map to actual CI steps. If a required gate is not yet wired, mark it as `required after §3 Phase <N>` and let the named rollout phase wire it.
-- Post-edit hook is **recommended local**, not a CI substitute.
-- Multimodal visual review is **selective**, applied to 1–3 critical screens, not to every page.
-- Vision-driven fallback (Anthropic Computer Use or OpenAI CUA) is reserved for DOM-unreachable surfaces; expensive per action.
-
-### Cookbook patterns (§6) — fills in over time
-
-`test-plan.md` is both a phased strategy and a **growing cookbook**. §6 starts as placeholders (`TBD — see §3 Phase <N>`) and fills in incrementally — each rollout phase's plan ends with a sub-phase that updates the relevant §6 entry (location, naming, reference test, run command). After Module 3 completes, §6 becomes the canonical answer to "how do I add a test for X in this project?" — and is what `/10x-tdd` reads in Lesson 2.
+- Read the gates from the "Quality Gates" section of `context/foundation/test-plan.md` (by title, not section number). A gate the plan explicitly defers stays deferred unless the user overrides it — quote the deferral when you ask.
+- Per-edit hooks check only the file that was edited. Never run `--fix` or a linter over the whole project on every edit.
+- End-of-turn hooks that can send the agent back must stop after one retry (the harness's "already continued" flag or equivalent), so an unfixable error does not loop.
+- Per-edit hooks only see the harness's edit tools; a file rewritten through a shell command skips them. The end-of-turn hook re-checks every file changed this turn (`git diff`), so it is the net for those edits.
+- Timeouts are usually in **seconds**. Check the unit before copying a number.
+- Prove every hook before trusting it: run the script with a sample payload on a deliberately broken file and on a clean one, then revert the error.
+- Never overwrite existing hook config silently. Audit it, name the defects, merge, and show the diff.
 
 ### Lesson boundaries
 
-- Do not write test code. That is Lesson 2 (`/10x-tdd` and unit-test authoring).
-- Do not configure hooks, hook lifecycle, or debugging hooks. That is Lesson 3.
-- Do not configure MCP servers, Playwright API, e2e code, or multimodal scenario code. That is Lesson 4.
-- Do not run the bug-to-fix-to-regression-test workflow. That is Lesson 5.
-- Do not author CI/CD pipelines from scratch or write GitHub Actions YAML. The guide names gates; configuration is owned by Module 1 Lesson 5 and Module 2 Lesson 5.
-- Do not benchmark multimodal models. Cite criteria (cost, latency, agent-friendliness), never a ranking.
-- Do not read the codebase for knowledge (call graphs, schemas, "which file owns this failure"). That is `/10x-research`'s job, per rollout phase.
-
-### Paths used by this lesson
-
-- `context/foundation/test-plan.md` — the quality contract produced and maintained by `/10x-test-plan`
-- `context/foundation/prd.md` — primary risk source
-- `context/foundation/roadmap.md` — likelihood weighting
-- `context/foundation/tech-stack.md` — stack input (when present)
-- `context/archive/<change-id>/plan.md` — implemented risk surface
-- `context/changes/<change-id>/` — per-rollout-phase change folder (one per row in §3)
+- Do not change the risk strategy or the gate definitions — that is Lesson 1 (`/10x-test-plan`).
+- Do not write new tests here — hooks only run the tests Lesson 2 produced.
+- Do not write E2E scenarios or browser verification — that is Lesson 4.
+- Do not author CI pipelines or install git-hook managers unasked; recommend pre-commit/pre-push gates, let the user decide.
 
 <!-- END @przeprogramowani/10x-cli -->
 
@@ -154,14 +124,14 @@ This is the core product flow and spans several files — read all of them befor
 - **Claude Design views keep their user-facing information**: styles, colours, components and display logic of views implemented from Claude Design (Raporty, Dialogi i błędy, Szczegóły raportu, Pulpit, Strona startowa, auth pages) may be refined, but the wording of messages, labels and hints — and the detail they carry (e.g. the missing-columns card's per-column table and near-miss hints) — must stay word for word unless the user approves a change.
 - **Landing page & brand-colour contrast**: `src/components/Welcome.astro` uses `Card` with the Claude Design dimensions as explicit overrides, the token focus ring on every link, and below `md` hides the section and auth links behind the header menu button (`data-landing-menu-toggle`, Esc/link-click/resize close it). It takes dev-only props `user` and `menuOpen`, used by `src/pages/dev/kitchen-sink/landing.astro` (capture the 390px view with `?compact=1`). Text on or in `--primary` must stay ≥ 4.5:1 in both themes: the dark theme pairs a light `--primary` (indigo-400) with a dark `--primary-foreground` — values and measurements in `context/archive/2026-10-07-landing-ui-contract/token-source.md`; re-measure before changing either token. `npm run check:ui-tokens` covers `Welcome.astro`.
 - **Report details (Szczegóły raportu) contract**: `src/pages/reports/[id].astro` renders load failures through `src/components/reports/ReportLoadError.astro` with kinds, messages and HTTP statuses from `src/lib/report-load-errors.ts` — `not_found` 404 (missing, foreign or malformed id, checked by a UUID regex before any query), `not_configured` 503, `load_failed` 500 (raw Supabase message to `console.error` only); never report a database failure as "not found". In `DeviationsList.tsx` review/export failures set one `Alert variant="destructive"` under the toolbar (cleared when a new attempt of the same kind starts, never on success — an overlapping success must not hide a failure) — no silent `console.error`-only failures. The visit date is the expand control (`<button aria-expanded aria-controls>`); the row click is a mouse convenience only, don't move expansion back onto the `<tr>`. Containers are `Card` with explicit design overrides; below `md` the Klient and Status columns are hidden and the status block (`statusContent`) renders under the deviations so the table fits 390px; representative groups start collapsed; group progress counts fully reviewed visits, not deviations. Dev-only props (`initialExpandedReps`, `initialOpenVisitIds`, `initialFilters`, `initialPendingIds`, `initialActionError`) exist for `src/pages/dev/kitchen-sink/report-details.astro` (7 states, light + dark, plus the three page errors). Rule labels/counts stay `text-destructive` here (a rule is a problem to check, not a `--rule-*` data series). `npm run check:ui-tokens` covers the page, the island and `ReportLoadError.astro`.
-- **API routes**: use uppercase `GET`, `POST` exports. No validation library is wired in yet (`zod` is not a direct dependency, only a transitive one via Astro) — handlers read `formData.get(...)`/`request.json()` directly; don't assume zod exists.
+- **API routes**: use uppercase `GET`, `POST` exports. No validation library is wired in yet (`zod` is not a direct dependency, only a transitive one via Astro) — handlers read `formData.get(...)`/`request.json()` directly; don't assume zod exists. JSON endpoints answer failures as `{ error: <code> }`, never a raw Supabase message: `POST /api/deviations/review` returns 400 `invalid_request` (ids must be a non-empty array of UUIDs, checked before the query), 404 `not_found` when the update touched no row (RLS hides foreign ids — "no error" is not success), 500 `update_failed`; a partial update stays 200 with only the changed rows. Without a session the middleware answers every protected page and API with 302 → `/auth/signin`, not 401.
 - **Logging server-side failures**: use `logAppEvent` from `src/lib/app-events.ts`, never `console.error` with a raw error object. It writes one plain object per entry (Workers Logs indexes its fields; a string prefix or second argument turns it into unsearchable text), whitelists the fields — only `error.code` from a Supabase error, ids only when UUID-shaped, file extension never the filename, parser `detail` only for `invalid_file` — and derives `error`/`warn` from the event name. Add a new event name or field in that module, not at the call site. Every error redirect in `src/pages/api/reports/upload.ts` and `[id]/delete.ts` logs one entry, including a failed compensating rollback (`report.upload.rollback_failed`). Entries are kept by Cloudflare Workers Logs (`observability.logs.enabled` in `wrangler.jsonc`) and queried in the dashboard (Workers → the worker → Logs) by `event`; `invocation_logs` also records one entry per request (method, path, status). Retention per Cloudflare docs: 3 days on Workers Free (this project, see `infrastructure.md`), 7 days on Paid — check entries within that window.
 - **Supabase migrations**: live in `supabase/migrations/`, named `YYYYMMDDHHmmss_short_description.sql`. Every table enables RLS with granular per-operation policies from the start (see the pipeline section above for the ownership pattern). After adding/editing a migration, run `npm run db:types` to regenerate `src/types.ts`.
 - **React**: no Next.js directives ("use client" etc.). Extract hooks to `src/hooks/` (matches the `@/hooks` alias in `components.json`; no hooks extracted yet).
 - **Services/helpers** go in `src/lib/` (or `src/lib/services/` for extracted business logic, e.g. `report-parser.ts`, `deviation-rules.ts`, `geo.ts`).
 - **Shared types**: `src/types.ts` is generated output (`npm run db:types`), not hand-written — don't edit it directly, edit the migration and regenerate.
 - **`xlsx`**: the dependency named `xlsx` in `package.json` resolves to the `@e965/xlsx` npm mirror (the original `xlsx` package stopped receiving security patches after 0.18.5). Used both server-side (parsing uploads) and client-side (exporting the deviations list) — same package, two call sites.
-- **Tests**: Vitest, co-located as `*.test.ts` next to the module (pure modules only so far — no Astro runtime, no Supabase, no DOM). Changes to `report-parser.ts` or `deviation-rules.ts` must keep `report-parser.test.ts` and `deviation-rules.test.ts` green. `npm run smoke` stays a dependency-free script outside Vitest (it needs a running server); integration tests that need local Supabase live in `tests/integration/` (`npm run test:integration`), outside `npm test`.
+- **Tests**: Vitest, co-located as `*.test.ts` next to the module (pure modules only so far — no Astro runtime, no Supabase, no DOM). Changes to `report-parser.ts` or `deviation-rules.ts` must keep `report-parser.test.ts` and `deviation-rules.test.ts` green. `npm run smoke` stays a dependency-free script outside Vitest (it needs a running server); integration tests that need local Supabase live in `tests/integration/*.int.test.ts` (`npm run test:integration`, `vitest.integration.config.ts`), outside `npm test` and Stryker. `globalSetup` creates three accounts per run (A and B for isolation, C only for the sign-out test — `signOut()` is global) and fails loudly if the app at `BASE_URL` is not connected to the local Supabase; reuse `tests/integration/helpers/` (`clientAs`/`anonClient`, `HttpClient` with `Origin` + cookie jar, `signInViaApp`, `uploadSampleReport`). Every denial asserts the database state re-read as the owner (and a control that the owner does see the row), never only a status code; at most one app sign-in per account per file (auth rate limit 30/5 min, shared with smoke). A new route under `src/pages` must be added to `PROTECTED_REQUESTS` or `PUBLIC_ROUTES` in `route-access.int.test.ts` — the inventory test fails otherwise. How-to: `context/foundation/test-plan.md` §6.2–§6.3.
 - Dependency versions are intentionally bleeding-edge: TypeScript `^6.0.3`, ESLint `^10.10.0`, `lucide-react` `^1.14.0` — don't "fix" these thinking they're typos. The one deliberate exception is `vitest` `^4.1.10`: `@stryker-mutator/vitest-runner` 10 is built against Vitest 4.1, and on Vitest 5 it silently never activates mutants (every mutant "survives", exit 0) — don't bump it until the runner supports 5 and `npm run test:mutation` still kills mutants. `eslint-plugin-react` is wrapped with `fixupPluginRules` in `eslint.config.js` since it doesn't yet natively support ESLint 10's context API.
 
 #### Environment
