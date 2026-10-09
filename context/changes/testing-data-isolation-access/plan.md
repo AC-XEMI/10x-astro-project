@@ -444,15 +444,15 @@ Brak migracji bazy. Zmiana kontraktu `review.ts` dla 0 wierszy (200 → 404) jes
 
 #### Automated
 
-- [ ] 2.1 `npm run lint`, `npx astro check` i `npm test` (w tym `app-events.test.ts`) przechodzą
-- [ ] 2.2 Job `smoke` w CI przechodzi z `rls-isolation.int.test.ts` i `http-isolation.int.test.ts`
-- [ ] 2.3 CI przed zmianą `review.ts` pokazuje czerwony test review (404 oczekiwane, 200 otrzymane), po zmianie zielony
-- [ ] 2.4 `grep -rn "verify-rls\|verify:rls" package.json .github CLAUDE.md scripts` nic nie zwraca
+- [x] 2.1 `npm run lint`, `npx astro check` i `npm test` (w tym `app-events.test.ts`) przechodzą — 38bb175
+- [x] 2.2 Job `smoke` w CI przechodzi z `rls-isolation.int.test.ts` i `http-isolation.int.test.ts` — 38bb175
+- [x] 2.3 CI przed zmianą `review.ts` pokazuje czerwony test review (404 oczekiwane, 200 otrzymane), po zmianie zielony — 38bb175
+- [x] 2.4 `grep -rn "verify-rls\|verify:rls" package.json .github CLAUDE.md scripts` nic nie zwraca — 38bb175
 
 #### Manual
 
-- [ ] 2.5 Na stronie szczegółów raportu oznaczenie i cofnięcie odstępstwa nadal działa
-- [ ] 2.6 Kontrola czułości: osłabiona polityka SELECT na `visits` daje czerwoną suitę; zmiana cofnięta
+- [x] 2.5 Na stronie szczegółów raportu oznaczenie i cofnięcie odstępstwa nadal działa — 38bb175
+- [x] 2.6 Kontrola czułości: osłabiona polityka SELECT na `visits` daje czerwoną suitę; zmiana cofnięta — 38bb175
 
 ### Phase 3: Dostęp bez sesji i po wylogowaniu (ryzyko #2)
 
